@@ -50,3 +50,16 @@ export function intervalsOverlap(
 ): boolean {
   return aStart < bEnd && bStart < aEnd;
 }
+
+/** Minutes of [aStart,aEnd) overlapping [bStart,bEnd). */
+export function overlapMinutes(
+  aStart: Date,
+  aEnd: Date,
+  bStart: Date,
+  bEnd: Date,
+): number {
+  const s = aStart > bStart ? aStart : bStart;
+  const e = aEnd < bEnd ? aEnd : bEnd;
+  if (e <= s) return 0;
+  return Math.round((e.getTime() - s.getTime()) / 60000);
+}

@@ -1,9 +1,33 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
+import { prisma } from "@/lib/db";
+import { computeDepartmentCoverage } from "@/lib/services/coverage";
+import { countPendingSwapsForManager } from "@/lib/queries/swaps";
 
 export default async function ManagerDashboardPage() {
   const session = await auth();
   const name = session?.user?.name ?? session?.user?.email ?? "Manager";
+
+  const weekStart = startOfWeekMondayUtc(new Date());
+  const weekEnd = addWeeksUtc(weekStart, 1);
+
+  const [swapCounts, coverageRows, openShifts] = await Promise.all([
+    countPendingSwapsForManager(),
+    computeDepartmentCoverage({
+      rangeStart: weekStart,
+      rangeEnd: weekEnd,
+    }),
+    prisma.shift.count({
+      where: {
+        startsAt: { gte: new Date() },
+        assignments: { none: {} },
+      },
+    }),
+  ]);
+
+  const coverageGapDays = coverageRows.filter((r) => r.gap > 0).length;
+  const pendingTotal = swapCounts.pending + swapCounts.awaitingManager;
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
@@ -17,23 +41,38 @@ export default async function ManagerDashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {[
-          { label: "Open shifts", value: "—", href: "/manager/schedule" },
-          { label: "Pending swaps", value: "—", href: "/manager/swaps" },
-          { label: "Coverage alerts", value: "—", href: "/manager/coverage" },
-        ].map((card) => (
-          <Link
-            key={card.label}
-            href={card.href}
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
-          >
-            <p className="text-sm text-slate-500">{card.label}</p>
-            <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
-              {card.value}
-            </p>
-            <p className="mt-1 text-xs text-slate-400">Open the page</p>
-          </Link>
-        ))}
+        <Link
+          href="/manager/schedule"
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+        >
+          <p className="text-sm text-slate-500">Unassigned future shifts</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+            {openShifts}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">Needs staffing</p>
+        </Link>
+        <Link
+          href="/manager/swaps"
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+        >
+          <p className="text-sm text-slate-500">Swap queue</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+            {pendingTotal}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">
+            {swapCounts.pending} pending · {swapCounts.awaitingManager} ready
+          </p>
+        </Link>
+        <Link
+          href="/manager/coverage"
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+        >
+          <p className="text-sm text-slate-500">Coverage gaps (week)</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+            {coverageGapDays}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">Day × dept below min</p>
+        </Link>
       </div>
 
       <section className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-6 text-sm text-slate-600">
@@ -49,8 +88,16 @@ export default async function ManagerDashboardPage() {
               Employees
             </Link>
           </li>
-          <li>Phase 3: swap engine with explicit block reasons</li>
-          <li>Phase 4: approvals inbox and audit views</li>
+          <li>
+            <Link href="/manager/audit" className="text-sky-700 hover:underline">
+              Audit log
+            </Link>
+          </li>
+          <li>
+            <Link href="/manager/notifications" className="text-sky-700 hover:underline">
+              Notifications
+            </Link>
+          </li>
         </ul>
       </section>
     </div>

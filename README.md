@@ -77,6 +77,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
    | `AUTH_SECRET` | Strong random string (server-only) |
    | `AUTH_URL` | Public URL of the app, e.g. `https://your-app.up.railway.app` |
    | `NEXT_PUBLIC_APP_URL` | Same as `AUTH_URL` if you use it in client code for links |
+   | `MIN_REST_MINUTES` | Optional; minimum rest between shifts for swap/assignment validation (default 480) |
 
    Do **not** expose secrets with `NEXT_PUBLIC_`. Only non-sensitive values belong in `NEXT_PUBLIC_*`.
 
@@ -110,7 +111,21 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 - Employee **my schedule** and **availability** CRUD.
 - **API:** `GET /api/v1/shifts?from=&to=&departmentId=&roleId=` — managers see full schedule; employees see only their shifts (session cookie).
 
-Later phases add swap engine, approvals inbox, notifications, and mobile polish.
+**Phase 3** — Swap engine and rules:
+
+- **Validation:** qualification, weekly/daily hour caps (`HourLimit`), minimum rest between shifts (`MIN_REST_MINUTES`, default 480).
+- **Flows:** one-way and two-way swap requests; target accept/reject; manager approve/deny with optional override reason; full swap execution in one transaction.
+- **Eligible staff:** manager shift detail suggests who can take the shift under current rules.
+
+**Phase 4** — Workflows and UI:
+
+- **Employee:** swap requests and incoming actions, profile, notifications (Alerts).
+- **Manager:** swap queue, audit log, notifications; dashboards surface unassigned shifts, pending swaps, and coverage gaps.
+
+**Phase 5** — Polish:
+
+- **Refresh:** `RefreshBridge` polls `router.refresh()` (~45s) on employee and manager layouts so open tabs pick up schedule/swap changes without manual reload.
+- **Mobile:** touch-friendly nav and home links; manager mobile nav shows all sections (horizontal scroll).
 
 ## License
 
