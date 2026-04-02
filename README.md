@@ -34,7 +34,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
    For active schema development you can use `npx prisma migrate dev` instead of `deploy`.
 
-   Default seed uses `SEED_PASSWORD` or `changeme` for all sample users.
+   Default seed uses `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` (if set), otherwise `changeme`, for all sample users. The seed creates seven departments (Attendant + Lead roles each), zones under Guest Services, sample coverage rules and hour limits (including one department-role limit), locations, and users: admin, manager, and three employees (multi- and single-department).
 
 4. **Run**
 
@@ -126,6 +126,12 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
 - **Refresh:** `RefreshBridge` polls `router.refresh()` (~45s) on employee and manager layouts so open tabs pick up schedule/swap changes without manual reload.
 - **Mobile:** touch-friendly nav and home links; manager mobile nav shows all sections (horizontal scroll).
+
+**Phase 6** — Time off:
+
+- **Employee:** request time off (start/end, optional reason); list history; cancel while `PENDING`.
+- **Manager:** queue at `/manager/time-off` with overlap context (how many assigned shifts intersect the window); approve or deny; notifications to staff on decision.
+- **Managers** are notified on new requests; **audit** entries for create / cancel / approve / deny.
 
 ## License
 

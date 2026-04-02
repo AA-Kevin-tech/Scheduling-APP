@@ -4,6 +4,7 @@ import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
 import { computeDepartmentCoverage } from "@/lib/services/coverage";
 import { countPendingSwapsForManager } from "@/lib/queries/swaps";
+import { countPendingTimeOffRequests } from "@/lib/queries/time-off";
 
 export default async function ManagerDashboardPage() {
   const session = await auth();
@@ -12,19 +13,21 @@ export default async function ManagerDashboardPage() {
   const weekStart = startOfWeekMondayUtc(new Date());
   const weekEnd = addWeeksUtc(weekStart, 1);
 
-  const [swapCounts, coverageRows, openShifts] = await Promise.all([
-    countPendingSwapsForManager(),
-    computeDepartmentCoverage({
-      rangeStart: weekStart,
-      rangeEnd: weekEnd,
-    }),
-    prisma.shift.count({
-      where: {
-        startsAt: { gte: new Date() },
-        assignments: { none: {} },
-      },
-    }),
-  ]);
+  const [swapCounts, coverageRows, openShifts, pendingTimeOff] =
+    await Promise.all([
+      countPendingSwapsForManager(),
+      computeDepartmentCoverage({
+        rangeStart: weekStart,
+        rangeEnd: weekEnd,
+      }),
+      prisma.shift.count({
+        where: {
+          startsAt: { gte: new Date() },
+          assignments: { none: {} },
+        },
+      }),
+      countPendingTimeOffRequests(),
+    ]);
 
   const coverageGapDays = coverageRows.filter((r) => r.gap > 0).length;
   const pendingTotal = swapCounts.pending + swapCounts.awaitingManager;
@@ -40,7 +43,7 @@ export default async function ManagerDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/manager/schedule"
           className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
@@ -62,6 +65,16 @@ export default async function ManagerDashboardPage() {
           <p className="mt-1 text-xs text-slate-400">
             {swapCounts.pending} pending · {swapCounts.awaitingManager} ready
           </p>
+        </Link>
+        <Link
+          href="/manager/time-off"
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+        >
+          <p className="text-sm text-slate-500">Time off pending</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+            {pendingTimeOff}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">Awaiting approval</p>
         </Link>
         <Link
           href="/manager/coverage"
@@ -91,6 +104,11 @@ export default async function ManagerDashboardPage() {
           <li>
             <Link href="/manager/audit" className="text-sky-700 hover:underline">
               Audit log
+            </Link>
+          </li>
+          <li>
+            <Link href="/manager/time-off" className="text-sky-700 hover:underline">
+              Time off
             </Link>
           </li>
           <li>
