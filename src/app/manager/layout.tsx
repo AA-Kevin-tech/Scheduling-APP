@@ -3,10 +3,11 @@ import { SignOutButton } from "@/components/sign-out-button";
 
 const links = [
   { href: "/manager", label: "Dashboard" },
-  { href: "/manager/schedule", label: "Schedule board" },
+  { href: "/manager/schedule", label: "Schedule" },
+  { href: "/manager/employees", label: "Employees" },
   { href: "/manager/coverage", label: "Coverage" },
-  { href: "/manager/swaps", label: "Swap approvals" },
-  { href: "/manager/audit", label: "Audit log" },
+  { href: "/manager/swaps", label: "Swaps" },
+  { href: "/manager/audit", label: "Audit" },
   { href: "/manager/departments", label: "Departments" },
   { href: "/manager/settings", label: "Settings" },
 ];

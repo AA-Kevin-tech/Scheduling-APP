@@ -31,15 +31,24 @@ export default async function ManagerDashboardPage() {
             <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
               {card.value}
             </p>
-            <p className="mt-1 text-xs text-slate-400">Phase 2+</p>
+            <p className="mt-1 text-xs text-slate-400">Open the page</p>
           </Link>
         ))}
       </div>
 
       <section className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-6 text-sm text-slate-600">
-        <p className="font-medium text-slate-800">Next steps</p>
+        <p className="font-medium text-slate-800">Shortcuts</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
-          <li>Phase 2: schedule board, CRUD, coverage math</li>
+          <li>
+            <Link href="/manager/shifts/new" className="text-sky-700 hover:underline">
+              Create shift
+            </Link>
+          </li>
+          <li>
+            <Link href="/manager/employees" className="text-sky-700 hover:underline">
+              Employees
+            </Link>
+          </li>
           <li>Phase 3: swap engine with explicit block reasons</li>
           <li>Phase 4: approvals inbox and audit views</li>
         </ul>
