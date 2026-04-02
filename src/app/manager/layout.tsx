@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SignOutButton } from "@/components/sign-out-button";
+import { RefreshBridge } from "@/components/refresh-bridge";
 
 const links = [
   { href: "/manager", label: "Dashboard" },
@@ -7,6 +8,7 @@ const links = [
   { href: "/manager/employees", label: "Employees" },
   { href: "/manager/coverage", label: "Coverage" },
   { href: "/manager/swaps", label: "Swaps" },
+  { href: "/manager/notifications", label: "Alerts" },
   { href: "/manager/audit", label: "Audit" },
   { href: "/manager/departments", label: "Departments" },
   { href: "/manager/settings", label: "Settings" },
@@ -42,7 +44,7 @@ export default function ManagerLayout({
           className="flex gap-2 overflow-x-auto px-2 pb-3 lg:hidden"
           aria-label="Manager mobile"
         >
-          {links.slice(0, 4).map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -53,7 +55,10 @@ export default function ManagerLayout({
           ))}
         </nav>
       </aside>
-      <div className="flex-1 p-6">{children}</div>
+      <div className="flex-1 p-6">
+        <RefreshBridge />
+        {children}
+      </div>
     </div>
   );
 }

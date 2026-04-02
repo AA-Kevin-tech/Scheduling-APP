@@ -18,6 +18,11 @@ export async function requireManager() {
 export async function requireEmployeeProfile() {
   const session = await requireSession();
   const employeeId = session.user.employeeId;
-  if (!employeeId) redirect("/login");
+  if (!employeeId) {
+    if (session.user.role === "MANAGER" || session.user.role === "ADMIN") {
+      redirect("/manager");
+    }
+    redirect("/login");
+  }
   return { session, employeeId };
 }

@@ -7,6 +7,7 @@ import {
   getEmployeesWithDepartments,
   getShiftById,
 } from "@/lib/queries/schedule";
+import { listEligibilityForShift } from "@/lib/services/eligible-employees";
 import { deleteShift, removeShiftAssignment } from "@/actions/shifts";
 import { AssignEmployeeForm } from "@/components/manager/assign-employee-form";
 import { EditShiftForm } from "@/components/manager/edit-shift-form";
@@ -18,10 +19,11 @@ export default async function ShiftDetailPage({
 }) {
   await requireManager();
   const { id } = await params;
-  const [shift, departments, employees] = await Promise.all([
+  const [shift, departments, employees, eligible] = await Promise.all([
     getShiftById(id),
     getDepartmentsWithRoles(),
     getEmployeesWithDepartments(),
+    listEligibilityForShift(id),
   ]);
 
   if (!shift) notFound();
@@ -106,6 +108,37 @@ export default async function ShiftDetailPage({
         </ul>
 
         <AssignEmployeeForm shiftId={shift.id} employees={employees} />
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">
+          Eligibility suggestions
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Who can take this shift under current rules (qualification, hours, rest).
+        </p>
+        <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto text-sm">
+          {eligible.map((row) => (
+            <li
+              key={row.employeeId}
+              className={`rounded-lg border px-2 py-2 ${
+                row.ok ? "border-emerald-200 bg-emerald-50" : "border-slate-200"
+              }`}
+            >
+              <span className="font-medium text-slate-900">
+                {row.name ?? row.email}
+              </span>
+              {!row.ok && (
+                <span className="mt-1 block text-xs text-red-700">
+                  {row.reasons.join(" · ")}
+                </span>
+              )}
+              {row.ok && (
+                <span className="ml-2 text-xs text-emerald-800">Eligible</span>
+              )}
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );
