@@ -11,12 +11,14 @@ export default async function ManagerEmployeesPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-slate-900">Employees</h1>
-        <Link
-          href="/manager/schedule"
-          className="text-sm text-sky-700 hover:underline"
-        >
-          Schedule board
-        </Link>
+        <div className="flex flex-wrap gap-4 text-sm">
+          <Link href="/manager/employees/new" className="text-sky-700 hover:underline">
+            Add employee
+          </Link>
+          <Link href="/manager/schedule" className="text-sky-700 hover:underline">
+            Schedule board
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -26,6 +28,7 @@ export default async function ManagerEmployeesPage() {
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Email</th>
               <th className="px-3 py-2">#</th>
+              <th className="px-3 py-2">Locations</th>
               <th className="px-3 py-2">Departments</th>
             </tr>
           </thead>
@@ -37,6 +40,23 @@ export default async function ManagerEmployeesPage() {
                 </td>
                 <td className="px-3 py-2 text-slate-600">{e.user.email}</td>
                 <td className="px-3 py-2 text-slate-500">{e.employeeNumber ?? "—"}</td>
+                <td className="px-3 py-2">
+                  <ul className="flex flex-wrap gap-1">
+                    {e.locations.length === 0 ? (
+                      <li className="text-slate-400">—</li>
+                    ) : (
+                      e.locations.map((el) => (
+                        <li
+                          key={el.id}
+                          className="text-xs text-slate-600"
+                        >
+                          {el.location.name}
+                          {el.isPrimary ? " · primary" : ""}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </td>
                 <td className="px-3 py-2">
                   <ul className="flex flex-wrap gap-1">
                     {e.departments.map((ed) => (

@@ -1,36 +1,27 @@
 import Link from "next/link";
-import { auth } from "@/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
 
 const links = [
-  { href: "/manager", label: "Dashboard" },
-  { href: "/manager/schedule", label: "Schedule" },
-  { href: "/manager/employees", label: "Employees" },
-  { href: "/manager/coverage", label: "Coverage" },
-  { href: "/manager/swaps", label: "Swaps" },
-  { href: "/manager/notifications", label: "Alerts" },
-  { href: "/manager/audit", label: "Audit" },
-  { href: "/manager/departments", label: "Departments" },
-  { href: "/manager/settings", label: "Settings" },
+  { href: "/admin", label: "Overview" },
+  { href: "/admin/locations", label: "Locations" },
+  { href: "/admin/departments", label: "Departments" },
+  { href: "/admin/users", label: "Users" },
 ];
 
-export default async function ManagerLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-  const showAdmin = session?.user?.role === "ADMIN";
-
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
       <aside className="border-b border-slate-200 bg-white lg:w-56 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-4 py-4 lg:block">
-          <span className="font-semibold text-slate-900">Manager</span>
+          <span className="font-semibold text-slate-900">Admin</span>
           <SignOutButton className="lg:mt-4 lg:block" />
         </div>
-        <nav className="hidden px-2 pb-4 lg:block" aria-label="Manager">
+        <nav className="hidden px-2 pb-4 lg:block" aria-label="Admin">
           <ul className="space-y-1">
             {links.map((l) => (
               <li key={l.href}>
@@ -42,21 +33,19 @@ export default async function ManagerLayout({
                 </Link>
               </li>
             ))}
-            {showAdmin ? (
-              <li className="pt-2">
-                <Link
-                  href="/admin"
-                  className="block rounded-md px-3 py-2 text-sm font-medium text-sky-800 hover:bg-sky-50"
-                >
-                  Admin panel →
-                </Link>
-              </li>
-            ) : null}
+            <li className="pt-2">
+              <Link
+                href="/manager"
+                className="block rounded-md px-3 py-2 text-sm text-sky-700 hover:bg-sky-50"
+              >
+                Manager tools →
+              </Link>
+            </li>
           </ul>
         </nav>
         <nav
           className="flex gap-2 overflow-x-auto px-2 pb-3 lg:hidden"
-          aria-label="Manager mobile"
+          aria-label="Admin mobile"
         >
           {links.map((l) => (
             <Link
@@ -67,14 +56,6 @@ export default async function ManagerLayout({
               {l.label}
             </Link>
           ))}
-          {showAdmin ? (
-            <Link
-              href="/admin"
-              className="shrink-0 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs text-sky-900"
-            >
-              Admin
-            </Link>
-          ) : null}
         </nav>
       </aside>
       <div className="flex-1 p-6">

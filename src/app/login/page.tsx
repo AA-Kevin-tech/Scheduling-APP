@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { LoginForm } from "./login-form";
@@ -12,9 +13,11 @@ export default async function LoginPage({
 
   if (session?.user) {
     const dest =
-      session.user.role === "ADMIN" || session.user.role === "MANAGER"
-        ? "/manager"
-        : "/employee";
+      session.user.role === "ADMIN"
+        ? "/admin"
+        : session.user.role === "MANAGER"
+          ? "/manager"
+          : "/employee";
     redirect(params.callbackUrl ?? dest);
   }
 
@@ -28,6 +31,11 @@ export default async function LoginPage({
           Austin Aquarium staff
         </p>
         <LoginForm callbackUrl={params.callbackUrl} />
+        <p className="mt-6 text-center text-sm">
+          <Link href="/forgot-password" className="text-sky-700 hover:underline">
+            Forgot password?
+          </Link>
+        </p>
       </div>
     </div>
   );
