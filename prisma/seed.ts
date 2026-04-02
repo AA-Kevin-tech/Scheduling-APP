@@ -8,6 +8,15 @@ import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+/** Plan §7: `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` (same value for all seeded users). */
+function seedPasswordPlain(): string {
+  return (
+    process.env.SEED_PASSWORD ??
+    process.env.SEED_ADMIN_PASSWORD ??
+    "changeme"
+  );
+}
+
 const DEPARTMENTS = [
   { name: "Guest Services", slug: "guest-services", colorToken: "emerald", sortOrder: 1 },
   { name: "Admissions", slug: "admissions", colorToken: "amber", sortOrder: 2 },
@@ -19,7 +28,7 @@ const DEPARTMENTS = [
 ] as const;
 
 async function main() {
-  const plain = process.env.SEED_PASSWORD ?? "changeme";
+  const plain = seedPasswordPlain();
   const passwordHash = await hash(plain, 12);
 
   const departments = await Promise.all(
@@ -90,6 +99,27 @@ async function main() {
     return r.id;
   };
 
+  const guestZones = [
+    { name: "Main floor", slug: "main-floor" },
+    { name: "Lobby / admissions desk", slug: "lobby" },
+  ] as const;
+  for (const z of guestZones) {
+    await prisma.departmentZone.upsert({
+      where: {
+        departmentId_slug: {
+          departmentId: bySlug["guest-services"].id,
+          slug: z.slug,
+        },
+      },
+      create: {
+        departmentId: bySlug["guest-services"].id,
+        name: z.name,
+        slug: z.slug,
+      },
+      update: { name: z.name },
+    });
+  }
+
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@austin-aquarium.local" },
     create: {
@@ -134,6 +164,17 @@ async function main() {
     update: { name: "Sam Chen", role: UserRole.EMPLOYEE, passwordHash },
   });
 
+  const emp3User = await prisma.user.upsert({
+    where: { email: "jordan@austin-aquarium.local" },
+    create: {
+      email: "jordan@austin-aquarium.local",
+      name: "Jordan Lee",
+      role: UserRole.EMPLOYEE,
+      passwordHash,
+    },
+    update: { name: "Jordan Lee", role: UserRole.EMPLOYEE, passwordHash },
+  });
+
   await prisma.employee.upsert({
     where: { userId: adminUser.id },
     create: {
@@ -170,8 +211,17 @@ async function main() {
     update: {},
   });
 
+  const jordan = await prisma.employee.upsert({
+    where: { userId: emp3User.id },
+    create: {
+      userId: emp3User.id,
+      employeeNumber: "E-3003",
+    },
+    update: {},
+  });
+
   await prisma.employeeDepartment.deleteMany({
-    where: { employeeId: { in: [alex.id, sam.id] } },
+    where: { employeeId: { in: [alex.id, sam.id, jordan.id] } },
   });
 
   await prisma.employeeDepartment.createMany({
@@ -194,6 +244,12 @@ async function main() {
         roleId: roleId("animal-care", "attendant"),
         isPrimary: true,
       },
+      {
+        employeeId: jordan.id,
+        departmentId: bySlug["education"].id,
+        roleId: roleId("education", "lead"),
+        isPrimary: true,
+      },
     ],
   });
 
@@ -206,20 +262,34 @@ async function main() {
 
   await prisma.employeeLocation.deleteMany({
     where: {
-      employeeId: { in: [adminEmp.id, managerEmp.id, alex.id, sam.id] },
+      employeeId: {
+        in: [adminEmp.id, managerEmp.id, alex.id, sam.id, jordan.id],
+      },
     },
   });
 
   await prisma.employeeLocation.createMany({
-    data: [adminEmp.id, managerEmp.id, alex.id, sam.id].map((employeeId) => ({
-      employeeId,
-      locationId: mainLocation.id,
-      isPrimary: true,
-    })),
+    data: [adminEmp.id, managerEmp.id, alex.id, sam.id, jordan.id].map(
+      (employeeId) => ({
+        employeeId,
+        locationId: mainLocation.id,
+        isPrimary: true,
+      }),
+    ),
   });
 
+  const retailAttendantRoleId = roleId("retail", "attendant");
   await prisma.hourLimit.deleteMany({
-    where: { employeeId: { in: [alex.id, sam.id] } },
+    where: {
+      OR: [
+        { employeeId: { in: [alex.id, sam.id, jordan.id] } },
+        {
+          scope: HourLimitScope.DEPARTMENT_ROLE,
+          departmentId: bySlug["retail"].id,
+          roleId: retailAttendantRoleId,
+        },
+      ],
+    },
   });
 
   await prisma.hourLimit.createMany({
@@ -236,29 +306,59 @@ async function main() {
         weeklyMaxMinutes: 40 * 60,
         dailyMaxMinutes: 12 * 60,
       },
+      {
+        scope: HourLimitScope.EMPLOYEE,
+        employeeId: jordan.id,
+        weeklyMaxMinutes: 30 * 60,
+        dailyMaxMinutes: 10 * 60,
+      },
+      {
+        scope: HourLimitScope.DEPARTMENT_ROLE,
+        departmentId: bySlug["retail"].id,
+        roleId: retailAttendantRoleId,
+        weeklyMaxMinutes: 24 * 60,
+        dailyMaxMinutes: null,
+      },
     ],
   });
 
   await prisma.coverageRule.deleteMany({
-    where: { departmentId: bySlug["guest-services"].id },
-  });
-
-  await prisma.coverageRule.create({
-    data: {
-      departmentId: bySlug["guest-services"].id,
-      minStaffCount: 2,
-      note: "Minimum 2 on guest services floor during open hours",
+    where: {
+      departmentId: {
+        in: [bySlug["guest-services"].id, bySlug["admissions"].id],
+      },
     },
   });
 
-  // eslint-disable-next-line no-console -- seed script
-  console.log("Seed complete. Sample logins (password from SEED_PASSWORD or `changeme`):");
-  // eslint-disable-next-line no-console -- seed script
+  await prisma.coverageRule.createMany({
+    data: [
+      {
+        departmentId: bySlug["guest-services"].id,
+        minStaffCount: 2,
+        note: "Minimum 2 on guest services floor during open hours",
+      },
+      {
+        departmentId: bySlug["admissions"].id,
+        minStaffCount: 1,
+        note: "At least one admissions desk during open hours",
+      },
+    ],
+  });
+
+  console.log(
+    "Seed complete. Password: SEED_PASSWORD or SEED_ADMIN_PASSWORD, else `changeme`",
+  );
   console.log("  Admin:", adminUser.email);
-  // eslint-disable-next-line no-console -- seed script
   console.log("  Manager:", managerUser.email);
-  // eslint-disable-next-line no-console -- seed script
-  console.log("  Employees:", emp1User.email, emp2User.email);
+  console.log(
+    "  Employees:",
+    emp1User.email,
+    "(multi-dept),",
+    emp2User.email,
+    ",",
+    emp3User.email,
+    "(single-dept)",
+  );
 }
 
 main()

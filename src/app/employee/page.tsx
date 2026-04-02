@@ -67,6 +67,17 @@ export default async function EmployeeHomePage() {
         </li>
         <li>
           <Link
+            href="/employee/time-off"
+            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+          >
+            <span className="font-medium text-slate-900">Time off</span>
+            <span className="mt-1 block text-sm text-slate-600">
+              Request and track PTO-style time away
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link
             href="/employee/swaps"
             className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
           >

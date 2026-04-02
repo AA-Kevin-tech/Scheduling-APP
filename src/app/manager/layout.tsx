@@ -9,6 +9,7 @@ const links = [
   { href: "/manager/employees", label: "Employees" },
   { href: "/manager/coverage", label: "Coverage" },
   { href: "/manager/swaps", label: "Swaps" },
+  { href: "/manager/time-off", label: "Time off" },
   { href: "/manager/notifications", label: "Alerts" },
   { href: "/manager/audit", label: "Audit" },
   { href: "/manager/departments", label: "Departments" },
