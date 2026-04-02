@@ -1,0 +1,34 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { LoginForm } from "./login-form";
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const session = await auth();
+  const params = await searchParams;
+
+  if (session?.user) {
+    const dest =
+      session.user.role === "ADMIN" || session.user.role === "MANAGER"
+        ? "/manager"
+        : "/employee";
+    redirect(params.callbackUrl ?? dest);
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h1 className="text-center text-xl font-semibold text-slate-900">
+          Sign in
+        </h1>
+        <p className="mt-1 text-center text-sm text-slate-500">
+          Austin Aquarium staff
+        </p>
+        <LoginForm callbackUrl={params.callbackUrl} />
+      </div>
+    </div>
+  );
+}

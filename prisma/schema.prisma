@@ -1,0 +1,355 @@
+// Austin Aquarium Scheduling — PostgreSQL (Railway + local)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ——— Auth.js (Prisma adapter) ———
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole  @default(EMPLOYEE)
+
+  accounts      Account[]
+  sessions      Session[]
+  notifications Notification[]
+  auditLogs     AuditLog[] @relation("AuditActor")
+
+  employee Employee?
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ——— Organization ———
+
+model Department {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  colorToken String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  zones               DepartmentZone[]
+  roles               Role[]
+  shifts              Shift[]
+  employeeDepartments EmployeeDepartment[]
+  certifications      Certification[]
+  coverageRules       CoverageRule[]
+  hourLimits          HourLimit[]
+}
+
+model DepartmentZone {
+  id           String   @id @default(cuid())
+  departmentId String
+  name         String
+  slug         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department    Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  shifts        Shift[]
+  coverageRules CoverageRule[]
+
+  @@unique([departmentId, slug])
+}
+
+/// Job role within a department (e.g. Attendant, Lead)
+model Role {
+  id           String   @id @default(cuid())
+  departmentId String
+  name         String
+  slug         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department          Department           @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  employeeDepartments EmployeeDepartment[]
+  shifts              Shift[]
+  hourLimits          HourLimit[]
+
+  @@unique([departmentId, slug])
+}
+
+model Employee {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  employeeNumber String?   @unique
+  hireDate       DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  departments      EmployeeDepartment[]
+  certifications   Certification[]
+  shiftAssignments ShiftAssignment[]
+  availability     Availability[]
+  timeOffRequests  TimeOffRequest[] @relation("TimeOffEmployee")
+  swapRequestsOut  SwapRequest[]    @relation("SwapRequester")
+  swapRequestsIn   SwapRequest[]    @relation("SwapTarget")
+  hourLimits       HourLimit[]
+}
+
+/// M2M: employee ↔ department with optional role and primary flag
+model EmployeeDepartment {
+  id           String   @id @default(cuid())
+  employeeId   String
+  departmentId String
+  roleId       String?
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  role       Role?      @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  @@unique([employeeId, departmentId])
+}
+
+model Certification {
+  id           String    @id @default(cuid())
+  employeeId   String
+  departmentId String?
+  name         String
+  issuedAt     DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  employee   Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+}
+
+// ——— Scheduling ———
+
+model Shift {
+  id             String    @id @default(cuid())
+  departmentId   String
+  roleId         String?
+  zoneId         String?
+  title          String?
+  startsAt       DateTime
+  endsAt         DateTime
+  recurrenceRule String?   @db.Text
+  parentShiftId  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  department Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  role       Role?           @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  zone       DepartmentZone? @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  parent     Shift?          @relation("ShiftSeries", fields: [parentShiftId], references: [id], onDelete: SetNull)
+  children   Shift[]         @relation("ShiftSeries")
+
+  assignments ShiftAssignment[]
+}
+
+model ShiftAssignment {
+  id                    String   @id @default(cuid())
+  shiftId               String
+  employeeId            String
+  assignedByUserId      String?
+  managerOverrideReason String?  @db.Text
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  shift    Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  swapRequestsFrom SwapRequest[] @relation("SwapFromAssignment")
+  swapRequestsTo   SwapRequest[] @relation("SwapToAssignment")
+}
+
+model Availability {
+  id            String    @id @default(cuid())
+  employeeId    String
+  dayOfWeek     Int
+  startsAt      String
+  endsAt        String
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+model TimeOffRequest {
+  id          String        @id @default(cuid())
+  employeeId  String
+  startsAt    DateTime
+  endsAt      DateTime
+  reason      String?       @db.Text
+  status      TimeOffStatus @default(PENDING)
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  employee Employee @relation("TimeOffEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model SwapRequest {
+  id                    String            @id @default(cuid())
+  requesterEmployeeId   String
+  targetEmployeeId      String?
+  fromAssignmentId      String
+  toAssignmentId        String?
+  status                SwapRequestStatus @default(PENDING)
+  managerNote           String?           @db.Text
+  decidedByUserId       String?
+  decidedAt             DateTime?
+  managerOverrideReason String?           @db.Text
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  requester      Employee @relation("SwapRequester", fields: [requesterEmployeeId], references: [id], onDelete: Cascade)
+  target         Employee? @relation("SwapTarget", fields: [targetEmployeeId], references: [id], onDelete: SetNull)
+  fromAssignment ShiftAssignment @relation("SwapFromAssignment", fields: [fromAssignmentId], references: [id], onDelete: Cascade)
+  toAssignment   ShiftAssignment? @relation("SwapToAssignment", fields: [toAssignmentId], references: [id], onDelete: SetNull)
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum TimeOffStatus {
+  PENDING
+  APPROVED
+  DENIED
+  CANCELLED
+}
+
+enum SwapRequestStatus {
+  PENDING
+  ACCEPTED_BY_TARGET
+  REJECTED_BY_TARGET
+  APPROVED_BY_MANAGER
+  DENIED_BY_MANAGER
+  CANCELLED
+}
+
+enum HourLimitScope {
+  EMPLOYEE
+  DEPARTMENT_ROLE
+}
+
+model HourLimit {
+  id               String          @id @default(cuid())
+  scope            HourLimitScope
+  employeeId       String?
+  departmentId     String?
+  roleId           String?
+  weeklyMaxMinutes Int?
+  dailyMaxMinutes  Int?
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  employee   Employee?   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  role       Role?       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([departmentId, roleId])
+}
+
+model CoverageRule {
+  id              String   @id @default(cuid())
+  departmentId    String
+  zoneId          String?
+  minStaffCount   Int
+  windowStartMins Int?
+  windowEndMins   Int?
+  validFrom       DateTime?
+  validTo         DateTime?
+  note            String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  department Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  zone       DepartmentZone? @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  body      String    @db.Text
+  type      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  entityType  String
+  entityId    String
+  action      String
+  payload     Json?
+  reason      String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
