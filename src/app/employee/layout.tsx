@@ -4,6 +4,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 const nav = [
   { href: "/employee", label: "Home" },
   { href: "/employee/schedule", label: "Schedule" },
+  { href: "/employee/availability", label: "Availability" },
   { href: "/employee/swaps", label: "Swaps" },
   { href: "/employee/profile", label: "Profile" },
 ];

@@ -99,7 +99,18 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
 ## Phases
 
-Phase 1 delivers scaffolding, auth, schema, shells, swap-validation utilities, seed, and deployment docs. Later phases add scheduling CRUD, swap engine, manager tooling, notifications, and mobile polish.
+**Phase 1** — Scaffolding, auth, schema, shells, swap-validation utilities, seed, deployment docs.
+
+**Phase 2** — Scheduling core:
+
+- Shifts: create (with optional weekly materialization for `repeatWeeks`), edit, delete; assignments with qualification + overlap checks; manager override with reason + audit.
+- Manager **schedule board** (`/manager/schedule`) with week navigation and filters by department and role.
+- **Coverage** view (`/manager/coverage`) vs `CoverageRule` minimums (per day × department).
+- **Employees** and **Departments** directory (read-focused).
+- Employee **my schedule** and **availability** CRUD.
+- **API:** `GET /api/v1/shifts?from=&to=&departmentId=&roleId=` — managers see full schedule; employees see only their shifts (session cookie).
+
+Later phases add swap engine, approvals inbox, notifications, and mobile polish.
 
 ## License
 
