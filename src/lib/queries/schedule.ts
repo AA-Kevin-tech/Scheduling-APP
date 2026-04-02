@@ -92,6 +92,7 @@ export async function getEmployeesWithDepartments() {
     orderBy: { user: { email: "asc" } },
     include: {
       user: { select: { name: true, email: true } },
+      locations: { include: { location: true } },
       departments: {
         include: { department: true, role: true },
       },

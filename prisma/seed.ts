@@ -43,6 +43,19 @@ async function main() {
 
   const bySlug = Object.fromEntries(departments.map((d) => [d.slug, d]));
 
+  const mainLocation = await prisma.location.upsert({
+    where: { slug: "austin-aquarium-main" },
+    create: {
+      name: "Austin Aquarium",
+      slug: "austin-aquarium-main",
+      address: "Austin, TX",
+      sortOrder: 0,
+    },
+    update: {
+      name: "Austin Aquarium",
+    },
+  });
+
   const roleRecords: { deptSlug: string; name: string; slug: string }[] = [];
   for (const d of DEPARTMENTS) {
     roleRecords.push(
@@ -182,6 +195,27 @@ async function main() {
         isPrimary: true,
       },
     ],
+  });
+
+  const adminEmp = await prisma.employee.findUniqueOrThrow({
+    where: { userId: adminUser.id },
+  });
+  const managerEmp = await prisma.employee.findUniqueOrThrow({
+    where: { userId: managerUser.id },
+  });
+
+  await prisma.employeeLocation.deleteMany({
+    where: {
+      employeeId: { in: [adminEmp.id, managerEmp.id, alex.id, sam.id] },
+    },
+  });
+
+  await prisma.employeeLocation.createMany({
+    data: [adminEmp.id, managerEmp.id, alex.id, sam.id].map((employeeId) => ({
+      employeeId,
+      locationId: mainLocation.id,
+      isPrimary: true,
+    })),
   });
 
   await prisma.hourLimit.deleteMany({

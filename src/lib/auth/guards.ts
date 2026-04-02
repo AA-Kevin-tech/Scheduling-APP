@@ -15,6 +15,23 @@ export async function requireManager() {
   return session;
 }
 
+export async function requireAdmin() {
+  const session = await requireSession();
+  if (session.user.role !== "ADMIN") {
+    redirect("/manager");
+  }
+  return session;
+}
+
+/** Admin or manager (for user provisioning, etc.). */
+export async function requireAdminOrManager() {
+  const session = await requireSession();
+  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+    redirect("/employee");
+  }
+  return session;
+}
+
 export async function requireEmployeeProfile() {
   const session = await requireSession();
   const employeeId = session.user.employeeId;
