@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { safeCallbackUrl } from "@/lib/auth/safe-callback-url";
 import { LoginForm } from "./login-form";
 
 export default async function LoginPage({
@@ -18,7 +19,7 @@ export default async function LoginPage({
         : session.user.role === "MANAGER"
           ? "/manager"
           : "/employee";
-    redirect(params.callbackUrl ?? dest);
+    redirect(safeCallbackUrl(params.callbackUrl, dest));
   }
 
   return (
@@ -30,7 +31,9 @@ export default async function LoginPage({
         <p className="mt-1 text-center text-sm text-slate-500">
           Austin Aquarium staff
         </p>
-        <LoginForm callbackUrl={params.callbackUrl} />
+        <LoginForm
+          callbackUrl={safeCallbackUrl(params.callbackUrl, "/")}
+        />
         <p className="mt-6 text-center text-sm">
           <Link href="/forgot-password" className="text-sky-700 hover:underline">
             Forgot password?

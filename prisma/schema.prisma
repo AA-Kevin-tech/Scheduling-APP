@@ -12,13 +12,15 @@ datasource db {
 // ——— Auth.js (Prisma adapter) ———
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  role          UserRole  @default(EMPLOYEE)
+  id                String    @id @default(cuid())
+  name              String?
+  email             String    @unique
+  emailVerified     DateTime?
+  image             String?
+  passwordHash      String?
+  role              UserRole  @default(EMPLOYEE)
+  /// Bumped on password reset; JWT must match or session is cleared.
+  credentialVersion Int       @default(0)
 
   accounts      Account[]
   sessions      Session[]

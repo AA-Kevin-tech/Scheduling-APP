@@ -91,7 +91,10 @@ export async function resetPassword(
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.update({
       where: { email },
-      data: { passwordHash },
+      data: {
+        passwordHash,
+        credentialVersion: { increment: 1 },
+      },
     });
     await tx.verificationToken.deleteMany({
       where: { identifier: row.identifier, token: row.token },
