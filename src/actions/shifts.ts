@@ -132,6 +132,9 @@ export async function updateShift(
 
   const startsAt = new Date(parsed.data.startsAt);
   const endsAt = new Date(parsed.data.endsAt);
+  if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
+    return { error: "Invalid start or end time." };
+  }
   if (endsAt <= startsAt) {
     return { error: "End time must be after start time." };
   }

@@ -2,6 +2,38 @@ import { HourLimitScope } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { intervalsOverlap } from "@/lib/datetime";
 
+function limitMatchesMembership(
+  limit: { departmentId: string | null; roleId: string | null },
+  m: { departmentId: string; roleId: string | null },
+): boolean {
+  if (limit.departmentId !== m.departmentId) return false;
+  if (limit.roleId == null) return true;
+  if (m.roleId == null) return false;
+  return limit.roleId === m.roleId;
+}
+
+function mergeHourCapRows(
+  rows: { weeklyMaxMinutes: number | null; dailyMaxMinutes: number | null }[],
+): { weeklyMaxMinutes: number | null; dailyMaxMinutes: number | null } {
+  let weeklyMaxMinutes: number | null = null;
+  let dailyMaxMinutes: number | null = null;
+  for (const l of rows) {
+    if (l.weeklyMaxMinutes != null) {
+      weeklyMaxMinutes =
+        weeklyMaxMinutes == null
+          ? l.weeklyMaxMinutes
+          : Math.min(weeklyMaxMinutes, l.weeklyMaxMinutes);
+    }
+    if (l.dailyMaxMinutes != null) {
+      dailyMaxMinutes =
+        dailyMaxMinutes == null
+          ? l.dailyMaxMinutes
+          : Math.min(dailyMaxMinutes, l.dailyMaxMinutes);
+    }
+  }
+  return { weeklyMaxMinutes, dailyMaxMinutes };
+}
+
 /** Sum shift minutes for an employee across assignments overlapping [rangeStart, rangeEnd). */
 export async function sumAssignedMinutesInRange(
   employeeId: string,
@@ -81,33 +113,38 @@ export async function sumAssignedMinutesOnCalendarDay(
   return total;
 }
 
-/** Effective hour caps for an employee (employee-scoped limits preferred). */
+/** Effective hour caps: tightest of employee-scoped and matching department/role limits. */
 export async function getEffectiveHourCaps(employeeId: string): Promise<{
   weeklyMaxMinutes: number | null;
   dailyMaxMinutes: number | null;
 }> {
-  const limits = await prisma.hourLimit.findMany({
-    where: {
-      scope: HourLimitScope.EMPLOYEE,
-      employeeId,
-    },
-    orderBy: { createdAt: "desc" },
-    take: 5,
+  const memberships = await prisma.employeeDepartment.findMany({
+    where: { employeeId },
+    select: { departmentId: true, roleId: true },
   });
 
-  let weeklyMaxMinutes: number | null = null;
-  let dailyMaxMinutes: number | null = null;
+  const deptIds = [...new Set(memberships.map((m) => m.departmentId))];
 
-  for (const l of limits) {
-    if (weeklyMaxMinutes == null && l.weeklyMaxMinutes != null) {
-      weeklyMaxMinutes = l.weeklyMaxMinutes;
-    }
-    if (dailyMaxMinutes == null && l.dailyMaxMinutes != null) {
-      dailyMaxMinutes = l.dailyMaxMinutes;
-    }
-  }
+  const [employeeLimits, deptRoleLimits] = await Promise.all([
+    prisma.hourLimit.findMany({
+      where: { scope: HourLimitScope.EMPLOYEE, employeeId },
+      orderBy: { createdAt: "desc" },
+    }),
+    deptIds.length
+      ? prisma.hourLimit.findMany({
+          where: {
+            scope: HourLimitScope.DEPARTMENT_ROLE,
+            departmentId: { in: deptIds },
+          },
+        })
+      : Promise.resolve([]),
+  ]);
 
-  return { weeklyMaxMinutes, dailyMaxMinutes };
+  const applicableDept = deptRoleLimits.filter((l) =>
+    memberships.some((m) => limitMatchesMembership(l, m)),
+  );
+
+  return mergeHourCapRows([...employeeLimits, ...applicableDept]);
 }
 
 export async function getRestAnchorsForEmployee(

@@ -124,22 +124,3 @@ export function validateCoverage(input: CoverageInput): ValidationResult {
   }
   return { ok: reasons.length === 0, reasons };
 }
-
-export type SwapEligibilityInput = {
-  qualification: QualificationInput;
-  hourLimits: HourLimitsInput;
-  rest: RestPeriodInput;
-  coverage: CoverageInput;
-};
-
-/** Run all checks; aggregates reasons for UI. */
-export function validateSwapEligibility(
-  input: SwapEligibilityInput,
-): ValidationResult {
-  const q = validateQualification(input.qualification);
-  const h = validateHourLimits(input.hourLimits);
-  const r = validateRestPeriod(input.rest);
-  const c = validateCoverage(input.coverage);
-  const reasons = [...q.reasons, ...h.reasons, ...r.reasons, ...c.reasons];
-  return { ok: reasons.length === 0, reasons };
-}
