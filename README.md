@@ -34,7 +34,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
    For active schema development you can use `npx prisma migrate dev` instead of `deploy`.
 
-   Default seed uses `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` (if set), otherwise `changeme`, for all sample users. The seed creates seven departments (Attendant + Lead roles each), zones under Guest Services, sample coverage rules and hour limits (including one department-role limit), locations, and users: admin, manager, and three employees (multi- and single-department).
+   The seeded **admin** (`admin@austin-aquarium.local`) uses its own password (set in `prisma/seed.ts`, overridable with `SEED_ADMIN_ACCOUNT_PASSWORD`). Other sample users use `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` if set, otherwise `changeme`. The seed creates seven departments (Attendant + Lead roles each), zones under Guest Services, sample coverage rules and hour limits (including one department-role limit), locations, and users: admin, manager, and three employees (multi- and single-department).
 
 4. **Run**
 
