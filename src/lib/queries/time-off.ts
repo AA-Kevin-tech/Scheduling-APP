@@ -54,3 +54,18 @@ export async function getOverlapCountForRequest(requestId: string) {
     row.endsAt,
   );
 }
+
+export async function getApprovedTimeOffOverlappingRange(
+  employeeId: string,
+  from: Date,
+  to: Date,
+) {
+  return prisma.timeOffRequest.findMany({
+    where: {
+      employeeId,
+      status: "APPROVED",
+      AND: [{ startsAt: { lt: to } }, { endsAt: { gt: from } }],
+    },
+    orderBy: { startsAt: "asc" },
+  });
+}
