@@ -3,16 +3,7 @@ import { requireEmployeeProfile } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { deleteAvailabilitySlot } from "@/actions/availability";
 import { AvailabilityAddForm } from "./availability-add-form";
-
-const DAYS = [
-  { v: 0, label: "Sunday" },
-  { v: 1, label: "Monday" },
-  { v: 2, label: "Tuesday" },
-  { v: 3, label: "Wednesday" },
-  { v: 4, label: "Thursday" },
-  { v: 5, label: "Friday" },
-  { v: 6, label: "Saturday" },
-];
+import { AvailabilitySlotForm } from "./availability-slot-form";
 
 export default async function EmployeeAvailabilityPage() {
   const { employeeId } = await requireEmployeeProfile();
@@ -34,8 +25,9 @@ export default async function EmployeeAvailabilityPage() {
         </Link>
       </div>
       <p className="text-sm text-slate-600">
-        Typical hours you can work each week (Phase 2 — used by scheduling
-        suggestions later).
+        Typical hours you can work each week. This is stored for visibility and
+        future scheduling features; shift assignments and swaps still use
+        department, hours, and rest rules from the schedule.
       </p>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -52,16 +44,18 @@ export default async function EmployeeAvailabilityPage() {
             {slots.map((s) => (
               <li
                 key={s.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+                className="space-y-3 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm"
               >
-                <span>
-                  {DAYS.find((d) => d.v === s.dayOfWeek)?.label ?? s.dayOfWeek}{" "}
-                  · {s.startsAt}–{s.endsAt}
-                </span>
+                <AvailabilitySlotForm
+                  id={s.id}
+                  dayOfWeek={s.dayOfWeek}
+                  startsAt={s.startsAt}
+                  endsAt={s.endsAt}
+                />
                 <form action={deleteAvailabilitySlot}>
                   <input type="hidden" name="id" value={s.id} />
-                  <button type="submit" className="text-red-700 hover:underline">
-                    Remove
+                  <button type="submit" className="text-xs text-red-700 hover:underline">
+                    Remove slot
                   </button>
                 </form>
               </li>

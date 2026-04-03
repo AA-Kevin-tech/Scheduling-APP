@@ -100,11 +100,13 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
 ## Phases
 
+All six phases below are **implemented in this repo**. Use the paths and API noted when verifying behavior.
+
 **Phase 1** — Scaffolding, auth, schema, shells, swap-validation utilities, seed, deployment docs.
 
 **Phase 2** — Scheduling core:
 
-- Shifts: create (with optional weekly materialization for `repeatWeeks`), edit, delete; assignments with qualification + overlap checks; manager override with reason + audit.
+- Shifts: create (with optional weekly materialization for `repeatWeeks`), edit, delete; assignments enforce qualification, no double-booking, hour caps, and minimum rest (aligned with swap rules); manager override with reason + audit when rules would block the assign.
 - Manager **schedule board** (`/manager/schedule`) with week navigation and filters by department and role.
 - **Coverage** view (`/manager/coverage`) vs `CoverageRule` minimums (per day × department).
 - **Employees** and **Departments** directory (read-focused).
@@ -124,7 +126,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
 **Phase 5** — Polish:
 
-- **Refresh:** `RefreshBridge` polls `router.refresh()` (~45s) on employee and manager layouts so open tabs pick up schedule/swap changes without manual reload.
+- **Refresh:** `RefreshBridge` polls `router.refresh()` (~45s) on employee, manager, and admin layouts so open tabs pick up schedule/swap changes without manual reload.
 - **Mobile:** touch-friendly nav and home links; manager mobile nav shows all sections (horizontal scroll).
 
 **Phase 6** — Time off:
