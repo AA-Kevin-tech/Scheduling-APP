@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-/** Soft refresh for schedule / swap changes (Phase 5). Polling avoids Railway WebSocket limits. */
+/** Soft refresh for schedule / swap changes. Polling avoids Railway WebSocket limits. */
 export function RefreshBridge({ intervalMs = 45000 }: { intervalMs?: number }) {
   const router = useRouter();
 

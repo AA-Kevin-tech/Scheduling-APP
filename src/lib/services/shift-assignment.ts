@@ -1,25 +1,8 @@
 import { prisma } from "@/lib/db";
 import { intervalsOverlap } from "@/lib/datetime";
-import {
-  employeeQualifiesForShift,
-  qualificationFailureReasons,
-  type DeptMembership,
-} from "@/lib/validation/shift-assignment";
+import { validateEmployeeTakingShift } from "@/lib/services/swap-context";
 
 export type ValidateAssignmentResult = { ok: true } | { ok: false; reasons: string[] };
-
-export async function getEmployeeDepartmentMemberships(
-  employeeId: string,
-): Promise<DeptMembership[]> {
-  const rows = await prisma.employeeDepartment.findMany({
-    where: { employeeId },
-    select: { departmentId: true, roleId: true },
-  });
-  return rows.map((r) => ({
-    departmentId: r.departmentId,
-    roleId: r.roleId,
-  }));
-}
 
 export async function findOverlappingAssignmentReason(
   employeeId: string,
@@ -52,6 +35,7 @@ export async function findOverlappingAssignmentReason(
   return null;
 }
 
+/** Qualification, overlap, hour caps, and minimum rest (same rules as swaps / eligibility). */
 export async function validateShiftAssignment(input: {
   employeeId: string;
   shiftId: string;
@@ -59,24 +43,11 @@ export async function validateShiftAssignment(input: {
 }): Promise<ValidateAssignmentResult> {
   const shift = await prisma.shift.findUnique({
     where: { id: input.shiftId },
-    select: { departmentId: true, roleId: true, startsAt: true, endsAt: true },
+    include: { department: true, role: true },
   });
 
   if (!shift) {
     return { ok: false, reasons: ["Shift not found."] };
-  }
-
-  const memberships = await getEmployeeDepartmentMemberships(input.employeeId);
-  const shiftQual = {
-    departmentId: shift.departmentId,
-    roleId: shift.roleId,
-  };
-
-  if (!employeeQualifiesForShift(memberships, shiftQual)) {
-    return {
-      ok: false,
-      reasons: qualificationFailureReasons(memberships, shiftQual),
-    };
   }
 
   const overlap = await findOverlappingAssignmentReason(
@@ -88,6 +59,16 @@ export async function validateShiftAssignment(input: {
 
   if (overlap) {
     return { ok: false, reasons: [overlap] };
+  }
+
+  const rules = await validateEmployeeTakingShift({
+    takerEmployeeId: input.employeeId,
+    shift,
+    dropAssignmentId: input.excludeAssignmentId ?? null,
+  });
+
+  if (!rules.ok) {
+    return { ok: false, reasons: rules.reasons };
   }
 
   return { ok: true };

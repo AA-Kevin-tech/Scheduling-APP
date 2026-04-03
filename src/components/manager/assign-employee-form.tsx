@@ -41,13 +41,14 @@ export function AssignEmployeeForm({
       </label>
       <label className="block text-sm">
         <span className="text-slate-600">
-          Override reason (only if rules block assignment)
+          Override reason (required if qualification, overlap, hours, or rest
+          rules block assignment)
         </span>
         <input
           name="managerOverrideReason"
           type="text"
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          placeholder="Required to force assignment when validation fails"
+          placeholder="Explain why this assign is allowed despite rule violations"
         />
       </label>
       {state.error && (
