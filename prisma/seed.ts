@@ -8,13 +8,18 @@ import { hash } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-/** Plan §7: `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` (same value for all seeded users). */
+/** Plan §7: `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` (same value for all seeded users except admin). */
 function seedPasswordPlain(): string {
   return (
     process.env.SEED_PASSWORD ??
     process.env.SEED_ADMIN_PASSWORD ??
     "changeme"
   );
+}
+
+/** Admin user only. Override with `SEED_ADMIN_ACCOUNT_PASSWORD` in `.env`. */
+function seedAdminPasswordPlain(): string {
+  return process.env.SEED_ADMIN_ACCOUNT_PASSWORD ?? "Bb3304917";
 }
 
 const DEPARTMENTS = [
@@ -30,6 +35,7 @@ const DEPARTMENTS = [
 async function main() {
   const plain = seedPasswordPlain();
   const passwordHash = await hash(plain, 12);
+  const adminPasswordHash = await hash(seedAdminPasswordPlain(), 12);
 
   const departments = await Promise.all(
     DEPARTMENTS.map((d) =>
@@ -126,9 +132,13 @@ async function main() {
       email: "admin@austin-aquarium.local",
       name: "Admin User",
       role: UserRole.ADMIN,
-      passwordHash,
+      passwordHash: adminPasswordHash,
     },
-    update: { name: "Admin User", role: UserRole.ADMIN, passwordHash },
+    update: {
+      name: "Admin User",
+      role: UserRole.ADMIN,
+      passwordHash: adminPasswordHash,
+    },
   });
 
   const managerUser = await prisma.user.upsert({
@@ -346,7 +356,7 @@ async function main() {
   });
 
   console.log(
-    "Seed complete. Password: SEED_PASSWORD or SEED_ADMIN_PASSWORD, else `changeme`",
+    "Seed complete. Admin password: SEED_ADMIN_ACCOUNT_PASSWORD or default; other users: SEED_PASSWORD or SEED_ADMIN_PASSWORD, else `changeme`",
   );
   console.log("  Admin:", adminUser.email);
   console.log("  Manager:", managerUser.email);
