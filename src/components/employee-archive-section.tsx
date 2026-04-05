@@ -17,7 +17,10 @@ export function EmployeeArchiveSection({ userId, archivedAt }: Props) {
         employee mobile app. Restore anytime to bring them back into scheduling.
       </p>
       {isArchived ? (
-        <form action={setEmployeeArchivedFromUser} className="mt-4">
+        <form
+          action={setEmployeeArchivedFromUser}
+          className="mt-4 sm:pl-[12rem]"
+        >
           <input type="hidden" name="userId" value={userId} />
           <input type="hidden" name="archived" value="false" />
           <button
@@ -28,7 +31,10 @@ export function EmployeeArchiveSection({ userId, archivedAt }: Props) {
           </button>
         </form>
       ) : (
-        <form action={setEmployeeArchivedFromUser} className="mt-4">
+        <form
+          action={setEmployeeArchivedFromUser}
+          className="mt-4 sm:pl-[12rem]"
+        >
           <input type="hidden" name="userId" value={userId} />
           <input type="hidden" name="archived" value="true" />
           <button

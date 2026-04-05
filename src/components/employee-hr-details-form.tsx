@@ -1,32 +1,17 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useState } from "react";
 import type {
   CompensationType,
   EmploymentType,
 } from "@prisma/client";
 import { updateEmployeeHrDetails } from "@/actions/employee-hr-details";
+import { FieldRow, formControlClassName } from "@/components/ui/field-row";
 
 function moneyInputValue(v: { toString(): string } | null | undefined): string {
   if (v == null) return "";
   const n = Number(v.toString());
   return Number.isFinite(n) ? String(n) : "";
-}
-
-/** Label + control row: labels share one column width so inputs line up. */
-function FieldRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[11rem_1fr] sm:items-center sm:gap-x-4">
-      <span className="text-sm text-slate-600 sm:pt-0">{label}</span>
-      <div className="min-w-0 max-w-md">{children}</div>
-    </div>
-  );
 }
 
 export function EmployeeHrDetailsForm({
@@ -54,9 +39,6 @@ export function EmployeeHrDetailsForm({
     {} as { ok?: boolean; error?: string },
   );
 
-  const controlClass =
-    "w-full min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-base";
-
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="employeeId" value={employeeId} />
@@ -68,16 +50,15 @@ export function EmployeeHrDetailsForm({
         />
       ) : null}
 
-      <label className="block text-sm">
-        <span className="text-slate-600">Manager notes</span>
+      <FieldRow label="Manager notes" fullWidthControl alignTop>
         <textarea
           name="managerNotes"
           rows={4}
           defaultValue={initialManagerNotes ?? ""}
           placeholder="Private notes — not visible to the employee"
-          className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
         />
-      </label>
+      </FieldRow>
 
       <div className="space-y-3">
         <FieldRow label="Compensation">
@@ -87,7 +68,7 @@ export function EmployeeHrDetailsForm({
             onChange={(e) =>
               setCompensationType(e.target.value as CompensationType)
             }
-            className={controlClass}
+            className={formControlClassName}
           >
             <option value="HOURLY">Hourly</option>
             <option value="SALARY">Salary (annual)</option>
@@ -103,7 +84,7 @@ export function EmployeeHrDetailsForm({
               step={0.01}
               placeholder="—"
               defaultValue={moneyInputValue(initialHourlyRate)}
-              className={controlClass}
+              className={formControlClassName}
             />
           </FieldRow>
         ) : (
@@ -115,7 +96,7 @@ export function EmployeeHrDetailsForm({
               step={100}
               placeholder="—"
               defaultValue={moneyInputValue(initialAnnualSalary)}
-              className={controlClass}
+              className={formControlClassName}
             />
           </FieldRow>
         )}
@@ -124,7 +105,7 @@ export function EmployeeHrDetailsForm({
           <select
             name="employmentType"
             defaultValue={initialEmploymentType}
-            className={controlClass}
+            className={formControlClassName}
           >
             <option value="FULL_TIME">Full time</option>
             <option value="PART_TIME">Part time</option>
@@ -132,19 +113,21 @@ export function EmployeeHrDetailsForm({
         </FieldRow>
       </div>
 
-      {state?.error && (
-        <p className="text-sm text-red-600" role="alert">
-          {state.error}
-        </p>
-      )}
-      {state?.ok && <p className="text-sm text-emerald-700">Saved.</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-sky-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
-      >
-        {pending ? "Saving…" : "Save HR details"}
-      </button>
+      <div className="space-y-2 sm:pl-[12rem]">
+        {state?.error && (
+          <p className="text-sm text-red-600" role="alert">
+            {state.error}
+          </p>
+        )}
+        {state?.ok && <p className="text-sm text-emerald-700">Saved.</p>}
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-lg bg-sky-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
+        >
+          {pending ? "Saving…" : "Save HR details"}
+        </button>
+      </div>
     </form>
   );
 }

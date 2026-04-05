@@ -5,6 +5,7 @@ import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
+import { FieldRow } from "@/components/ui/field-row";
 import { requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
@@ -37,6 +38,11 @@ export default async function ManagerEmployeeHourLimitsPage({
     getEffectiveHourCaps(employeeId),
   ]);
 
+  const effectiveLabel =
+    effective.weeklyMaxMinutes != null
+      ? `${Math.floor(effective.weeklyMaxMinutes / 60)}h (${effective.weeklyMaxMinutes} min)`
+      : "—";
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -50,16 +56,24 @@ export default async function ManagerEmployeeHourLimitsPage({
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium text-slate-800">
-          {employee.user?.name ?? "—"}
-        </p>
-        <p className="text-sm text-slate-600">{employee.user?.email}</p>
-        {employee.phone && (
-          <p className="mt-1 text-sm text-slate-700">{employee.phone}</p>
-        )}
-        {employee.employeeNumber && (
-          <p className="mt-1 text-xs text-slate-500">#{employee.employeeNumber}</p>
-        )}
+        <div className="space-y-3">
+          <FieldRow label="Name">
+            <p className="text-sm font-medium text-slate-900">
+              {employee.user?.name ?? "—"}
+            </p>
+          </FieldRow>
+          <FieldRow label="Email">
+            <p className="text-sm text-slate-600">{employee.user?.email}</p>
+          </FieldRow>
+          <FieldRow label="Phone">
+            <p className="text-sm text-slate-700">{employee.phone ?? "—"}</p>
+          </FieldRow>
+          <FieldRow label="Employee #">
+            <p className="text-xs text-slate-500">
+              {employee.employeeNumber ? `#${employee.employeeNumber}` : "—"}
+            </p>
+          </FieldRow>
+        </div>
       </div>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -70,11 +84,13 @@ export default async function ManagerEmployeeHourLimitsPage({
           Tightest limit after combining this employee&apos;s settings with
           department/role rules.
         </p>
-        <p className="mt-3 text-sm text-slate-700">
-          {effective.weeklyMaxMinutes != null
-            ? `${Math.floor(effective.weeklyMaxMinutes / 60)}h (${effective.weeklyMaxMinutes} min)`
-            : "—"}
-        </p>
+        <div className="mt-3">
+          <FieldRow label="Effective cap">
+            <div>
+              <p className="text-sm text-slate-700">{effectiveLabel}</p>
+            </div>
+          </FieldRow>
+        </div>
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

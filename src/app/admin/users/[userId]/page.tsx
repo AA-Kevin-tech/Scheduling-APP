@@ -6,6 +6,7 @@ import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeUserForm } from "@/components/admin/employee-user-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
+import { FieldRow } from "@/components/ui/field-row";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
@@ -46,6 +47,11 @@ export default async function AdminEditUserPage({
     name: d.name,
     roles: d.roles.map((r) => ({ id: r.id, name: r.name })),
   }));
+
+  const effectiveWeeklyLabel =
+    effectiveCaps.weeklyMaxMinutes != null
+      ? `${Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h`
+      : "—";
 
   const initial = {
     email: user.email,
@@ -101,10 +107,13 @@ export default async function AdminEditUserPage({
           Manager notes, hourly rate or annual salary, and employment type are not visible
           to the employee.
         </p>
-        <p className="mt-2 text-sm text-slate-700">
-          <span className="text-slate-500">Phone (employee-editable): </span>
-          {user.employee.phone ?? "—"}
-        </p>
+        <div className="mt-3 space-y-3">
+          <FieldRow label="Phone (employee)">
+            <p className="text-sm text-slate-700">
+              {user.employee.phone ?? "—"}
+            </p>
+          </FieldRow>
+        </div>
         <div className="mt-4">
           <EmployeeHrDetailsForm
             employeeId={employeeId}
@@ -121,12 +130,18 @@ export default async function AdminEditUserPage({
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Effective weekly cap (scheduling and swaps):{" "}
-          {effectiveCaps.weeklyMaxMinutes != null
-            ? `${Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h`
-            : "—"}
-          . Department limits may tighten this.
+          Department limits may tighten the effective cap below.
         </p>
+        <div className="mt-3">
+          <FieldRow label="Effective weekly cap">
+            <div>
+              <p className="text-sm text-slate-700">{effectiveWeeklyLabel}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Scheduling and swaps use this effective cap.
+              </p>
+            </div>
+          </FieldRow>
+        </div>
         <div className="mt-4">
           <EmployeeHourLimitsForm
             employeeId={employeeId}
