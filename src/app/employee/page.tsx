@@ -56,6 +56,17 @@ export default async function EmployeeHomePage() {
         </li>
         <li>
           <Link
+            href="/terminal"
+            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+          >
+            <span className="font-medium text-slate-900">Time clock</span>
+            <span className="mt-1 block text-sm text-slate-600">
+              Clock in or out at the work computer
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link
             href="/employee/availability"
             className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
           >
