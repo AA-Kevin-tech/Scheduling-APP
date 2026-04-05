@@ -93,6 +93,10 @@ export default async function AdminEditUserPage({
         <p className="mt-1 text-xs text-slate-500">
           Manager notes, pay rate, and employment type are not visible to the employee.
         </p>
+        <p className="mt-2 text-sm text-slate-700">
+          <span className="text-slate-500">Phone (employee-editable): </span>
+          {user.employee.phone ?? "—"}
+        </p>
         <div className="mt-4">
           <EmployeeHrDetailsForm
             employeeId={employeeId}

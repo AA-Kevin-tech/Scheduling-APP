@@ -139,6 +139,8 @@ model Employee {
   id             String    @id @default(cuid())
   userId         String    @unique
   employeeNumber String?   @unique
+  /// Contact phone (employee-editable on their profile).
+  phone          String?
   /// IANA time zone (e.g. America/Chicago) for schedule display and defaults.
   timezone       String    @default("America/Chicago")
   hireDate       DateTime?
