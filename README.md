@@ -1,6 +1,6 @@
 # Austin Aquarium Scheduling
 
-Production-oriented staff scheduling for the Austin Aquarium: multi-department scheduling, shifts, swaps (with rules and audit), and manager workflows. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
+Production-oriented staff scheduling for the Austin Aquarium: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, and a **kiosk time clock** with alerts for managers and admins. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
    cp .env.example .env
    ```
 
-   Set `DATABASE_URL` to your Postgres connection string. Generate `AUTH_SECRET` (e.g. `openssl rand -base64 32`).
+   Set `DATABASE_URL` to your Postgres connection string. Generate `AUTH_SECRET` (e.g. `openssl rand -base64 32`). Optional time clock and schedule variables are documented in `.env.example` (kiosk window, late/missing-in grace, weekly cap warning, default schedule timezone).
 
 3. **Database**
 
@@ -79,6 +79,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
    | `NEXT_PUBLIC_APP_URL` | Same as `AUTH_URL` if you use it in client code for links |
    | `MIN_REST_MINUTES` | Optional; minimum rest between shifts for swap/assignment validation (default 480) |
    | `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` | Optional; IANA zone for the manager schedule grid and create-shift defaults (default `America/Chicago`) |
+   | `TIME_CLOCK_*` | Optional; see `.env.example` — early clock-in window, late/missing-in thresholds, weekly hour-cap alert threshold, kiosk and worker session cookies |
 
    Do **not** expose secrets with `NEXT_PUBLIC_`. Only non-sensitive values belong in `NEXT_PUBLIC_*`.
 
@@ -93,7 +94,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
 
 ## Project layout
 
-- `src/app/` — App Router pages (employee vs manager areas, auth, API routes)
+- `src/app/` — App Router pages (employee vs manager areas, **`/terminal`** kiosk, auth, API routes)
 - `src/auth.ts` — Auth.js (NextAuth v5) configuration
 - `src/lib/` — DB client, validation helpers, shared utilities
 - `prisma/schema.prisma` — Data model
@@ -137,6 +138,12 @@ All six phases below are **implemented in this repo**. Use the paths and API not
 - **Manager:** queue at `/manager/time-off` with overlap context (how many assigned shifts intersect the window); approve or deny; notifications to staff on decision.
 - **Managers** are notified on new requests; **audit** entries for create / cancel / approve / deny.
 
+**Time clock (kiosk)** — Implemented alongside the scheduling model (`ShiftTimePunch` on assignments):
+
+- **`/terminal`** — After a manager locks the browser at **`/terminal/setup`**, employees authenticate and clock in or out against their shift assignments (shared tablet / kiosk; no geofence).
+- **Alerts** — **Managers** and **admins** receive in-app notifications (under **Alerts**) for late clock-in, weekly hour-limit approach or exceed (uses configured **`HourLimit`** caps), still clocked in after shift end, missing clock-in while a shift is in progress, and ended shifts with no punch. The manager **Clock issues** page (`/manager/time-clock`) lists current issues; the dashboard shows a total count. Admins can open the same page from the admin nav.
+- **Configuration** — See `.env.example` for `TIME_CLOCK_EARLY_MINUTES`, `TIME_CLOCK_LATE_AFTER_MINUTES`, `TIME_CLOCK_MISSING_IN_AFTER_MINUTES`, `TIME_CLOCK_WEEKLY_CAP_WARN_PERCENT`, and kiosk/session cookie lifetime.
+
 ## License
 
-Private — Austin Aquarium internal use.
+Proprietary — **all rights reserved.** Only the copyright holder is permitted to use this code. See [`LICENSE`](./LICENSE) in the repository root. No license is granted to others (this is not open source).
