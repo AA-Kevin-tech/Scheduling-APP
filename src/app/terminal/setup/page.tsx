@@ -30,8 +30,10 @@ export default async function TerminalSetupPage() {
           Time clock terminal
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Configure the shared computer employees use to clock in and out—similar
-          to a fixed terminal in When I Work.
+          Configure the shared computer employees use to clock in and out. After you
+          lock this browser, employees open <span className="font-mono">/terminal</span>{" "}
+          and sign in with the time clock PIN you set on each employee&apos;s profile
+          (no account password).
         </p>
       </div>
 

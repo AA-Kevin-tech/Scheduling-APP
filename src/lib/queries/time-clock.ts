@@ -1,3 +1,4 @@
+import { compare } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { clockInEarlyMinutes } from "@/lib/time-clock/constants";
 
@@ -14,19 +15,34 @@ const assignmentTerminalInclude = {
   employee: { include: { user: { select: { name: true, email: true } } } },
 } as const;
 
-export async function findEmployeeByTerminalIdentifier(raw: string) {
-  const s = raw.trim();
-  if (!s) return null;
-  if (s.includes("@")) {
-    return prisma.employee.findFirst({
-      where: { user: { email: s.toLowerCase() }, archivedAt: null },
-      select: { id: true, userId: true, timezone: true },
-    });
-  }
-  return prisma.employee.findFirst({
-    where: { employeeNumber: s, archivedAt: null },
-    select: { id: true, userId: true, timezone: true },
+/** Resolve employee by time clock PIN (bcrypt compare against hashed PINs). */
+export async function findEmployeeByTimeClockPin(raw: string) {
+  const pin = raw.trim();
+  if (!/^\d{4,8}$/.test(pin)) return null;
+
+  const rows = await prisma.employee.findMany({
+    where: { archivedAt: null, timeClockPinHash: { not: null } },
+    select: {
+      id: true,
+      userId: true,
+      timezone: true,
+      timeClockPinHash: true,
+    },
   });
+
+  for (const r of rows) {
+    if (
+      r.timeClockPinHash &&
+      (await compare(pin, r.timeClockPinHash))
+    ) {
+      return {
+        id: r.id,
+        userId: r.userId,
+        timezone: r.timezone,
+      };
+    }
+  }
+  return null;
 }
 
 /** Open punch (clocked in, not out) for this employee on any assignment. */

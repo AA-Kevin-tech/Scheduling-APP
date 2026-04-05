@@ -5,6 +5,7 @@ import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeUserForm } from "@/components/admin/employee-user-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
+import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
@@ -87,6 +88,17 @@ export default async function AdminEditUserPage({
         userId={user.id}
         archivedAt={user.employee.archivedAt}
       />
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
+        <div className="mt-4">
+          <EmployeeTimeClockPinForm
+            employeeId={employeeId}
+            hasPin={user.employee.timeClockPinHash != null}
+            adminUserIdForRevalidate={user.id}
+          />
+        </div>
+      </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">HR details</h2>

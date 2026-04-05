@@ -4,6 +4,7 @@ import { HourLimitScope } from "@prisma/client";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
+import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
 import { requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
@@ -80,6 +81,16 @@ export default async function ManagerEmployeeHourLimitsPage({
         userId={employee.userId}
         archivedAt={employee.archivedAt}
       />
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
+        <div className="mt-4">
+          <EmployeeTimeClockPinForm
+            employeeId={employeeId}
+            hasPin={employee.timeClockPinHash != null}
+          />
+        </div>
+      </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">HR details</h2>

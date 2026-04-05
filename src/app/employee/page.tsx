@@ -61,7 +61,7 @@ export default async function EmployeeHomePage() {
           >
             <span className="font-medium text-slate-900">Time clock</span>
             <span className="mt-1 block text-sm text-slate-600">
-              Clock in or out at the work computer
+              Use your time clock PIN on the work computer
             </span>
           </Link>
         </li>
