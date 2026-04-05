@@ -1,13 +1,12 @@
 "use server";
 
-import { compare } from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import {
-  findEmployeeByTerminalIdentifier,
+  findEmployeeByTimeClockPin,
   findOpenPunchForEmployee,
   getShiftAssignmentForEmployee,
 } from "@/lib/queries/time-clock";
@@ -129,29 +128,18 @@ export async function terminalSignIn(
     return { error: e instanceof Error ? e.message : "Kiosk inactive." };
   }
 
-  const identifier = String(formData.get("identifier") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
+  const pin = String(formData.get("pin") ?? "").trim();
 
-  if (!identifier || !password) {
-    return { error: "Enter your email or employee ID and password." };
+  if (!pin) {
+    return { error: "Enter your time clock PIN." };
+  }
+  if (!/^\d{4,8}$/.test(pin)) {
+    return { error: "PIN must be 4–8 digits." };
   }
 
-  const employee = await findEmployeeByTerminalIdentifier(identifier);
+  const employee = await findEmployeeByTimeClockPin(pin);
   if (!employee) {
-    return { error: "No employee matches that email or ID." };
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: employee.userId },
-    select: { passwordHash: true },
-  });
-  if (!user?.passwordHash) {
-    return { error: "Account cannot sign in here." };
-  }
-
-  const valid = await compare(password, user.passwordHash);
-  if (!valid) {
-    return { error: "Incorrect password." };
+    return { error: "Invalid PIN." };
   }
 
   const mins = terminalWorkerSessionMinutes();

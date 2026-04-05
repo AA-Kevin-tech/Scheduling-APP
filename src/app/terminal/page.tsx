@@ -31,7 +31,7 @@ export default async function TerminalPage() {
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-slate-900">Clock in</h1>
           <p className="mt-2 text-sm text-slate-600">
-            Enter your work email or employee ID and password.
+            Enter your time clock PIN.
           </p>
         </div>
         <TerminalSignInForm />

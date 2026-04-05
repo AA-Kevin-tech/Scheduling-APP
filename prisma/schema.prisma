@@ -150,6 +150,8 @@ model Employee {
   managerNotes   String?   @db.Text
   hourlyRate     Decimal?  @db.Decimal(10, 2)
   employmentType EmploymentType @default(FULL_TIME)
+  /// Bcrypt hash of time clock PIN (terminal login); set by manager/admin only.
+  timeClockPinHash String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
