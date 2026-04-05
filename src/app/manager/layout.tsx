@@ -6,6 +6,7 @@ import { RefreshBridge } from "@/components/refresh-bridge";
 const links = [
   { href: "/manager", label: "Dashboard" },
   { href: "/manager/schedule", label: "Schedule" },
+  { href: "/terminal/setup", label: "Time clock" },
   { href: "/manager/employees", label: "Employees" },
   { href: "/manager/coverage", label: "Coverage" },
   { href: "/manager/swaps", label: "Swaps" },

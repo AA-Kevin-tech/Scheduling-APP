@@ -240,6 +240,23 @@ model ShiftAssignment {
 
   swapRequestsFrom SwapRequest[] @relation("SwapFromAssignment")
   swapRequestsTo   SwapRequest[] @relation("SwapToAssignment")
+  timePunch        ShiftTimePunch?
+}
+
+/// One punch record per shift assignment (clock in / clock out pair).
+model ShiftTimePunch {
+  id                String    @id @default(cuid())
+  shiftAssignmentId String    @unique
+  clockInAt         DateTime
+  clockOutAt      DateTime?
+  clockInNote       String?   @db.Text
+  clockOutNote      String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  assignment ShiftAssignment @relation(fields: [shiftAssignmentId], references: [id], onDelete: Cascade)
+
+  @@index([clockOutAt])
 }
 
 model Availability {
