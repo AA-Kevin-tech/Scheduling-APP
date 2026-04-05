@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HourLimitScope } from "@prisma/client";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
+import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeUserForm } from "@/components/admin/employee-user-form";
+import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
@@ -81,24 +83,40 @@ export default async function AdminEditUserPage({
         />
       </div>
 
+      <EmployeeArchiveSection
+        userId={user.id}
+        archivedAt={user.employee.archivedAt}
+      />
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">HR details</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Manager notes, pay rate, and employment type are not visible to the employee.
+        </p>
+        <div className="mt-4">
+          <EmployeeHrDetailsForm
+            employeeId={employeeId}
+            initialManagerNotes={user.employee.managerNotes}
+            initialHourlyRate={user.employee.hourlyRate}
+            initialEmploymentType={user.employee.employmentType}
+            adminUserIdForRevalidate={user.id}
+          />
+        </div>
+      </div>
+
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Effective caps (used for scheduling and swaps): weekly{" "}
+          Effective weekly cap (scheduling and swaps):{" "}
           {effectiveCaps.weeklyMaxMinutes != null
             ? `${Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h`
             : "—"}
-          , daily{" "}
-          {effectiveCaps.dailyMaxMinutes != null
-            ? `${Math.floor(effectiveCaps.dailyMaxMinutes / 60)}h`
-            : "—"}
-          . Department limits may tighten these.
+          . Department limits may tighten this.
         </p>
         <div className="mt-4">
           <EmployeeHourLimitsForm
             employeeId={employeeId}
             initialWeeklyMaxMinutes={employeeCapRow?.weeklyMaxMinutes ?? null}
-            initialDailyMaxMinutes={employeeCapRow?.dailyMaxMinutes ?? null}
             adminUserIdForRevalidate={user.id}
           />
         </div>

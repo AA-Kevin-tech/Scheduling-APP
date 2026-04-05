@@ -18,6 +18,7 @@ export async function listEligibilityForShift(shiftId: string): Promise<Eligible
   if (!shift) return [];
 
   const employees = await prisma.employee.findMany({
+    where: { archivedAt: null },
     include: {
       user: { select: { name: true, email: true } },
     },

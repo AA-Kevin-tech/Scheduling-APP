@@ -117,8 +117,12 @@ export async function getShiftForEmployee(params: {
   });
 }
 
-export async function getEmployeesWithDepartments() {
+export async function getEmployeesWithDepartments(options?: {
+  includeArchived?: boolean;
+}) {
+  const includeArchived = options?.includeArchived === true;
   return prisma.employee.findMany({
+    where: includeArchived ? undefined : { archivedAt: null },
     orderBy: { user: { email: "asc" } },
     include: {
       user: { select: { name: true, email: true } },

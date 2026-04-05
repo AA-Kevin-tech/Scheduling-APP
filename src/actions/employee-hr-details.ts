@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { HourLimitScope } from "@prisma/client";
+import { EmploymentType, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
@@ -9,19 +9,21 @@ import { writeAuditLog } from "@/lib/services/audit";
 
 const schema = z.object({
   employeeId: z.string().min(1),
-  weeklyMaxHours: z.string().optional(),
+  managerNotes: z.string().optional(),
+  hourlyRate: z.string().optional(),
+  employmentType: z.nativeEnum(EmploymentType),
   adminUserIdForRevalidate: z.string().optional(),
 });
 
-function parseHours(raw: string | undefined): number | null {
+function parseHourlyRate(raw: string | undefined): Prisma.Decimal | null {
   const t = (raw ?? "").trim();
   if (t === "") return null;
   const n = Number(t);
-  if (!Number.isFinite(n)) return null;
-  return n;
+  if (!Number.isFinite(n) || n < 0) return null;
+  return new Prisma.Decimal(n.toFixed(2));
 }
 
-export async function updateEmployeeHourLimits(
+export async function updateEmployeeHrDetails(
   _prev: { ok?: boolean; error?: string } | undefined,
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
@@ -29,7 +31,9 @@ export async function updateEmployeeHourLimits(
 
   const parsed = schema.safeParse({
     employeeId: formData.get("employeeId"),
-    weeklyMaxHours: formData.get("weeklyMaxHours") ?? undefined,
+    managerNotes: formData.get("managerNotes") ?? undefined,
+    hourlyRate: formData.get("hourlyRate") ?? undefined,
+    employmentType: formData.get("employmentType"),
     adminUserIdForRevalidate: formData.get("adminUserIdForRevalidate") ?? undefined,
   });
 
@@ -45,49 +49,26 @@ export async function updateEmployeeHourLimits(
     return { error: "Employee not found." };
   }
 
-  const weeklyH = parseHours(parsed.data.weeklyMaxHours);
-
-  if (weeklyH !== null && (weeklyH < 0.5 || weeklyH > 168)) {
-    return { error: "Weekly cap must be between 0.5 and 168 hours, or left blank." };
+  const hourlyRate = parseHourlyRate(parsed.data.hourlyRate);
+  if (hourlyRate === null && (parsed.data.hourlyRate ?? "").trim() !== "") {
+    return { error: "Enter a valid hourly rate or leave blank." };
   }
 
-  if (weeklyH === null) {
-    await prisma.$transaction(async (tx) => {
-      await tx.hourLimit.deleteMany({
-        where: {
-          scope: HourLimitScope.EMPLOYEE,
-          employeeId: parsed.data.employeeId,
-        },
-      });
-    });
-  } else {
-    const weeklyMaxMinutes = Math.round(weeklyH * 60);
-
-    await prisma.$transaction(async (tx) => {
-      await tx.hourLimit.deleteMany({
-        where: {
-          scope: HourLimitScope.EMPLOYEE,
-          employeeId: parsed.data.employeeId,
-        },
-      });
-      await tx.hourLimit.create({
-        data: {
-          scope: HourLimitScope.EMPLOYEE,
-          employeeId: parsed.data.employeeId,
-          weeklyMaxMinutes,
-        },
-      });
-    });
-  }
+  await prisma.employee.update({
+    where: { id: parsed.data.employeeId },
+    data: {
+      managerNotes: parsed.data.managerNotes?.trim() || null,
+      hourlyRate,
+      employmentType: parsed.data.employmentType,
+    },
+  });
 
   await writeAuditLog({
     actorUserId: session.user.id,
     entityType: "Employee",
     entityId: parsed.data.employeeId,
-    action: "UPDATE_HOUR_LIMITS",
-    payload: {
-      weeklyMaxHours: weeklyH,
-    },
+    action: "UPDATE_HR_DETAILS",
+    payload: { employmentType: parsed.data.employmentType },
   });
 
   revalidatePath("/manager/employees");
@@ -96,7 +77,6 @@ export async function updateEmployeeHourLimits(
   if (parsed.data.adminUserIdForRevalidate) {
     revalidatePath(`/admin/users/${parsed.data.adminUserIdForRevalidate}`);
   }
-  revalidatePath("/employee/profile");
 
   return { ok: true };
 }

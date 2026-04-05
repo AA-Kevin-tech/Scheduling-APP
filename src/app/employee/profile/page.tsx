@@ -72,27 +72,18 @@ export default async function EmployeeProfilePage() {
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Effective caps used for scheduling (your settings and department
+          Effective weekly cap used for scheduling (your settings and department
           rules combined). Managers set limits under Employees.
         </p>
-        {effectiveCaps.weeklyMaxMinutes != null ||
-        effectiveCaps.dailyMaxMinutes != null ? (
+        {effectiveCaps.weeklyMaxMinutes != null ? (
           <ul className="mt-2 text-sm text-slate-600">
-            {effectiveCaps.weeklyMaxMinutes != null && (
-              <li>
-                Weekly cap: {Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h (
-                {effectiveCaps.weeklyMaxMinutes} min)
-              </li>
-            )}
-            {effectiveCaps.dailyMaxMinutes != null && (
-              <li>
-                Daily cap: {Math.floor(effectiveCaps.dailyMaxMinutes / 60)}h (
-                {effectiveCaps.dailyMaxMinutes} min)
-              </li>
-            )}
+            <li>
+              Weekly cap: {Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h (
+              {effectiveCaps.weeklyMaxMinutes} min)
+            </li>
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-slate-500">No caps configured.</p>
+          <p className="mt-2 text-sm text-slate-500">No weekly cap configured.</p>
         )}
       </section>
 

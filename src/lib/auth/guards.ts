@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/db";
 
 export async function requireSession() {
   const session = await auth();
@@ -40,6 +41,13 @@ export async function requireEmployeeProfile() {
       redirect("/manager");
     }
     redirect("/login");
+  }
+  const emp = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { archivedAt: true },
+  });
+  if (emp?.archivedAt) {
+    redirect("/employee/account-archived");
   }
   return { session, employeeId };
 }

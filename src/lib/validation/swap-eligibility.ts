@@ -19,10 +19,8 @@ export type QualificationInput = {
 
 export type HourLimitsInput = {
   weeklyWorkedMinutes: number;
-  dailyWorkedMinutes: number;
   proposedShiftMinutes: number;
   weeklyMaxMinutes: number | null;
-  dailyMaxMinutes: number | null;
 };
 
 export type RestPeriodInput = {
@@ -66,20 +64,14 @@ export function validateQualification(input: QualificationInput): ValidationResu
   return { ok: reasons.length === 0, reasons };
 }
 
-/** Rules 2–3: Weekly and daily hour caps. */
+/** Rule 2: Weekly hour cap. */
 export function validateHourLimits(input: HourLimitsInput): ValidationResult {
   const reasons: string[] = [];
   const weeklyAfter = input.weeklyWorkedMinutes + input.proposedShiftMinutes;
-  const dailyAfter = input.dailyWorkedMinutes + input.proposedShiftMinutes;
 
   if (input.weeklyMaxMinutes != null && weeklyAfter > input.weeklyMaxMinutes) {
     reasons.push(
       `Weekly hours would exceed the limit (${Math.floor(input.weeklyMaxMinutes / 60)}h max).`,
-    );
-  }
-  if (input.dailyMaxMinutes != null && dailyAfter > input.dailyMaxMinutes) {
-    reasons.push(
-      `Daily hours would exceed the limit (${Math.floor(input.dailyMaxMinutes / 60)}h max).`,
     );
   }
   return { ok: reasons.length === 0, reasons };
