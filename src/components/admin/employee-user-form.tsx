@@ -6,6 +6,7 @@ import {
   createEmployeeUser,
   updateEmployeeUser,
 } from "@/actions/admin/users";
+import { SCHEDULE_TIMEZONE_OPTIONS } from "@/lib/schedule/timezones";
 
 export type DeptOption = {
   id: string;
@@ -32,6 +33,7 @@ type Props = {
     name: string;
     role: UserRole;
     employeeNumber: string | null;
+    timezone?: string;
     locationIds: string[];
     assignments: Assignment[];
   };
@@ -251,6 +253,26 @@ export function EmployeeUserForm(props: Props) {
             placeholder="Optional"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-700">
+          Time zone
+        </label>
+        <select
+          name="timezone"
+          defaultValue={initial?.timezone ?? "America/Chicago"}
+          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        >
+          {SCHEDULE_TIMEZONE_OPTIONS.map((z) => (
+            <option key={z.value} value={z.value}>
+              {z.label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-xs text-slate-500">
+          Used for their schedule and calendar display.
+        </p>
       </div>
 
       <div>

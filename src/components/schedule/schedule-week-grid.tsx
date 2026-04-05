@@ -24,12 +24,19 @@ export type ScheduleWeekRow = {
 
 type Props = {
   weekDays: WeekDayColumn[];
-  /** UTC date `YYYY-MM-DD` for today highlight. */
+  /** Calendar date `YYYY-MM-DD` in the schedule timezone for “today” highlight. */
   todayIso: string;
   rows: ScheduleWeekRow[];
   /** Total scheduled hours per day (sum of displayed shifts). */
   footerHoursByDay?: Record<string, number>;
   emptyMessage?: string;
+  /** Shown in the header corner (e.g. IANA zone). */
+  timezoneLabel?: string;
+  /** Empty cells link to create a shift (manager schedule). */
+  getEmptyCellHref?: (ctx: {
+    rowId: string;
+    dayIso: string;
+  }) => string | undefined;
 };
 
 function BlockCard({ block }: { block: ScheduleWeekBlock }) {
@@ -73,6 +80,8 @@ export function ScheduleWeekGrid({
   rows,
   footerHoursByDay,
   emptyMessage,
+  timezoneLabel,
+  getEmptyCellHref,
 }: Props) {
   const hasAnyBlock = rows.some((r) =>
     weekDays.some((d) => (r.blocksByDay[d.isoKey]?.length ?? 0) > 0),
@@ -94,7 +103,9 @@ export function ScheduleWeekGrid({
                 scope="col"
                 className="sticky left-0 z-20 min-w-[180px] border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
               >
-                {/* corner */}
+                {timezoneLabel ? (
+                  <span className="normal-case text-slate-400">{timezoneLabel}</span>
+                ) : null}
               </th>
               {weekDays.map((d) => {
                 const isToday = d.isoKey === todayIso;
@@ -141,6 +152,10 @@ export function ScheduleWeekGrid({
                 {weekDays.map((d) => {
                   const isToday = d.isoKey === todayIso;
                   const blocks = row.blocksByDay[d.isoKey] ?? [];
+                  const emptyHref = getEmptyCellHref?.({
+                    rowId: row.rowId,
+                    dayIso: d.isoKey,
+                  });
                   return (
                     <td
                       key={d.isoKey}
@@ -149,9 +164,20 @@ export function ScheduleWeekGrid({
                       }`}
                     >
                       <div className="flex min-h-[52px] flex-col gap-1">
-                        {blocks.map((b) => (
-                          <BlockCard key={b.key} block={b} />
-                        ))}
+                        {blocks.length === 0 && emptyHref ? (
+                          <Link
+                            href={emptyHref}
+                            className="flex min-h-[52px] flex-1 items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/80 text-lg text-slate-300 transition hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600"
+                            title="Create shift"
+                          >
+                            <span className="sr-only">Create shift</span>
+                            +
+                          </Link>
+                        ) : blocks.length > 0 ? (
+                          blocks.map((b) => <BlockCard key={b.key} block={b} />)
+                        ) : (
+                          <div className="min-h-[52px]" />
+                        )}
                       </div>
                     </td>
                   );

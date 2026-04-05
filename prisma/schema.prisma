@@ -139,6 +139,8 @@ model Employee {
   id             String    @id @default(cuid())
   userId         String    @unique
   employeeNumber String?   @unique
+  /// IANA time zone (e.g. America/Chicago) for schedule display and defaults.
+  timezone       String    @default("America/Chicago")
   hireDate       DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

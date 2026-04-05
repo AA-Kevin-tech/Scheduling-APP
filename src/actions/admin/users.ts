@@ -7,6 +7,7 @@ import type { UserRole } from "@prisma/client";
 import { requireAdmin, requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
+import { normalizeIanaTimezone } from "@/lib/schedule/tz";
 
 const assignmentSchema = z.array(
   z.object({
@@ -22,6 +23,7 @@ const createUserSchema = z.object({
   password: z.string().min(8),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   employeeNumber: z.string().nullable().optional(),
+  timezone: z.string().optional(),
   locationIds: z.array(z.string()).min(1),
   assignments: assignmentSchema,
 });
@@ -64,6 +66,7 @@ export async function createEmployeeUser(
     password: formData.get("password"),
     role,
     employeeNumber: emptyToNull(formData.get("employeeNumber")),
+    timezone: formData.get("timezone"),
     locationIds,
     assignments,
   });
@@ -129,6 +132,11 @@ export async function createEmployeeUser(
       data: {
         userId: u.id,
         employeeNumber: parsed.data.employeeNumber?.trim() || null,
+        timezone: normalizeIanaTimezone(
+          typeof parsed.data.timezone === "string"
+            ? parsed.data.timezone
+            : undefined,
+        ),
         locations: {
           create: parsed.data.locationIds.map((locationId, i) => ({
             locationId,
@@ -158,6 +166,7 @@ export async function createEmployeeUser(
 
   revalidatePath("/admin/users");
   revalidatePath("/manager/employees");
+  revalidatePath("/manager/schedule");
   return { ok: true };
 }
 
@@ -166,6 +175,7 @@ const updateUserSchema = z.object({
   name: z.string().min(1),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   employeeNumber: z.string().nullable().optional(),
+  timezone: z.string().optional(),
   locationIds: z.array(z.string()).min(1),
   assignments: assignmentSchema,
 });
@@ -191,6 +201,7 @@ export async function updateEmployeeUser(
     name: formData.get("name"),
     role: formData.get("role"),
     employeeNumber: emptyToNull(formData.get("employeeNumber")),
+    timezone: formData.get("timezone"),
     locationIds,
     assignments,
   });
@@ -256,6 +267,11 @@ export async function updateEmployeeUser(
       where: { id: empId },
       data: {
         employeeNumber: parsed.data.employeeNumber?.trim() || null,
+        timezone: normalizeIanaTimezone(
+          typeof parsed.data.timezone === "string"
+            ? parsed.data.timezone
+            : undefined,
+        ),
       },
     });
     await tx.employeeLocation.deleteMany({ where: { employeeId: empId } });
@@ -288,6 +304,8 @@ export async function updateEmployeeUser(
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${parsed.data.userId}`);
   revalidatePath("/manager/employees");
+  revalidatePath("/manager/schedule");
+  revalidatePath("/employee/schedule");
   return { ok: true };
 }
 

@@ -32,6 +32,7 @@ export default async function AdminEditUserPage({
     name: user.name ?? "",
     role: user.role,
     employeeNumber: user.employee.employeeNumber,
+    timezone: user.employee.timezone,
     locationIds: user.employee.locations.map((l) => l.locationId),
     assignments: user.employee.departments.map((ed) => ({
       departmentId: ed.departmentId,

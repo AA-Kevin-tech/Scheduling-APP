@@ -78,6 +78,7 @@ Production-oriented staff scheduling for the Austin Aquarium: multi-department s
    | `AUTH_URL` | Public URL of the app, e.g. `https://your-app.up.railway.app` |
    | `NEXT_PUBLIC_APP_URL` | Same as `AUTH_URL` if you use it in client code for links |
    | `MIN_REST_MINUTES` | Optional; minimum rest between shifts for swap/assignment validation (default 480) |
+   | `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` | Optional; IANA zone for the manager schedule grid and create-shift defaults (default `America/Chicago`) |
 
    Do **not** expose secrets with `NEXT_PUBLIC_`. Only non-sensitive values belong in `NEXT_PUBLIC_*`.
 
@@ -107,7 +108,8 @@ All six phases below are **implemented in this repo**. Use the paths and API not
 **Phase 2** — Scheduling core:
 
 - Shifts: create (with optional weekly materialization for `repeatWeeks`), edit, delete; assignments enforce qualification, no double-booking, hour caps, and minimum rest (aligned with swap rules); manager override with reason + audit when rules would block the assign.
-- Manager **schedule board** (`/manager/schedule`) with week navigation and filters by department and role.
+- Manager **schedule** (`/manager/schedule`): week grid in `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` (or `America/Chicago`), filters (department, role, **staff rows**: scheduled-only vs all, name search), **empty cells** link to create a shift for that day; shift times shown in that zone.
+- Each **employee** has a profile **time zone** (set when provisioning users or on **Profile**); **my schedule** (`/employee/schedule`) and **shift detail** (`/employee/shifts/[id]`) use it.
 - **Coverage** view (`/manager/coverage`) vs `CoverageRule` minimums (per day × department).
 - **Employees** and **Departments** directory (read-focused).
 - Employee **my schedule** and **availability** CRUD.
