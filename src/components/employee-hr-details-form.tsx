@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import type {
   CompensationType,
   EmploymentType,
@@ -11,6 +11,22 @@ function moneyInputValue(v: { toString(): string } | null | undefined): string {
   if (v == null) return "";
   const n = Number(v.toString());
   return Number.isFinite(n) ? String(n) : "";
+}
+
+/** Label + control row: labels share one column width so inputs line up. */
+function FieldRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-[11rem_1fr] sm:items-center sm:gap-x-4">
+      <span className="text-sm text-slate-600 sm:pt-0">{label}</span>
+      <div className="min-w-0 max-w-md">{children}</div>
+    </div>
+  );
 }
 
 export function EmployeeHrDetailsForm({
@@ -38,6 +54,9 @@ export function EmployeeHrDetailsForm({
     {} as { ok?: boolean; error?: string },
   );
 
+  const controlClass =
+    "w-full min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-base";
+
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="employeeId" value={employeeId} />
@@ -56,64 +75,62 @@ export function EmployeeHrDetailsForm({
           rows={4}
           defaultValue={initialManagerNotes ?? ""}
           placeholder="Private notes — not visible to the employee"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
+          className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-base"
         />
       </label>
 
-      <label className="block text-sm">
-        <span className="text-slate-600">Compensation</span>
-        <select
-          name="compensationType"
-          value={compensationType}
-          onChange={(e) =>
-            setCompensationType(e.target.value as CompensationType)
-          }
-          className="mt-1 w-full min-h-11 max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-base"
-        >
-          <option value="HOURLY">Hourly</option>
-          <option value="SALARY">Salary (annual)</option>
-        </select>
-      </label>
+      <div className="space-y-3">
+        <FieldRow label="Compensation">
+          <select
+            name="compensationType"
+            value={compensationType}
+            onChange={(e) =>
+              setCompensationType(e.target.value as CompensationType)
+            }
+            className={controlClass}
+          >
+            <option value="HOURLY">Hourly</option>
+            <option value="SALARY">Salary (annual)</option>
+          </select>
+        </FieldRow>
 
-      {compensationType === "HOURLY" ? (
-        <label className="block text-sm">
-          <span className="text-slate-600">Hourly rate (USD)</span>
-          <input
-            name="hourlyRate"
-            type="number"
-            min={0}
-            step={0.01}
-            placeholder="—"
-            defaultValue={moneyInputValue(initialHourlyRate)}
-            className="mt-1 w-full min-h-11 max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-base"
-          />
-        </label>
-      ) : (
-        <label className="block text-sm">
-          <span className="text-slate-600">Annual salary (USD)</span>
-          <input
-            name="annualSalary"
-            type="number"
-            min={0}
-            step={100}
-            placeholder="—"
-            defaultValue={moneyInputValue(initialAnnualSalary)}
-            className="mt-1 w-full min-h-11 max-w-sm rounded-lg border border-slate-300 px-3 py-2 text-base"
-          />
-        </label>
-      )}
+        {compensationType === "HOURLY" ? (
+          <FieldRow label="Hourly rate (USD)">
+            <input
+              name="hourlyRate"
+              type="number"
+              min={0}
+              step={0.01}
+              placeholder="—"
+              defaultValue={moneyInputValue(initialHourlyRate)}
+              className={controlClass}
+            />
+          </FieldRow>
+        ) : (
+          <FieldRow label="Annual salary (USD)">
+            <input
+              name="annualSalary"
+              type="number"
+              min={0}
+              step={100}
+              placeholder="—"
+              defaultValue={moneyInputValue(initialAnnualSalary)}
+              className={controlClass}
+            />
+          </FieldRow>
+        )}
 
-      <label className="block text-sm">
-        <span className="text-slate-600">Employment</span>
-        <select
-          name="employmentType"
-          defaultValue={initialEmploymentType}
-          className="mt-1 w-full min-h-11 max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-base"
-        >
-          <option value="FULL_TIME">Full time</option>
-          <option value="PART_TIME">Part time</option>
-        </select>
-      </label>
+        <FieldRow label="Employment">
+          <select
+            name="employmentType"
+            defaultValue={initialEmploymentType}
+            className={controlClass}
+          >
+            <option value="FULL_TIME">Full time</option>
+            <option value="PART_TIME">Part time</option>
+          </select>
+        </FieldRow>
+      </div>
 
       {state?.error && (
         <p className="text-sm text-red-600" role="alert">
