@@ -53,6 +53,9 @@ export default async function ManagerEmployeeHourLimitsPage({
           {employee.user?.name ?? "—"}
         </p>
         <p className="text-sm text-slate-600">{employee.user?.email}</p>
+        {employee.phone && (
+          <p className="mt-1 text-sm text-slate-700">{employee.phone}</p>
+        )}
         {employee.employeeNumber && (
           <p className="mt-1 text-xs text-slate-500">#{employee.employeeNumber}</p>
         )}
