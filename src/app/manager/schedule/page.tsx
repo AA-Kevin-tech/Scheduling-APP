@@ -22,25 +22,32 @@ import {
   getEmployeesWithDepartments,
   getShiftsForRange,
 } from "@/lib/queries/schedule";
+import { firstSearchParam } from "@/lib/search-params";
 
 export default async function ManagerSchedulePage({
   searchParams,
 }: {
   searchParams: Promise<{
-    week?: string;
-    departmentId?: string;
-    roleId?: string;
-    roster?: string;
-    q?: string;
+    week?: string | string[];
+    departmentId?: string | string[];
+    roleId?: string | string[];
+    roster?: string | string[];
+    q?: string | string[];
   }>;
 }) {
   await requireManager();
-  const params = await searchParams;
+  const raw = await searchParams;
+  const week = firstSearchParam(raw.week);
+  const departmentId = firstSearchParam(raw.departmentId);
+  const roleId = firstSearchParam(raw.roleId);
+  const roster = firstSearchParam(raw.roster);
+  const q = firstSearchParam(raw.q);
+
   const scheduleTz = getDefaultScheduleTimezone();
   const now = new Date();
 
   const { from: weekStart, to: weekEnd, mondayIso } = resolveWeekRangeFromQuery(
-    params.week,
+    week,
     scheduleTz,
     now,
   );
@@ -49,21 +56,21 @@ export default async function ManagerSchedulePage({
     getShiftsForRange({
       from: weekStart,
       to: weekEnd,
-      departmentId: params.departmentId,
-      roleId: params.roleId,
+      departmentId,
+      roleId,
     }),
     getDepartmentsWithRoles(),
     getEmployeesWithDepartments(),
   ]);
 
-  const rosterMode = params.roster === "all" ? "all" : "scheduled";
-  const searchQ = (params.q ?? "").trim().toLowerCase();
+  const rosterMode = roster === "all" ? "all" : "scheduled";
+  const searchQ = (q ?? "").trim().toLowerCase();
 
   const baseQuery = new URLSearchParams();
-  if (params.departmentId) baseQuery.set("departmentId", params.departmentId);
-  if (params.roleId) baseQuery.set("roleId", params.roleId);
+  if (departmentId) baseQuery.set("departmentId", departmentId);
+  if (roleId) baseQuery.set("roleId", roleId);
   if (rosterMode === "all") baseQuery.set("roster", "all");
-  if (searchQ) baseQuery.set("q", params.q ?? "");
+  if (searchQ) baseQuery.set("q", q ?? "");
 
   function weekHref(monday: string) {
     const q = new URLSearchParams(baseQuery);
@@ -91,8 +98,8 @@ export default async function ManagerSchedulePage({
     employees,
     weekDays,
     scheduleTz,
-    departmentId: params.departmentId,
-    roleId: params.roleId,
+    departmentId,
+    roleId,
     rosterMode,
     searchQ,
   });
@@ -103,8 +110,8 @@ export default async function ManagerSchedulePage({
     const q = new URLSearchParams();
     q.set("day", dayIso);
     q.set("week", mondayIso);
-    if (params.departmentId) q.set("departmentId", params.departmentId);
-    if (params.roleId) q.set("roleId", params.roleId);
+    if (departmentId) q.set("departmentId", departmentId);
+    if (roleId) q.set("roleId", roleId);
     return `/manager/shifts/new?${q.toString()}`;
   }
 
@@ -155,7 +162,7 @@ export default async function ManagerSchedulePage({
           <span className="block text-slate-600">Department</span>
           <select
             name="departmentId"
-            defaultValue={params.departmentId ?? ""}
+            defaultValue={departmentId ?? ""}
             className="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="">All</option>
@@ -170,7 +177,7 @@ export default async function ManagerSchedulePage({
           <span className="block text-slate-600">Role</span>
           <select
             name="roleId"
-            defaultValue={params.roleId ?? ""}
+            defaultValue={roleId ?? ""}
             className="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="">All</option>
@@ -199,7 +206,7 @@ export default async function ManagerSchedulePage({
           <input
             name="q"
             type="search"
-            defaultValue={params.q ?? ""}
+            defaultValue={q ?? ""}
             placeholder="Filter rows"
             className="mt-1 w-44 rounded-md border border-slate-300 px-3 py-2 text-sm"
           />

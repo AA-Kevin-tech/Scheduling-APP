@@ -11,7 +11,7 @@ import { computeDepartmentCoverage, summarizeCoverage } from "@/lib/services/cov
 export default async function ManagerCoveragePage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string }>;
+  searchParams: Promise<{ week?: string | string[] }>;
 }) {
   await requireManager();
   const params = await searchParams;

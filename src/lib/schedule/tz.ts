@@ -1,22 +1,33 @@
 import { addDays, startOfWeek } from "date-fns";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 
-/** Org default for manager schedule board and shift-create defaults. */
+const FALLBACK_SCHEDULE_TZ = "America/Chicago";
+
+function isValidIanaTimeZone(tz: string): boolean {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Org default for manager schedule board and shift-create defaults.
+ * Validates IANA ids so `date-fns-tz` never receives a bad zone (would 500 in production).
+ */
 export function getDefaultScheduleTimezone(): string {
-  return process.env.NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE ?? "America/Chicago";
+  const raw = process.env.NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE;
+  if (!raw?.trim()) return FALLBACK_SCHEDULE_TZ;
+  const candidate = raw.trim();
+  return isValidIanaTimeZone(candidate) ? candidate : FALLBACK_SCHEDULE_TZ;
 }
 
 /** Validate IANA id; fallback to default if invalid. */
 export function normalizeIanaTimezone(raw: string | null | undefined): string {
-  const fallback = getDefaultScheduleTimezone();
-  if (!raw?.trim()) return fallback;
+  if (!raw?.trim()) return getDefaultScheduleTimezone();
   const tz = raw.trim();
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: tz });
-    return tz;
-  } catch {
-    return fallback;
-  }
+  return isValidIanaTimeZone(tz) ? tz : getDefaultScheduleTimezone();
 }
 
 export function parseYmdTime(
@@ -55,13 +66,14 @@ export function weekRangeUtcForZoneAnchor(anchorUtc: Date, tz: string): {
  * Returns UTC range for DB queries and the Monday `YYYY-MM-DD` in `tz` for URLs.
  */
 export function resolveWeekRangeFromQuery(
-  weekParam: string | undefined,
+  weekParam: string | string[] | undefined,
   tz: string,
   now: Date,
 ): { from: Date; to: Date; mondayIso: string } {
+  const weekStr = Array.isArray(weekParam) ? weekParam[0] : weekParam;
   const anchor =
-    weekParam && /^\d{4}-\d{2}-\d{2}$/.test(weekParam)
-      ? fromZonedTime(parseYmdTime(weekParam, 12, 0, 0), tz)
+    weekStr && /^\d{4}-\d{2}-\d{2}$/.test(weekStr)
+      ? fromZonedTime(parseYmdTime(weekStr, 12, 0, 0), tz)
       : now;
   const { from, to } = weekRangeUtcForZoneAnchor(anchor, tz);
   const mondayIso = formatInTimeZone(from, tz, "yyyy-MM-dd");

@@ -22,15 +22,17 @@ import {
   todayIsoInZone,
   zonedDayBoundsUtc,
 } from "@/lib/schedule/tz";
+import { firstSearchParam } from "@/lib/search-params";
 
 export default async function EmployeeSchedulePage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string }>;
+  searchParams: Promise<{ week?: string | string[] }>;
 }) {
   const { session, employeeId } = await requireEmployeeProfile();
   const user = session.user;
-  const params = await searchParams;
+  const raw = await searchParams;
+  const week = firstSearchParam(raw.week);
 
   const empRow = await prisma.employee.findUnique({
     where: { id: employeeId },
@@ -40,7 +42,7 @@ export default async function EmployeeSchedulePage({
 
   const now = new Date();
   const { from: weekStart, to: weekEnd, mondayIso } = resolveWeekRangeFromQuery(
-    params.week,
+    week,
     scheduleTz,
     now,
   );

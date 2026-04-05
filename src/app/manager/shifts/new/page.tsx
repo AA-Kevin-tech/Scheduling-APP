@@ -9,28 +9,32 @@ import {
   getDefaultScheduleTimezone,
   parseYmdTime,
 } from "@/lib/schedule/tz";
+import { firstSearchParam } from "@/lib/search-params";
 
 export default async function NewShiftPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    day?: string;
-    week?: string;
-    departmentId?: string;
-    roleId?: string;
+    day?: string | string[];
+    week?: string | string[];
+    departmentId?: string | string[];
+    roleId?: string | string[];
   }>;
 }) {
   await requireManager();
   const departments = await getDepartmentsWithRoles();
-  const params = await searchParams;
+  const raw = await searchParams;
+  const day = firstSearchParam(raw.day);
+  const initialDepartmentId = firstSearchParam(raw.departmentId);
+  const initialRoleId = firstSearchParam(raw.roleId);
   const tz = getDefaultScheduleTimezone();
 
   let defaultStartsAtLocal: string;
   let defaultEndsAtLocal: string;
 
-  if (params.day && /^\d{4}-\d{2}-\d{2}$/.test(params.day)) {
-    const startUtc = fromZonedTime(parseYmdTime(params.day, 9, 0, 0), tz);
-    const endUtc = fromZonedTime(parseYmdTime(params.day, 17, 0, 0), tz);
+  if (day && /^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    const startUtc = fromZonedTime(parseYmdTime(day, 9, 0, 0), tz);
+    const endUtc = fromZonedTime(parseYmdTime(day, 17, 0, 0), tz);
     defaultStartsAtLocal = formatDatetimeLocalInTimezone(startUtc, tz);
     defaultEndsAtLocal = formatDatetimeLocalInTimezone(endUtc, tz);
   } else {
@@ -43,9 +47,6 @@ export default async function NewShiftPage({
     defaultStartsAtLocal = formatDatetimeLocalInTimezone(startUtc, tz);
     defaultEndsAtLocal = formatDatetimeLocalInTimezone(endUtc, tz);
   }
-
-  const initialDepartmentId = params.departmentId;
-  const initialRoleId = params.roleId;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

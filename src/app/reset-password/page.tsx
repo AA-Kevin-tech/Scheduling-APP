@@ -1,12 +1,14 @@
 import Link from "next/link";
+import { firstSearchParam } from "@/lib/search-params";
 import { ResetPasswordForm } from "./reset-password-form";
 
 export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string | string[] }>;
 }) {
-  const { token } = await searchParams;
+  const raw = await searchParams;
+  const token = firstSearchParam(raw.token);
 
   if (!token) {
     return (
