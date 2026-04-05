@@ -34,7 +34,14 @@ export default async function AdminUsersPage() {
             {users.map((u) => (
               <tr key={u.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-3 py-2 font-medium text-slate-900">
-                  {u.name ?? "—"}
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {u.name ?? "—"}
+                    {u.employee?.archivedAt != null && (
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                        Archived
+                      </span>
+                    )}
+                  </span>
                 </td>
                 <td className="px-3 py-2 text-slate-600">{u.email}</td>
                 <td className="px-3 py-2 text-slate-700">{u.role}</td>

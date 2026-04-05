@@ -19,12 +19,12 @@ export async function findEmployeeByTerminalIdentifier(raw: string) {
   if (!s) return null;
   if (s.includes("@")) {
     return prisma.employee.findFirst({
-      where: { user: { email: s.toLowerCase() } },
+      where: { user: { email: s.toLowerCase() }, archivedAt: null },
       select: { id: true, userId: true, timezone: true },
     });
   }
   return prisma.employee.findFirst({
-    where: { employeeNumber: s },
+    where: { employeeNumber: s, archivedAt: null },
     select: { id: true, userId: true, timezone: true },
   });
 }

@@ -11,12 +11,10 @@ function minutesToHoursField(m: number | null): string {
 export function EmployeeHourLimitsForm({
   employeeId,
   initialWeeklyMaxMinutes,
-  initialDailyMaxMinutes,
   adminUserIdForRevalidate,
 }: {
   employeeId: string;
   initialWeeklyMaxMinutes: number | null;
-  initialDailyMaxMinutes: number | null;
   /** When embedded on Admin → user edit, revalidate that page after save. */
   adminUserIdForRevalidate?: string;
 }) {
@@ -35,37 +33,22 @@ export function EmployeeHourLimitsForm({
           value={adminUserIdForRevalidate}
         />
       ) : null}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm">
-          <span className="text-slate-600">Weekly cap (hours)</span>
-          <input
-            name="weeklyMaxHours"
-            type="number"
-            min={0.5}
-            max={168}
-            step={0.5}
-            placeholder="No employee-specific weekly cap"
-            defaultValue={minutesToHoursField(initialWeeklyMaxMinutes)}
-            className="mt-1 w-full min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-base"
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="text-slate-600">Daily cap (hours)</span>
-          <input
-            name="dailyMaxHours"
-            type="number"
-            min={0.5}
-            max={24}
-            step={0.5}
-            placeholder="No employee-specific daily cap"
-            defaultValue={minutesToHoursField(initialDailyMaxMinutes)}
-            className="mt-1 w-full min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-base"
-          />
-        </label>
-      </div>
+      <label className="block text-sm">
+        <span className="text-slate-600">Weekly cap (hours)</span>
+        <input
+          name="weeklyMaxHours"
+          type="number"
+          min={0.5}
+          max={168}
+          step={0.5}
+          placeholder="No employee-specific weekly cap"
+          defaultValue={minutesToHoursField(initialWeeklyMaxMinutes)}
+          className="mt-1 w-full min-h-11 max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-base"
+        />
+      </label>
       <p className="text-xs text-slate-500">
         Leave blank to clear employee-only caps. Department or role limits may
-        still apply; scheduling uses the strictest effective cap.
+        still apply; scheduling uses the strictest effective weekly cap.
       </p>
       {state?.error && (
         <p className="text-sm text-red-600" role="alert">

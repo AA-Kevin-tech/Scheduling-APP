@@ -11,7 +11,6 @@ import {
   getEffectiveHourCaps,
   getRestAnchorsForEmployee,
   sumAssignedMinutesInRange,
-  sumAssignedMinutesOnCalendarDay,
 } from "@/lib/services/hours";
 
 export type SwapTakeValidationParams = {
@@ -27,6 +26,14 @@ export async function validateEmployeeTakingShift(
   const { takerEmployeeId, shift, dropAssignmentId } = params;
   const reasons: string[] = [];
   const excludeIds = dropAssignmentId ? [dropAssignmentId] : [];
+
+  const archivedRow = await prisma.employee.findUnique({
+    where: { id: takerEmployeeId },
+    select: { archivedAt: true },
+  });
+  if (archivedRow?.archivedAt) {
+    reasons.push("This employee is archived and cannot be scheduled.");
+  }
 
   const memberships = await prisma.employeeDepartment.findMany({
     where: { employeeId: takerEmployeeId },
@@ -59,36 +66,12 @@ export async function validateEmployeeTakingShift(
     weekEnd,
   );
 
-  const { weeklyMaxMinutes, dailyMaxMinutes } =
-    await getEffectiveHourCaps(takerEmployeeId);
+  const { weeklyMaxMinutes } = await getEffectiveHourCaps(takerEmployeeId);
 
   const weeklyAfter = weeklyWorked + addWeekly;
   if (weeklyMaxMinutes != null && weeklyAfter > weeklyMaxMinutes) {
     reasons.push(
       `Weekly hours would exceed the limit (${Math.floor(weeklyMaxMinutes / 60)}h max).`,
-    );
-  }
-
-  const dayStart = new Date(shift.startsAt);
-  dayStart.setUTCHours(0, 0, 0, 0);
-  const dayEnd = new Date(dayStart);
-  dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
-
-  const dailyWorked = await sumAssignedMinutesOnCalendarDay(
-    takerEmployeeId,
-    new Date(shift.startsAt),
-    excludeIds,
-  );
-  const addDaily = overlapMinutes(
-    shift.startsAt,
-    shift.endsAt,
-    dayStart,
-    dayEnd,
-  );
-  const dailyAfter = dailyWorked + addDaily;
-  if (dailyMaxMinutes != null && dailyAfter > dailyMaxMinutes) {
-    reasons.push(
-      `Daily hours would exceed the limit (${Math.floor(dailyMaxMinutes / 60)}h max).`,
     );
   }
 

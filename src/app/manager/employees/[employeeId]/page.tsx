@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HourLimitScope } from "@prisma/client";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
+import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
+import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
@@ -37,7 +39,7 @@ export default async function ManagerEmployeeHourLimitsPage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Hour limits</h1>
+        <h1 className="text-xl font-semibold text-slate-900">Employee</h1>
         <Link
           href="/manager/employees"
           className="text-sm text-sky-700 hover:underline"
@@ -58,41 +60,51 @@ export default async function ManagerEmployeeHourLimitsPage({
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">
-          Effective caps (scheduling &amp; swaps)
+          Effective weekly cap (scheduling &amp; swaps)
         </h2>
         <p className="mt-1 text-xs text-slate-500">
           Tightest limit after combining this employee&apos;s settings with
           department/role rules.
         </p>
-        <ul className="mt-3 text-sm text-slate-700">
-          <li>
-            Weekly:{" "}
-            {effective.weeklyMaxMinutes != null
-              ? `${Math.floor(effective.weeklyMaxMinutes / 60)}h (${effective.weeklyMaxMinutes} min)`
-              : "—"}
-          </li>
-          <li>
-            Daily:{" "}
-            {effective.dailyMaxMinutes != null
-              ? `${Math.floor(effective.dailyMaxMinutes / 60)}h (${effective.dailyMaxMinutes} min)`
-              : "—"}
-          </li>
-        </ul>
+        <p className="mt-3 text-sm text-slate-700">
+          {effective.weeklyMaxMinutes != null
+            ? `${Math.floor(effective.weeklyMaxMinutes / 60)}h (${effective.weeklyMaxMinutes} min)`
+            : "—"}
+        </p>
+      </section>
+
+      <EmployeeArchiveSection
+        userId={employee.userId}
+        archivedAt={employee.archivedAt}
+      />
+
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">HR details</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Manager notes, pay rate, and employment type are not visible to the employee.
+        </p>
+        <div className="mt-4">
+          <EmployeeHrDetailsForm
+            employeeId={employeeId}
+            initialManagerNotes={employee.managerNotes}
+            initialHourlyRate={employee.hourlyRate}
+            initialEmploymentType={employee.employmentType}
+          />
+        </div>
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">
-          Employee-specific limits
+          Employee-specific weekly limit
         </h2>
         <p className="mt-2 text-xs text-slate-500">
-          Only managers and admins can change these. Clear both fields and save
-          to remove employee-only caps.
+          Only managers and admins can change this. Leave blank and save to remove
+          the employee-only weekly cap.
         </p>
         <div className="mt-4">
           <EmployeeHourLimitsForm
             employeeId={employeeId}
             initialWeeklyMaxMinutes={employeeRow?.weeklyMaxMinutes ?? null}
-            initialDailyMaxMinutes={employeeRow?.dailyMaxMinutes ?? null}
           />
         </div>
       </section>

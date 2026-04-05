@@ -142,6 +142,12 @@ model Employee {
   /// IANA time zone (e.g. America/Chicago) for schedule display and defaults.
   timezone       String    @default("America/Chicago")
   hireDate       DateTime?
+  /// When set, the profile is kept for records but excluded from scheduling and the employee app.
+  archivedAt     DateTime?
+  /// Internal notes visible to managers and admins only (not shown to the employee).
+  managerNotes   String?   @db.Text
+  hourlyRate     Decimal?  @db.Decimal(10, 2)
+  employmentType EmploymentType @default(FULL_TIME)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -316,6 +322,11 @@ enum UserRole {
   EMPLOYEE
 }
 
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+}
+
 enum TimeOffStatus {
   PENDING
   APPROVED
@@ -344,7 +355,6 @@ model HourLimit {
   departmentId     String?
   roleId           String?
   weeklyMaxMinutes Int?
-  dailyMaxMinutes  Int?
   effectiveFrom    DateTime?
   effectiveTo      DateTime?
   createdAt        DateTime        @default(now())

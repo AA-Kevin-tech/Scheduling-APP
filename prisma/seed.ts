@@ -308,26 +308,22 @@ async function main() {
         scope: HourLimitScope.EMPLOYEE,
         employeeId: alex.id,
         weeklyMaxMinutes: 40 * 60,
-        dailyMaxMinutes: 12 * 60,
       },
       {
         scope: HourLimitScope.EMPLOYEE,
         employeeId: sam.id,
         weeklyMaxMinutes: 40 * 60,
-        dailyMaxMinutes: 12 * 60,
       },
       {
         scope: HourLimitScope.EMPLOYEE,
         employeeId: jordan.id,
         weeklyMaxMinutes: 30 * 60,
-        dailyMaxMinutes: 10 * 60,
       },
       {
         scope: HourLimitScope.DEPARTMENT_ROLE,
         departmentId: bySlug["retail"].id,
         roleId: retailAttendantRoleId,
         weeklyMaxMinutes: 24 * 60,
-        dailyMaxMinutes: null,
       },
     ],
   });

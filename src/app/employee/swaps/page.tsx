@@ -11,7 +11,7 @@ export default async function EmployeeSwapsPage() {
   const [swaps, colleagues, myAssignments, peerAssignments] = await Promise.all([
     listSwapRequestsForEmployee(employeeId),
     prisma.employee.findMany({
-      where: { id: { not: employeeId } },
+      where: { id: { not: employeeId }, archivedAt: null },
       include: { user: { select: { name: true, email: true } } },
       orderBy: { user: { email: "asc" } },
     }),

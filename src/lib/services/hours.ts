@@ -1,6 +1,5 @@
 import { HourLimitScope } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { intervalsOverlap } from "@/lib/datetime";
 
 function limitMatchesMembership(
   limit: { departmentId: string | null; roleId: string | null },
@@ -13,10 +12,9 @@ function limitMatchesMembership(
 }
 
 function mergeHourCapRows(
-  rows: { weeklyMaxMinutes: number | null; dailyMaxMinutes: number | null }[],
-): { weeklyMaxMinutes: number | null; dailyMaxMinutes: number | null } {
+  rows: { weeklyMaxMinutes: number | null }[],
+): { weeklyMaxMinutes: number | null } {
   let weeklyMaxMinutes: number | null = null;
-  let dailyMaxMinutes: number | null = null;
   for (const l of rows) {
     if (l.weeklyMaxMinutes != null) {
       weeklyMaxMinutes =
@@ -24,14 +22,8 @@ function mergeHourCapRows(
           ? l.weeklyMaxMinutes
           : Math.min(weeklyMaxMinutes, l.weeklyMaxMinutes);
     }
-    if (l.dailyMaxMinutes != null) {
-      dailyMaxMinutes =
-        dailyMaxMinutes == null
-          ? l.dailyMaxMinutes
-          : Math.min(dailyMaxMinutes, l.dailyMaxMinutes);
-    }
   }
-  return { weeklyMaxMinutes, dailyMaxMinutes };
+  return { weeklyMaxMinutes };
 }
 
 /** Sum shift minutes for an employee across assignments overlapping [rangeStart, rangeEnd). */
@@ -72,51 +64,9 @@ export function shiftDurationMinutes(startsAt: Date, endsAt: Date): number {
   return Math.max(0, Math.round((endsAt.getTime() - startsAt.getTime()) / 60000));
 }
 
-/** Calendar day in local terms: use UTC date bucket for consistency with existing code. */
-export async function sumAssignedMinutesOnCalendarDay(
-  employeeId: string,
-  day: Date,
-  excludeAssignmentIds: string[] = [],
-): Promise<number> {
-  const start = new Date(day);
-  start.setUTCHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setUTCDate(end.getUTCDate() + 1);
-
-  const assignments = await prisma.shiftAssignment.findMany({
-    where: {
-      employeeId,
-      ...(excludeAssignmentIds.length
-        ? { id: { notIn: excludeAssignmentIds } }
-        : {}),
-    },
-    include: {
-      shift: { select: { startsAt: true, endsAt: true } },
-    },
-  });
-
-  let total = 0;
-  for (const a of assignments) {
-    if (
-      intervalsOverlap(a.shift.startsAt, a.shift.endsAt, start, end)
-    ) {
-      const overlapStart =
-        a.shift.startsAt > start ? a.shift.startsAt : start;
-      const overlapEnd = a.shift.endsAt < end ? a.shift.endsAt : end;
-      if (overlapEnd > overlapStart) {
-        total += Math.round(
-          (overlapEnd.getTime() - overlapStart.getTime()) / 60000,
-        );
-      }
-    }
-  }
-  return total;
-}
-
 /** Effective hour caps: tightest of employee-scoped and matching department/role limits. */
 export async function getEffectiveHourCaps(employeeId: string): Promise<{
   weeklyMaxMinutes: number | null;
-  dailyMaxMinutes: number | null;
 }> {
   const memberships = await prisma.employeeDepartment.findMany({
     where: { employeeId },
