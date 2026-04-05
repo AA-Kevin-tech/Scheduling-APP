@@ -36,9 +36,11 @@ export default async function ManagerEmployeesPage() {
             {employees.map((e) => (
               <tr key={e.id} className="border-b border-slate-100 last:border-0">
                 <td className="px-3 py-2 font-medium text-slate-900">
-                  {e.user.name ?? "—"}
+                  {e.user?.name ?? "—"}
                 </td>
-                <td className="px-3 py-2 text-slate-600">{e.user.email}</td>
+                <td className="px-3 py-2 text-slate-600">
+                  {e.user?.email ?? "—"}
+                </td>
                 <td className="px-3 py-2 text-slate-500">{e.employeeNumber ?? "—"}</td>
                 <td className="px-3 py-2">
                   <ul className="flex flex-wrap gap-1">
@@ -50,7 +52,7 @@ export default async function ManagerEmployeesPage() {
                           key={el.id}
                           className="text-xs text-slate-600"
                         >
-                          {el.location.name}
+                          {el.location?.name ?? "—"}
                           {el.isPrimary ? " · primary" : ""}
                         </li>
                       ))
@@ -62,9 +64,11 @@ export default async function ManagerEmployeesPage() {
                     {e.departments.map((ed) => (
                       <li key={ed.id}>
                         <span
-                          className={`inline-block rounded-full border px-2 py-0.5 text-xs ${departmentBadgeClass(ed.department.slug)}`}
+                          className={`inline-block rounded-full border px-2 py-0.5 text-xs ${departmentBadgeClass(
+                            ed.department?.slug ?? "",
+                          )}`}
                         >
-                          {ed.department.name}
+                          {ed.department?.name ?? "—"}
                           {ed.role ? ` · ${ed.role.name}` : ""}
                         </span>
                       </li>

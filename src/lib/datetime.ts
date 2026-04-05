@@ -32,9 +32,13 @@ export function addWeeksUtc(d: Date, weeks: number): Date {
   return addDaysUtc(d, weeks * 7);
 }
 
-export function parseDateParam(s: string | undefined, fallback: Date): Date {
-  if (!s) return fallback;
-  const d = new Date(s);
+export function parseDateParam(
+  s: string | string[] | undefined,
+  fallback: Date,
+): Date {
+  const v = Array.isArray(s) ? s[0] : s;
+  if (!v) return fallback;
+  const d = new Date(v);
   return Number.isNaN(d.getTime()) ? fallback : d;
 }
 
