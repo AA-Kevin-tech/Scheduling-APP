@@ -1,6 +1,6 @@
-# Austin Aquarium Scheduling
+# Pulse - Scheduling
 
-Production-oriented staff scheduling for the Austin Aquarium: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, and a **kiosk time clock** with alerts for managers and admins. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
+**Pulse** is production-oriented **staff scheduling**: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, and a **kiosk time clock** with alerts for managers and admins. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
 
 ## Prerequisites
 
