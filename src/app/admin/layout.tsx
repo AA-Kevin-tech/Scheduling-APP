@@ -7,6 +7,7 @@ const links = [
   { href: "/admin/locations", label: "Locations" },
   { href: "/admin/departments", label: "Departments" },
   { href: "/admin/users", label: "Users" },
+  { href: "/manager/time-clock", label: "Time clock issues" },
 ];
 
 export default function AdminLayout({

@@ -11,13 +11,20 @@ import {
   findOpenPunchForEmployee,
   getShiftAssignmentForEmployee,
 } from "@/lib/queries/time-clock";
+import { getEffectiveHourCaps } from "@/lib/services/hours";
+import {
+  notifyLateClockIn,
+  notifyWeeklyHourCapAfterClockOut,
+} from "@/lib/services/time-clock-notify";
 import { writeAuditLog } from "@/lib/services/audit";
 import { signPayload, verifyPayload } from "@/lib/terminal/signed-cookie";
 import {
   clockInEarlyMinutes,
+  clockInLateAfterMinutes,
   kioskCookieHours,
   terminalWorkerSessionMinutes,
 } from "@/lib/time-clock/constants";
+import { sumWorkedMinutesInIsoWeek } from "@/lib/time-clock/worked-minutes";
 
 const COOKIE_KIOSK = "timeclock_kiosk";
 const COOKIE_WORKER = "timeclock_worker";
@@ -235,6 +242,20 @@ export async function terminalClockIn(
     },
   });
 
+  const lateMs = clockInLateAfterMinutes() * 60 * 1000;
+  if (now.getTime() > assignment.shift.startsAt.getTime() + lateMs) {
+    const u = assignment.employee.user;
+    const employeeLabel = u.name?.trim() || u.email;
+    await notifyLateClockIn({
+      employeeLabel,
+      departmentName: assignment.shift.department.name,
+      scheduledStart: assignment.shift.startsAt,
+      minutesAfterStart: Math.round(
+        (now.getTime() - assignment.shift.startsAt.getTime()) / 60000,
+      ),
+    });
+  }
+
   revalidatePath("/terminal");
   return { ok: true };
 }
@@ -274,6 +295,26 @@ export async function terminalClockOut(
       terminal: true,
     },
   });
+
+  const [empRow, caps, workedWeek] = await Promise.all([
+    prisma.employee.findUnique({
+      where: { id: worker.employeeId },
+      include: { user: { select: { name: true, email: true } } },
+    }),
+    getEffectiveHourCaps(worker.employeeId),
+    sumWorkedMinutesInIsoWeek(worker.employeeId, now),
+  ]);
+  if (empRow && caps.weeklyMaxMinutes != null) {
+    const employeeLabel =
+      empRow.user.name?.trim() || empRow.user.email || "Employee";
+    await notifyWeeklyHourCapAfterClockOut({
+      employeeId: worker.employeeId,
+      employeeLabel,
+      workedMinutes: workedWeek,
+      weeklyMaxMinutes: caps.weeklyMaxMinutes,
+      now,
+    });
+  }
 
   revalidatePath("/terminal");
   return { ok: true };

@@ -8,6 +8,12 @@ const shiftInclude = {
   location: true,
 } as const;
 
+const assignmentTerminalInclude = {
+  shift: { include: shiftInclude },
+  timePunch: true,
+  employee: { include: { user: { select: { name: true, email: true } } } },
+} as const;
+
 export async function findEmployeeByTerminalIdentifier(raw: string) {
   const s = raw.trim();
   if (!s) return null;
@@ -72,9 +78,6 @@ export async function getShiftAssignmentForEmployee(
 ) {
   return prisma.shiftAssignment.findFirst({
     where: { id: assignmentId, employeeId },
-    include: {
-      shift: { include: shiftInclude },
-      timePunch: true,
-    },
+    include: assignmentTerminalInclude,
   });
 }
