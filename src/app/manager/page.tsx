@@ -2,7 +2,9 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
+import { getTimeClockIssueCounts } from "@/lib/queries/time-clock-issues";
 import { computeDepartmentCoverage } from "@/lib/services/coverage";
+import { ensureTimeClockIssueNotifications } from "@/lib/services/time-clock-notify";
 import { countPendingSwapsForManager } from "@/lib/queries/swaps";
 import { countPendingTimeOffRequests } from "@/lib/queries/time-off";
 
@@ -12,8 +14,9 @@ export default async function ManagerDashboardPage() {
 
   const weekStart = startOfWeekMondayUtc(new Date());
   const weekEnd = addWeeksUtc(weekStart, 1);
+  const now = new Date();
 
-  const [swapCounts, coverageRows, openShifts, pendingTimeOff] =
+  const [swapCounts, coverageRows, openShifts, pendingTimeOff, timeClock] =
     await Promise.all([
       countPendingSwapsForManager(),
       computeDepartmentCoverage({
@@ -27,6 +30,10 @@ export default async function ManagerDashboardPage() {
         },
       }),
       countPendingTimeOffRequests(),
+      (async () => {
+        await ensureTimeClockIssueNotifications(now);
+        return getTimeClockIssueCounts(now);
+      })(),
     ]);
 
   const coverageGapDays = coverageRows.filter((r) => r.gap > 0).length;
@@ -43,7 +50,7 @@ export default async function ManagerDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/manager/schedule"
           className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
@@ -86,6 +93,18 @@ export default async function ManagerDashboardPage() {
           </p>
           <p className="mt-1 text-xs text-slate-400">Day × dept below min</p>
         </Link>
+        <Link
+          href="/manager/time-clock"
+          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+        >
+          <p className="text-sm text-slate-500">Time clock issues</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+            {timeClock.total}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">
+            Open punch · missing in · no punch
+          </p>
+        </Link>
       </div>
 
       <section className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-6 text-sm text-slate-600">
@@ -114,6 +133,11 @@ export default async function ManagerDashboardPage() {
           <li>
             <Link href="/manager/notifications" className="text-sky-700 hover:underline">
               Notifications
+            </Link>
+          </li>
+          <li>
+            <Link href="/manager/time-clock" className="text-sky-700 hover:underline">
+              Time clock issues
             </Link>
           </li>
         </ul>
