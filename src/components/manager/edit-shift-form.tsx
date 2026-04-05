@@ -17,9 +17,15 @@ type Dept = Department & {
 export function EditShiftForm({
   shift,
   departments,
+  scheduleTimeZone,
+  defaultStartsAtLocal,
+  defaultEndsAtLocal,
 }: {
   shift: ShiftFields;
   departments: Dept[];
+  scheduleTimeZone: string;
+  defaultStartsAtLocal: string;
+  defaultEndsAtLocal: string;
 }) {
   const [deptId, setDeptId] = useState(shift.departmentId);
   const [state, formAction, pending] = useActionState(updateShift, {} as {
@@ -35,6 +41,11 @@ export function EditShiftForm({
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="id" value={shift.id} />
+      <input type="hidden" name="scheduleTimeZone" value={scheduleTimeZone} />
+      <p className="text-xs text-slate-500">
+        Times use{" "}
+        <span className="font-medium text-slate-700">{scheduleTimeZone}</span>.
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
           <span className="text-slate-600">Department</span>
@@ -97,7 +108,7 @@ export function EditShiftForm({
             name="startsAt"
             type="datetime-local"
             required
-            defaultValue={toLocalDatetimeValue(new Date(shift.startsAt))}
+            defaultValue={defaultStartsAtLocal}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </label>
@@ -107,7 +118,7 @@ export function EditShiftForm({
             name="endsAt"
             type="datetime-local"
             required
-            defaultValue={toLocalDatetimeValue(new Date(shift.endsAt))}
+            defaultValue={defaultEndsAtLocal}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </label>
@@ -129,9 +140,4 @@ export function EditShiftForm({
       </button>
     </form>
   );
-}
-
-function toLocalDatetimeValue(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

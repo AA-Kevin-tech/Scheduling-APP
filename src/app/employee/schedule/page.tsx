@@ -1,27 +1,27 @@
 import Link from "next/link";
+import { formatInTimeZone } from "date-fns-tz";
 import { requireEmployeeProfile } from "@/lib/auth/guards";
 import {
   ScheduleWeekGrid,
   type ScheduleWeekBlock,
   type ScheduleWeekRow,
 } from "@/components/schedule/schedule-week-grid";
-import {
-  addDaysUtc,
-  addWeeksUtc,
-  endOfDayUtc,
-  intervalsOverlap,
-  parseDateParam,
-  startOfDayUtc,
-  startOfWeekMondayUtc,
-  toIsoDate,
-} from "@/lib/datetime";
+import { intervalsOverlap } from "@/lib/datetime";
+import { prisma } from "@/lib/db";
+import { getShiftsForEmployee } from "@/lib/queries/schedule";
 import { getApprovedTimeOffOverlappingRange } from "@/lib/queries/time-off";
 import {
   buildWeekColumns,
   formatShiftTimeRange,
   shiftHours,
 } from "@/lib/schedule/week-grid";
-import { getShiftsForEmployee } from "@/lib/queries/schedule";
+import {
+  addWeeksToMondayIso,
+  normalizeIanaTimezone,
+  resolveWeekRangeFromQuery,
+  todayIsoInZone,
+  zonedDayBoundsUtc,
+} from "@/lib/schedule/tz";
 
 export default async function EmployeeSchedulePage({
   searchParams,
@@ -32,10 +32,18 @@ export default async function EmployeeSchedulePage({
   const user = session.user;
   const params = await searchParams;
 
-  const anchor = parseDateParam(params.week, new Date());
-  const weekStart = startOfWeekMondayUtc(anchor);
-  const weekEnd = addWeeksUtc(weekStart, 1);
-  const weekLast = addDaysUtc(weekStart, 6);
+  const empRow = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { timezone: true },
+  });
+  const scheduleTz = normalizeIanaTimezone(empRow?.timezone);
+
+  const now = new Date();
+  const { from: weekStart, to: weekEnd, mondayIso } = resolveWeekRangeFromQuery(
+    params.week,
+    scheduleTz,
+    now,
+  );
 
   const [shifts, timeOff] = await Promise.all([
     getShiftsForEmployee({
@@ -46,11 +54,13 @@ export default async function EmployeeSchedulePage({
     getApprovedTimeOffOverlappingRange(employeeId, weekStart, weekEnd),
   ]);
 
-  const prevWeek = addWeeksUtc(weekStart, -1);
-  const nextWeek = addWeeksUtc(weekStart, 1);
+  const prevMonday = addWeeksToMondayIso(mondayIso, -1, scheduleTz);
+  const nextMonday = addWeeksToMondayIso(mondayIso, 1, scheduleTz);
+  const thisWeekMonday = resolveWeekRangeFromQuery(undefined, scheduleTz, now)
+    .mondayIso;
 
-  const weekDays = buildWeekColumns(weekStart);
-  const todayIso = toIsoDate(new Date());
+  const weekDays = buildWeekColumns(weekStart, scheduleTz);
+  const todayIso = todayIsoInZone(now, scheduleTz);
 
   const name = user.name?.trim() || user.email || "Me";
 
@@ -59,21 +69,17 @@ export default async function EmployeeSchedulePage({
     shifts,
     timeOff,
     weekDays,
+    scheduleTz,
   });
 
-  const footerHoursByDay = buildEmployeeFooterHours(shifts, weekDays);
+  const footerHoursByDay = buildEmployeeFooterHours(shifts, weekDays, scheduleTz);
 
-  const rangeLabel = `${weekStart.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })} – ${weekLast.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })}`;
+  const lastCol = weekDays[6];
+  const rangeLabel = `${formatInTimeZone(weekStart, scheduleTz, "MMM d, yyyy")} – ${formatInTimeZone(
+    lastCol?.date ?? weekStart,
+    scheduleTz,
+    "MMM d, yyyy",
+  )}`;
 
   let weekMinutes = 0;
   for (const s of shifts) {
@@ -101,25 +107,24 @@ export default async function EmployeeSchedulePage({
 
       <div className="flex flex-wrap items-center gap-2">
         <Link
-          href={`/employee/schedule?week=${toIsoDate(prevWeek)}`}
+          href={`/employee/schedule?week=${prevMonday}`}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
           aria-label="Previous week"
         >
           ←
         </Link>
-        <span className="min-w-[200px] text-center text-sm font-semibold text-slate-800">
-          {rangeLabel}{" "}
-          <span className="font-normal text-slate-500">(UTC)</span>
+        <span className="min-w-[220px] text-center text-sm font-semibold text-slate-800">
+          {rangeLabel}
         </span>
         <Link
-          href={`/employee/schedule?week=${toIsoDate(nextWeek)}`}
+          href={`/employee/schedule?week=${nextMonday}`}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
           aria-label="Next week"
         >
           →
         </Link>
         <Link
-          href={`/employee/schedule?week=${toIsoDate(startOfWeekMondayUtc(new Date()))}`}
+          href={`/employee/schedule?week=${thisWeekMonday}`}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
         >
           Today
@@ -131,6 +136,7 @@ export default async function EmployeeSchedulePage({
         todayIso={todayIso}
         rows={rowsWithDetail}
         footerHoursByDay={footerHoursByDay}
+        timezoneLabel={scheduleTz}
         emptyMessage={
           shifts.length === 0 && timeOff.length === 0
             ? "Nothing scheduled this week."
@@ -147,13 +153,18 @@ type TimeOffRow = Awaited<
 >[number];
 type WeekDay = ReturnType<typeof buildWeekColumns>[number];
 
+function shiftDayIso(shift: ShiftEmp, scheduleTz: string): string {
+  return formatInTimeZone(shift.startsAt, scheduleTz, "yyyy-MM-dd");
+}
+
 function buildEmployeeGridRow(opts: {
   name: string;
   shifts: ShiftEmp[];
   timeOff: TimeOffRow[];
   weekDays: WeekDay[];
+  scheduleTz: string;
 }): ScheduleWeekRow[] {
-  const { name, shifts, timeOff, weekDays } = opts;
+  const { name, shifts, timeOff, weekDays, scheduleTz } = opts;
 
   const emptyDays = (): Record<string, ScheduleWeekBlock[]> => {
     const m: Record<string, ScheduleWeekBlock[]> = {};
@@ -166,7 +177,7 @@ function buildEmployeeGridRow(opts: {
   const byDay = new Map<string, ShiftEmp[]>();
   for (const d of weekDays) byDay.set(d.isoKey, []);
   for (const s of shifts) {
-    const day = toIsoDate(s.startsAt);
+    const day = shiftDayIso(s, scheduleTz);
     const list = byDay.get(day);
     if (list) list.push(s);
   }
@@ -178,15 +189,18 @@ function buildEmployeeGridRow(opts: {
     const shiftBlocks: ScheduleWeekBlock[] = sorted.map((s) => ({
       key: s.id,
       kind: "shift" as const,
-      line1: formatShiftTimeRange(s.startsAt, s.endsAt),
+      href: `/employee/shifts/${s.id}`,
+      line1: formatShiftTimeRange(s.startsAt, s.endsAt, scheduleTz),
       line2:
         [s.role?.name, s.department.name].filter(Boolean).join(" · ") ||
         undefined,
       variant: "assigned" as const,
     }));
 
-    const dayStart = startOfDayUtc(d.date);
-    const dayEnd = endOfDayUtc(d.date);
+    const { start: dayStart, end: dayEnd } = zonedDayBoundsUtc(
+      d.isoKey,
+      scheduleTz,
+    );
     const offBlocks: ScheduleWeekBlock[] = [];
     for (const t of timeOff) {
       if (!intervalsOverlap(t.startsAt, t.endsAt, dayStart, dayEnd)) continue;
@@ -218,11 +232,12 @@ function buildEmployeeGridRow(opts: {
 function buildEmployeeFooterHours(
   shifts: ShiftEmp[],
   weekDays: WeekDay[],
+  scheduleTz: string,
 ): Record<string, number> {
   const out: Record<string, number> = {};
   for (const d of weekDays) out[d.isoKey] = 0;
   for (const s of shifts) {
-    const day = toIsoDate(s.startsAt);
+    const day = shiftDayIso(s, scheduleTz);
     if (out[day] === undefined) continue;
     out[day] += shiftHours(s.startsAt, s.endsAt);
   }

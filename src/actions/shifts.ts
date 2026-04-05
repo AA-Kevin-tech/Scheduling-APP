@@ -8,6 +8,10 @@ import { addWeeksUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import { validateShiftAssignment } from "@/lib/services/shift-assignment";
+import {
+  normalizeIanaTimezone,
+  parseDatetimeLocalInTimezone,
+} from "@/lib/schedule/tz";
 
 const createShiftSchema = z.object({
   departmentId: z.string().min(1),
@@ -16,6 +20,7 @@ const createShiftSchema = z.object({
   title: z.string().nullable().optional(),
   startsAt: z.string().min(1),
   endsAt: z.string().min(1),
+  scheduleTimeZone: z.string().optional(),
   repeatWeeks: z.coerce.number().int().min(1).max(26).optional().default(1),
 });
 
@@ -31,6 +36,7 @@ export async function createShift(
     title: emptyToNull(formData.get("title")),
     startsAt: formData.get("startsAt"),
     endsAt: formData.get("endsAt"),
+    scheduleTimeZone: formData.get("scheduleTimeZone"),
     repeatWeeks: formData.get("repeatWeeks"),
   });
 
@@ -39,8 +45,13 @@ export async function createShift(
   }
 
   const { departmentId, roleId, zoneId, title, repeatWeeks } = parsed.data;
-  const startsAt = new Date(parsed.data.startsAt);
-  const endsAt = new Date(parsed.data.endsAt);
+  const tz = normalizeIanaTimezone(parsed.data.scheduleTimeZone);
+  const startsAt =
+    parseDatetimeLocalInTimezone(parsed.data.startsAt, tz) ??
+    new Date(parsed.data.startsAt);
+  const endsAt =
+    parseDatetimeLocalInTimezone(parsed.data.endsAt, tz) ??
+    new Date(parsed.data.endsAt);
 
   if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
     return { error: "Invalid start or end time." };
@@ -98,6 +109,7 @@ export async function createShift(
 
   revalidatePath("/manager/schedule");
   revalidatePath("/manager/coverage");
+  revalidatePath("/employee/schedule");
   return { ok: true };
 }
 
@@ -109,6 +121,7 @@ const updateShiftSchema = z.object({
   title: z.string().nullable().optional(),
   startsAt: z.string().min(1),
   endsAt: z.string().min(1),
+  scheduleTimeZone: z.string().optional(),
 });
 
 export async function updateShift(
@@ -124,14 +137,20 @@ export async function updateShift(
     title: emptyToNull(formData.get("title")),
     startsAt: formData.get("startsAt"),
     endsAt: formData.get("endsAt"),
+    scheduleTimeZone: formData.get("scheduleTimeZone"),
   });
 
   if (!parsed.success) {
     return { error: parsed.error.flatten().formErrors.join(", ") };
   }
 
-  const startsAt = new Date(parsed.data.startsAt);
-  const endsAt = new Date(parsed.data.endsAt);
+  const tz = normalizeIanaTimezone(parsed.data.scheduleTimeZone);
+  const startsAt =
+    parseDatetimeLocalInTimezone(parsed.data.startsAt, tz) ??
+    new Date(parsed.data.startsAt);
+  const endsAt =
+    parseDatetimeLocalInTimezone(parsed.data.endsAt, tz) ??
+    new Date(parsed.data.endsAt);
   if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
     return { error: "Invalid start or end time." };
   }
@@ -162,6 +181,8 @@ export async function updateShift(
   revalidatePath("/manager/schedule");
   revalidatePath(`/manager/shifts/${parsed.data.id}`);
   revalidatePath("/manager/coverage");
+  revalidatePath("/employee/schedule");
+  revalidatePath(`/employee/shifts/${parsed.data.id}`);
   return { ok: true };
 }
 
@@ -181,6 +202,7 @@ export async function deleteShift(formData: FormData): Promise<void> {
 
   revalidatePath("/manager/schedule");
   revalidatePath("/manager/coverage");
+  revalidatePath("/employee/schedule");
   redirect("/manager/schedule");
 }
 

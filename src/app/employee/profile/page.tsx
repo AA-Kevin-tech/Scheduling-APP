@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireEmployeeProfile } from "@/lib/auth/guards";
+import { ProfileTimezoneForm } from "@/components/employee/profile-timezone-form";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { prisma } from "@/lib/db";
 
@@ -42,6 +43,13 @@ export default async function EmployeeProfilePage() {
         {employee.employeeNumber && (
           <p className="mt-1 text-xs text-slate-500">#{employee.employeeNumber}</p>
         )}
+        <h3 className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">
+          Schedule time zone
+        </h3>
+        <p className="text-xs text-slate-500">
+          Your week view and shift times use this zone.
+        </p>
+        <ProfileTimezoneForm currentTimezone={employee.timezone} />
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

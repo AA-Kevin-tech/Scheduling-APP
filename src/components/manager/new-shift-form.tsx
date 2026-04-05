@@ -9,28 +9,38 @@ type Dept = Department & {
   zones: DepartmentZone[];
 };
 
-export function NewShiftForm({ departments }: { departments: Dept[] }) {
-  const [deptId, setDeptId] = useState(departments[0]?.id ?? "");
-  const [state, formAction, pending] = useActionState(createShift, {} as { ok?: boolean; error?: string });
+type Props = {
+  departments: Dept[];
+  /** IANA zone for interpreting datetime-local fields. */
+  scheduleTimeZone: string;
+  defaultStartsAtLocal: string;
+  defaultEndsAtLocal: string;
+  initialDepartmentId?: string;
+  initialRoleId?: string;
+};
+
+export function NewShiftForm({
+  departments,
+  scheduleTimeZone,
+  defaultStartsAtLocal,
+  defaultEndsAtLocal,
+  initialDepartmentId,
+  initialRoleId,
+}: Props) {
+  const [deptId, setDeptId] = useState(
+    initialDepartmentId && departments.some((d) => d.id === initialDepartmentId)
+      ? initialDepartmentId
+      : (departments[0]?.id ?? ""),
+  );
+  const [state, formAction, pending] = useActionState(createShift, {} as {
+    ok?: boolean;
+    error?: string;
+  });
 
   const dept = useMemo(
     () => departments.find((d) => d.id === deptId),
     [departments, deptId],
   );
-
-  const defaultStart = useMemo(() => {
-    const d = new Date();
-    d.setMinutes(0, 0, 0);
-    d.setHours(d.getHours() + 1);
-    return toLocalDatetimeValue(d);
-  }, []);
-
-  const defaultEnd = useMemo(() => {
-    const d = new Date();
-    d.setMinutes(0, 0, 0);
-    d.setHours(d.getHours() + 2);
-    return toLocalDatetimeValue(d);
-  }, []);
 
   if (departments.length === 0) {
     return (
@@ -42,6 +52,11 @@ export function NewShiftForm({ departments }: { departments: Dept[] }) {
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="scheduleTimeZone" value={scheduleTimeZone} />
+      <p className="text-xs text-slate-500">
+        Times are saved in{" "}
+        <span className="font-medium text-slate-700">{scheduleTimeZone}</span>.
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
           <span className="text-slate-600">Department</span>
@@ -64,6 +79,7 @@ export function NewShiftForm({ departments }: { departments: Dept[] }) {
           <select
             name="roleId"
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            defaultValue={initialRoleId ?? ""}
           >
             <option value="">Any qualified role</option>
             {dept?.roles.map((r) => (
@@ -102,7 +118,7 @@ export function NewShiftForm({ departments }: { departments: Dept[] }) {
             name="startsAt"
             type="datetime-local"
             required
-            defaultValue={defaultStart}
+            defaultValue={defaultStartsAtLocal}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </label>
@@ -112,7 +128,7 @@ export function NewShiftForm({ departments }: { departments: Dept[] }) {
             name="endsAt"
             type="datetime-local"
             required
-            defaultValue={defaultEnd}
+            defaultValue={defaultEndsAtLocal}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </label>
@@ -149,9 +165,4 @@ export function NewShiftForm({ departments }: { departments: Dept[] }) {
       </button>
     </form>
   );
-}
-
-function toLocalDatetimeValue(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

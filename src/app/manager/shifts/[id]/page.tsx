@@ -11,6 +11,10 @@ import { listEligibilityForShift } from "@/lib/services/eligible-employees";
 import { deleteShift, removeShiftAssignment } from "@/actions/shifts";
 import { AssignEmployeeForm } from "@/components/manager/assign-employee-form";
 import { EditShiftForm } from "@/components/manager/edit-shift-form";
+import {
+  formatDatetimeLocalInTimezone,
+  getDefaultScheduleTimezone,
+} from "@/lib/schedule/tz";
 
 export default async function ShiftDetailPage({
   params,
@@ -27,6 +31,13 @@ export default async function ShiftDetailPage({
   ]);
 
   if (!shift) notFound();
+
+  const scheduleTz = getDefaultScheduleTimezone();
+  const defaultStartsAtLocal = formatDatetimeLocalInTimezone(
+    shift.startsAt,
+    scheduleTz,
+  );
+  const defaultEndsAtLocal = formatDatetimeLocalInTimezone(shift.endsAt, scheduleTz);
 
   const badge = departmentBadgeClass(shift.department.slug);
 
@@ -64,7 +75,13 @@ export default async function ShiftDetailPage({
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Edit shift</h2>
         <div className="mt-4">
-          <EditShiftForm shift={shift} departments={departments} />
+          <EditShiftForm
+            shift={shift}
+            departments={departments}
+            scheduleTimeZone={scheduleTz}
+            defaultStartsAtLocal={defaultStartsAtLocal}
+            defaultEndsAtLocal={defaultEndsAtLocal}
+          />
         </div>
         <form action={deleteShift} className="mt-6 border-t border-slate-100 pt-4">
           <input type="hidden" name="id" value={shift.id} />

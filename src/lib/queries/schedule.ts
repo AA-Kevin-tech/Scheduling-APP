@@ -74,7 +74,37 @@ export async function getShiftById(id: string) {
       department: true,
       role: true,
       zone: true,
+      location: true,
       assignments: {
+        include: {
+          employee: {
+            include: {
+              user: { select: { name: true, email: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+/** Shift visible to this employee only if they have an assignment. */
+export async function getShiftForEmployee(params: {
+  shiftId: string;
+  employeeId: string;
+}) {
+  return prisma.shift.findFirst({
+    where: {
+      id: params.shiftId,
+      assignments: { some: { employeeId: params.employeeId } },
+    },
+    include: {
+      department: true,
+      role: true,
+      zone: true,
+      location: true,
+      assignments: {
+        where: { employeeId: params.employeeId },
         include: {
           employee: {
             include: {

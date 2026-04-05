@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatInTimeZone } from "date-fns-tz";
 import { requireManager } from "@/lib/auth/guards";
 import {
   ScheduleWeekGrid,
@@ -6,12 +7,11 @@ import {
   type ScheduleWeekRow,
 } from "@/components/schedule/schedule-week-grid";
 import {
-  addDaysUtc,
-  addWeeksUtc,
-  parseDateParam,
-  startOfWeekMondayUtc,
-  toIsoDate,
-} from "@/lib/datetime";
+  addWeeksToMondayIso,
+  getDefaultScheduleTimezone,
+  resolveWeekRangeFromQuery,
+  todayIsoInZone,
+} from "@/lib/schedule/tz";
 import {
   buildWeekColumns,
   formatShiftTimeRange,
@@ -30,15 +30,20 @@ export default async function ManagerSchedulePage({
     week?: string;
     departmentId?: string;
     roleId?: string;
+    roster?: string;
+    q?: string;
   }>;
 }) {
   await requireManager();
   const params = await searchParams;
+  const scheduleTz = getDefaultScheduleTimezone();
+  const now = new Date();
 
-  const anchor = parseDateParam(params.week, new Date());
-  const weekStart = startOfWeekMondayUtc(anchor);
-  const weekEnd = addWeeksUtc(weekStart, 1);
-  const weekLast = addDaysUtc(weekStart, 6);
+  const { from: weekStart, to: weekEnd, mondayIso } = resolveWeekRangeFromQuery(
+    params.week,
+    scheduleTz,
+    now,
+  );
 
   const [shifts, departments, employees] = await Promise.all([
     getShiftsForRange({
@@ -51,43 +56,57 @@ export default async function ManagerSchedulePage({
     getEmployeesWithDepartments(),
   ]);
 
-  const prevWeek = addWeeksUtc(weekStart, -1);
-  const nextWeek = addWeeksUtc(weekStart, 1);
+  const rosterMode = params.roster === "all" ? "all" : "scheduled";
+  const searchQ = (params.q ?? "").trim().toLowerCase();
 
   const baseQuery = new URLSearchParams();
   if (params.departmentId) baseQuery.set("departmentId", params.departmentId);
   if (params.roleId) baseQuery.set("roleId", params.roleId);
+  if (rosterMode === "all") baseQuery.set("roster", "all");
+  if (searchQ) baseQuery.set("q", params.q ?? "");
 
-  function weekHref(w: Date) {
+  function weekHref(monday: string) {
     const q = new URLSearchParams(baseQuery);
-    q.set("week", toIsoDate(w));
+    q.set("week", monday);
     return `/manager/schedule?${q.toString()}`;
   }
 
-  const weekDays = buildWeekColumns(weekStart);
-  const todayIso = toIsoDate(new Date());
+  const prevMonday = addWeeksToMondayIso(mondayIso, -1, scheduleTz);
+  const nextMonday = addWeeksToMondayIso(mondayIso, 1, scheduleTz);
+  const thisWeekMonday = resolveWeekRangeFromQuery(undefined, scheduleTz, now)
+    .mondayIso;
+
+  const weekDays = buildWeekColumns(weekStart, scheduleTz);
+  const todayIso = todayIsoInZone(now, scheduleTz);
+
+  const lastCol = weekDays[6];
+  const rangeLabel = `${formatInTimeZone(weekStart, scheduleTz, "MMM d, yyyy")} – ${formatInTimeZone(
+    lastCol?.date ?? weekStart,
+    scheduleTz,
+    "MMM d, yyyy",
+  )}`;
 
   const rows = buildManagerGridRows({
     shifts,
     employees,
     weekDays,
+    scheduleTz,
     departmentId: params.departmentId,
     roleId: params.roleId,
+    rosterMode,
+    searchQ,
   });
 
-  const footerHoursByDay = buildFooterHoursByDay(shifts, weekDays);
+  const footerHoursByDay = buildFooterHoursByDay(shifts, weekDays, scheduleTz);
 
-  const rangeLabel = `${weekStart.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })} – ${weekLast.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })}`;
+  function newShiftHref(dayIso: string): string {
+    const q = new URLSearchParams();
+    q.set("day", dayIso);
+    q.set("week", mondayIso);
+    if (params.departmentId) q.set("departmentId", params.departmentId);
+    if (params.roleId) q.set("roleId", params.roleId);
+    return `/manager/shifts/new?${q.toString()}`;
+  }
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
@@ -103,25 +122,24 @@ export default async function ManagerSchedulePage({
 
       <div className="flex flex-wrap items-center gap-2">
         <Link
-          href={weekHref(prevWeek)}
+          href={weekHref(prevMonday)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
           aria-label="Previous week"
         >
           ←
         </Link>
-        <span className="min-w-[200px] text-center text-sm font-semibold text-slate-800">
-          {rangeLabel}{" "}
-          <span className="font-normal text-slate-500">(UTC)</span>
+        <span className="min-w-[220px] text-center text-sm font-semibold text-slate-800">
+          {rangeLabel}
         </span>
         <Link
-          href={weekHref(nextWeek)}
+          href={weekHref(nextMonday)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
           aria-label="Next week"
         >
           →
         </Link>
         <Link
-          href={weekHref(startOfWeekMondayUtc(new Date()))}
+          href={weekHref(thisWeekMonday)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
         >
           Today
@@ -132,7 +150,7 @@ export default async function ManagerSchedulePage({
         method="get"
         className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
       >
-        <input type="hidden" name="week" value={toIsoDate(weekStart)} />
+        <input type="hidden" name="week" value={mondayIso} />
         <label className="text-sm">
           <span className="block text-slate-600">Department</span>
           <select
@@ -165,11 +183,32 @@ export default async function ManagerSchedulePage({
             )}
           </select>
         </label>
+        <label className="text-sm">
+          <span className="block text-slate-600">Staff rows</span>
+          <select
+            name="roster"
+            defaultValue={rosterMode === "all" ? "all" : ""}
+            className="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">Scheduled this week (default)</option>
+            <option value="all">All staff</option>
+          </select>
+        </label>
+        <label className="text-sm">
+          <span className="block text-slate-600">Search name</span>
+          <input
+            name="q"
+            type="search"
+            defaultValue={params.q ?? ""}
+            placeholder="Filter rows"
+            className="mt-1 w-44 rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </label>
         <button
           type="submit"
           className="rounded-md bg-slate-800 px-3 py-2 text-sm text-white hover:bg-slate-900"
         >
-          Apply filters
+          Apply
         </button>
       </form>
 
@@ -178,6 +217,8 @@ export default async function ManagerSchedulePage({
         todayIso={todayIso}
         rows={rows}
         footerHoursByDay={footerHoursByDay}
+        timezoneLabel={scheduleTz}
+        getEmptyCellHref={({ dayIso }) => newShiftHref(dayIso)}
         emptyMessage={
           shifts.length === 0
             ? "No shifts this week. Create one to get started."
@@ -213,13 +254,21 @@ type ShiftRow = Awaited<ReturnType<typeof getShiftsForRange>>[number];
 type EmpRow = Awaited<ReturnType<typeof getEmployeesWithDepartments>>[number];
 type WeekDay = ReturnType<typeof buildWeekColumns>[number];
 
-function shiftToBlock(shift: ShiftRow, variant: "assigned" | "open"): ScheduleWeekBlock {
+function shiftDayIso(shift: ShiftRow, scheduleTz: string): string {
+  return formatInTimeZone(shift.startsAt, scheduleTz, "yyyy-MM-dd");
+}
+
+function shiftToBlock(
+  shift: ShiftRow,
+  variant: "assigned" | "open",
+  scheduleTz: string,
+): ScheduleWeekBlock {
   const sub = [shift.role?.name, shift.department.name].filter(Boolean).join(" · ");
   return {
     key: shift.id + (variant === "open" ? "-open" : ""),
     kind: "shift",
     href: `/manager/shifts/${shift.id}`,
-    line1: formatShiftTimeRange(shift.startsAt, shift.endsAt),
+    line1: formatShiftTimeRange(shift.startsAt, shift.endsAt, scheduleTz),
     line2: sub || undefined,
     variant,
   };
@@ -233,10 +282,22 @@ function buildManagerGridRows(opts: {
   shifts: ShiftRow[];
   employees: EmpRow[];
   weekDays: WeekDay[];
+  scheduleTz: string;
   departmentId?: string;
   roleId?: string;
+  rosterMode: "all" | "scheduled";
+  searchQ: string;
 }): ScheduleWeekRow[] {
-  const { shifts, employees, weekDays, departmentId, roleId } = opts;
+  const {
+    shifts,
+    employees,
+    weekDays,
+    scheduleTz,
+    departmentId,
+    roleId,
+    rosterMode,
+    searchQ,
+  } = opts;
 
   let staff: EmpRow[];
   if (departmentId || roleId) {
@@ -245,6 +306,13 @@ function buildManagerGridRows(opts: {
     );
   } else {
     staff = employees;
+  }
+
+  if (searchQ) {
+    staff = staff.filter((e) => {
+      const n = displayName(e).toLowerCase();
+      return n.includes(searchQ) || e.user.email.toLowerCase().includes(searchQ);
+    });
   }
 
   staff = [...staff].sort((a, b) =>
@@ -263,7 +331,7 @@ function buildManagerGridRows(opts: {
   for (const d of weekDays) openByDay.set(d.isoKey, []);
   for (const s of shifts) {
     if (s.assignments.length > 0) continue;
-    const day = toIsoDate(s.startsAt);
+    const day = shiftDayIso(s, scheduleTz);
     const list = openByDay.get(day);
     if (list) list.push(s);
   }
@@ -271,7 +339,7 @@ function buildManagerGridRows(opts: {
   for (const d of weekDays) {
     openBlocks[d.isoKey] = sortShiftsChronological(
       openByDay.get(d.isoKey) ?? [],
-    ).map((s) => shiftToBlock(s, "open"));
+    ).map((s) => shiftToBlock(s, "open", scheduleTz));
   }
 
   const openRow: ScheduleWeekRow = {
@@ -282,7 +350,7 @@ function buildManagerGridRows(opts: {
     blocksByDay: openBlocks,
   };
 
-  const empRows: ScheduleWeekRow[] = staff.map((emp) => {
+  const empRowsUnfiltered: ScheduleWeekRow[] = staff.map((emp) => {
     const blocksByDay = emptyDays();
     let weekMinutes = 0;
 
@@ -291,7 +359,7 @@ function buildManagerGridRows(opts: {
 
     for (const s of shifts) {
       if (!s.assignments.some((a) => a.employeeId === emp.id)) continue;
-      const day = toIsoDate(s.startsAt);
+      const day = shiftDayIso(s, scheduleTz);
       const list = byDay.get(day);
       if (list) list.push(s);
       weekMinutes += (s.endsAt.getTime() - s.startsAt.getTime()) / 60000;
@@ -300,7 +368,7 @@ function buildManagerGridRows(opts: {
     for (const d of weekDays) {
       blocksByDay[d.isoKey] = sortShiftsChronological(
         byDay.get(d.isoKey) ?? [],
-      ).map((s) => shiftToBlock(s, "assigned"));
+      ).map((s) => shiftToBlock(s, "assigned", scheduleTz));
     }
 
     const hrs = Math.round((weekMinutes / 60) * 10) / 10;
@@ -314,19 +382,30 @@ function buildManagerGridRows(opts: {
     };
   });
 
+  const empRows =
+    rosterMode === "all"
+      ? empRowsUnfiltered
+      : empRowsUnfiltered.filter((row) => {
+          const hasShift = weekDays.some(
+            (d) => (row.blocksByDay[d.isoKey]?.length ?? 0) > 0,
+          );
+          return hasShift;
+        });
+
   return [openRow, ...empRows];
 }
 
 function buildFooterHoursByDay(
   shifts: ShiftRow[],
   weekDays: WeekDay[],
+  scheduleTz: string,
 ): Record<string, number> {
   const out: Record<string, number> = {};
   for (const d of weekDays) out[d.isoKey] = 0;
 
   for (const s of shifts) {
     if (s.assignments.length === 0) continue;
-    const day = toIsoDate(s.startsAt);
+    const day = shiftDayIso(s, scheduleTz);
     if (out[day] === undefined) continue;
     out[day] += shiftHours(s.startsAt, s.endsAt);
   }
