@@ -5,6 +5,7 @@ import {
   clearEmployeeTimeClockPin,
   updateEmployeeTimeClockPin,
 } from "@/actions/employee-time-clock-pin";
+import { FieldRow, formControlClassName } from "@/components/ui/field-row";
 
 export function EmployeeTimeClockPinForm({
   employeeId,
@@ -24,18 +25,24 @@ export function EmployeeTimeClockPinForm({
     {} as { ok?: boolean; error?: string },
   );
 
+  const pinClass = `${formControlClassName} tracking-widest`;
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-slate-500">
         Employees sign in at the time clock with this PIN only (no email or account
         password). Use 4–8 digits. Each PIN must be unique.
       </p>
-      <p className="text-sm text-slate-700">
-        Status:{" "}
-        <span className={hasPin ? "font-medium text-emerald-800" : "text-slate-500"}>
-          {hasPin ? "PIN is set" : "No PIN — terminal sign-in disabled"}
-        </span>
-      </p>
+
+      <FieldRow label="Status">
+        <p className="text-sm text-slate-700">
+          <span
+            className={hasPin ? "font-medium text-emerald-800" : "text-slate-500"}
+          >
+            {hasPin ? "PIN is set" : "No PIN — terminal sign-in disabled"}
+          </span>
+        </p>
+      </FieldRow>
 
       <form action={saveAction} className="space-y-3">
         <input type="hidden" name="employeeId" value={employeeId} />
@@ -46,49 +53,49 @@ export function EmployeeTimeClockPinForm({
             value={adminUserIdForRevalidate}
           />
         ) : null}
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block text-sm">
-            <span className="text-slate-600">New PIN</span>
-            <input
-              name="pin"
-              type="password"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="4–8 digits"
-              className="mt-1 w-full min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-base tracking-widest"
-            />
-          </label>
-          <label className="block text-sm">
-            <span className="text-slate-600">Confirm PIN</span>
-            <input
-              name="pinConfirm"
-              type="password"
-              inputMode="numeric"
-              autoComplete="off"
-              placeholder="Repeat PIN"
-              className="mt-1 w-full min-h-11 rounded-lg border border-slate-300 px-3 py-2 text-base tracking-widest"
-            />
-          </label>
-        </div>
+
+        <FieldRow label="New PIN">
+          <input
+            name="pin"
+            type="password"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="4–8 digits"
+            className={pinClass}
+          />
+        </FieldRow>
+        <FieldRow label="Confirm PIN">
+          <input
+            name="pinConfirm"
+            type="password"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="Repeat PIN"
+            className={pinClass}
+          />
+        </FieldRow>
+
         {saveState?.error && (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-sm text-red-600 sm:pl-[12rem]" role="alert">
             {saveState.error}
           </p>
         )}
         {saveState?.ok && (
-          <p className="text-sm text-emerald-700">PIN saved.</p>
+          <p className="text-sm text-emerald-700 sm:pl-[12rem]">PIN saved.</p>
         )}
-        <button
-          type="submit"
-          disabled={savePending}
-          className="rounded-lg bg-sky-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
-        >
-          {savePending ? "Saving…" : "Save PIN"}
-        </button>
+        <div className="sm:pl-[12rem]">
+          <button
+            type="submit"
+            disabled={savePending}
+            className="rounded-lg bg-sky-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
+          >
+            {savePending ? "Saving…" : "Save PIN"}
+          </button>
+        </div>
       </form>
 
       {hasPin ? (
-        <form action={clearAction}>
+        <form action={clearAction} className="sm:pl-[12rem]">
           <input type="hidden" name="employeeId" value={employeeId} />
           {adminUserIdForRevalidate ? (
             <input
