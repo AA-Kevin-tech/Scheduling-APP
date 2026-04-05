@@ -29,7 +29,7 @@ export default async function LoginPage({
           Sign in
         </h1>
         <p className="mt-1 text-center text-sm text-slate-500">
-          Austin Aquarium staff
+          Staff sign-in
         </p>
         <LoginForm
           callbackUrl={safeCallbackUrl(params.callbackUrl, "/")}

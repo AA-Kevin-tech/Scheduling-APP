@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Austin Aquarium Scheduling",
-  description: "Staff scheduling for the Austin Aquarium",
+  title: "Pulse",
+  description: "Staff scheduling, time clock, and coverage",
 };
 
 export default function RootLayout({
