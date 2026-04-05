@@ -84,11 +84,6 @@ export default async function AdminEditUserPage({
         />
       </div>
 
-      <EmployeeArchiveSection
-        userId={user.id}
-        archivedAt={user.employee.archivedAt}
-      />
-
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
         <div className="mt-4">
@@ -103,7 +98,8 @@ export default async function AdminEditUserPage({
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">HR details</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Manager notes, pay rate, and employment type are not visible to the employee.
+          Manager notes, hourly rate or annual salary, and employment type are not visible
+          to the employee.
         </p>
         <p className="mt-2 text-sm text-slate-700">
           <span className="text-slate-500">Phone (employee-editable): </span>
@@ -113,7 +109,9 @@ export default async function AdminEditUserPage({
           <EmployeeHrDetailsForm
             employeeId={employeeId}
             initialManagerNotes={user.employee.managerNotes}
+            initialCompensationType={user.employee.compensationType}
             initialHourlyRate={user.employee.hourlyRate}
+            initialAnnualSalary={user.employee.annualSalary}
             initialEmploymentType={user.employee.employmentType}
             adminUserIdForRevalidate={user.id}
           />
@@ -137,6 +135,11 @@ export default async function AdminEditUserPage({
           />
         </div>
       </div>
+
+      <EmployeeArchiveSection
+        userId={user.id}
+        archivedAt={user.employee.archivedAt}
+      />
     </div>
   );
 }

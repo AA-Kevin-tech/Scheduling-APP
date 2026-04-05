@@ -77,11 +77,6 @@ export default async function ManagerEmployeeHourLimitsPage({
         </p>
       </section>
 
-      <EmployeeArchiveSection
-        userId={employee.userId}
-        archivedAt={employee.archivedAt}
-      />
-
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
         <div className="mt-4">
@@ -95,13 +90,16 @@ export default async function ManagerEmployeeHourLimitsPage({
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">HR details</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Manager notes, pay rate, and employment type are not visible to the employee.
+          Manager notes, hourly rate or annual salary, and employment type are not visible
+          to the employee.
         </p>
         <div className="mt-4">
           <EmployeeHrDetailsForm
             employeeId={employeeId}
             initialManagerNotes={employee.managerNotes}
+            initialCompensationType={employee.compensationType}
             initialHourlyRate={employee.hourlyRate}
+            initialAnnualSalary={employee.annualSalary}
             initialEmploymentType={employee.employmentType}
           />
         </div>
@@ -122,6 +120,11 @@ export default async function ManagerEmployeeHourLimitsPage({
           />
         </div>
       </section>
+
+      <EmployeeArchiveSection
+        userId={employee.userId}
+        archivedAt={employee.archivedAt}
+      />
     </div>
   );
 }

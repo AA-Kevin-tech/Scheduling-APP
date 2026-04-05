@@ -148,7 +148,9 @@ model Employee {
   archivedAt     DateTime?
   /// Internal notes visible to managers and admins only (not shown to the employee).
   managerNotes   String?   @db.Text
+  compensationType CompensationType @default(HOURLY)
   hourlyRate     Decimal?  @db.Decimal(10, 2)
+  annualSalary   Decimal?  @db.Decimal(12, 2)
   employmentType EmploymentType @default(FULL_TIME)
   /// Bcrypt hash of time clock PIN (terminal login); set by manager/admin only.
   timeClockPinHash String?
@@ -329,6 +331,11 @@ enum UserRole {
 enum EmploymentType {
   FULL_TIME
   PART_TIME
+}
+
+enum CompensationType {
+  HOURLY
+  SALARY
 }
 
 enum TimeOffStatus {
