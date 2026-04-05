@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
+import { getVenueLabelForEmployee } from "@/lib/queries/location-display";
 
 const nav = [
   { href: "/employee", label: "Home" },
@@ -12,16 +14,26 @@ const nav = [
   { href: "/employee/profile", label: "Profile" },
 ];
 
-export default function EmployeeLayout({
+export default async function EmployeeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  const employeeId = session?.user?.employeeId;
+  const venueLabel =
+    employeeId != null
+      ? await getVenueLabelForEmployee(employeeId)
+      : null;
+  const headerTitle = venueLabel?.trim() || "Pulse";
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <span className="text-sm font-semibold text-slate-900">Aquarium</span>
+          <span className="text-sm font-semibold text-slate-900">
+            {headerTitle}
+          </span>
           <SignOutButton />
         </div>
       </header>

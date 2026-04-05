@@ -19,7 +19,7 @@ export default async function HomePage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-sky-50 to-slate-100 px-4">
       <div className="max-w-lg text-center">
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-          Austin Aquarium Scheduling
+          Pulse
         </h1>
         <p className="mt-3 text-slate-600">
           Sign in to view your schedule, request swaps, and manage coverage.
