@@ -3,6 +3,7 @@ import { requireEmployeeProfile } from "@/lib/auth/guards";
 import { ProfileTimezoneForm } from "@/components/employee/profile-timezone-form";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { prisma } from "@/lib/db";
+import { getEffectiveHourCaps } from "@/lib/services/hours";
 
 export default async function EmployeeProfilePage() {
   const { employeeId } = await requireEmployeeProfile();
@@ -15,7 +16,6 @@ export default async function EmployeeProfilePage() {
         include: { department: true, role: true },
       },
       certifications: { include: { department: true } },
-      hourLimits: true,
     },
   });
 
@@ -23,7 +23,7 @@ export default async function EmployeeProfilePage() {
     return <p className="text-sm text-slate-600">Profile not found.</p>;
   }
 
-  const hl = employee.hourLimits[0];
+  const effectiveCaps = await getEffectiveHourCaps(employeeId);
 
   return (
     <div className="space-y-6">
@@ -71,23 +71,28 @@ export default async function EmployeeProfilePage() {
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
-        {hl ? (
+        <p className="mt-1 text-xs text-slate-500">
+          Effective caps used for scheduling (your settings and department
+          rules combined). Managers set limits under Employees.
+        </p>
+        {effectiveCaps.weeklyMaxMinutes != null ||
+        effectiveCaps.dailyMaxMinutes != null ? (
           <ul className="mt-2 text-sm text-slate-600">
-            {hl.weeklyMaxMinutes != null && (
+            {effectiveCaps.weeklyMaxMinutes != null && (
               <li>
-                Weekly cap: {Math.floor(hl.weeklyMaxMinutes / 60)}h (
-                {hl.weeklyMaxMinutes} min)
+                Weekly cap: {Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h (
+                {effectiveCaps.weeklyMaxMinutes} min)
               </li>
             )}
-            {hl.dailyMaxMinutes != null && (
+            {effectiveCaps.dailyMaxMinutes != null && (
               <li>
-                Daily cap: {Math.floor(hl.dailyMaxMinutes / 60)}h (
-                {hl.dailyMaxMinutes} min)
+                Daily cap: {Math.floor(effectiveCaps.dailyMaxMinutes / 60)}h (
+                {effectiveCaps.dailyMaxMinutes} min)
               </li>
             )}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-slate-500">No limits on file.</p>
+          <p className="mt-2 text-sm text-slate-500">No caps configured.</p>
         )}
       </section>
 
