@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { TimeClockIssuesPanel } from "@/components/manager/time-clock-issues";
 import {
   getMissingClockInsDuringShift,
@@ -8,6 +9,7 @@ import {
 import { ensureTimeClockIssueNotifications } from "@/lib/services/time-clock-notify";
 
 export default async function ManagerTimeClockPage() {
+  await connection();
   const now = new Date();
   await ensureTimeClockIssueNotifications(now);
 

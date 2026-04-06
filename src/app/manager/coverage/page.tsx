@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { requireManager } from "@/lib/auth/guards";
 import {
   addWeeksUtc,
@@ -13,6 +14,7 @@ export default async function ManagerCoveragePage({
 }: {
   searchParams: Promise<{ week?: string | string[] }>;
 }) {
+  await connection();
   await requireManager();
   const params = await searchParams;
   const anchor = parseDateParam(params.week, new Date());

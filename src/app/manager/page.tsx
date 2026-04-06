@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { auth } from "@/auth";
 import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
@@ -9,6 +10,7 @@ import { countPendingSwapsForManager } from "@/lib/queries/swaps";
 import { countPendingTimeOffRequests } from "@/lib/queries/time-off";
 
 export default async function ManagerDashboardPage() {
+  await connection();
   const session = await auth();
   const name = session?.user?.name ?? session?.user?.email ?? "Manager";
 
