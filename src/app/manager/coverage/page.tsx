@@ -41,6 +41,11 @@ export default async function ManagerCoveragePage({
           Schedule board
         </Link>
       </div>
+      <p className="text-sm text-slate-600">
+        Required headcounts come from coverage rules your administrator sets for
+        each department (and optional zones). Published shifts only count toward
+        scheduled staff.
+      </p>
 
       <div className="flex flex-wrap items-center gap-3">
         <Link

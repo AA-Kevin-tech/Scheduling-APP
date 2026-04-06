@@ -125,6 +125,7 @@ export default async function AdminEditUserPage({
             initialHourlyRate={user.employee.hourlyRate}
             initialAnnualSalary={user.employee.annualSalary}
             initialEmploymentType={user.employee.employmentType}
+            initialHolidayPayEligible={user.employee.holidayPayEligible}
             adminUserIdForRevalidate={user.id}
           />
         </div>

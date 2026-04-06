@@ -142,6 +142,7 @@ export async function getDepartmentsWithRoles() {
     include: {
       roles: { orderBy: { name: "asc" } },
       zones: { orderBy: { name: "asc" } },
+      coverageRules: { orderBy: [{ minStaffCount: "desc" }, { id: "asc" }] },
     },
   });
 }

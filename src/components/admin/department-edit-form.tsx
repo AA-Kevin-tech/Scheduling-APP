@@ -1,7 +1,17 @@
 "use client";
 
 import { useActionState } from "react";
-import type { Department, DepartmentZone, Role } from "@prisma/client";
+import type {
+  CoverageRule,
+  Department,
+  DepartmentZone,
+  Role,
+} from "@prisma/client";
+import {
+  createCoverageRule,
+  deleteCoverageRule,
+  updateCoverageRule,
+} from "@/actions/admin/coverage-rules";
 import {
   createDepartmentZone,
   deleteDepartment,
@@ -23,6 +33,7 @@ const COLORS = [
 type Dept = Department & {
   roles: Role[];
   zones: DepartmentZone[];
+  coverageRules: CoverageRule[];
 };
 
 export function DepartmentEditForm({ d }: { d: Dept }) {
@@ -116,6 +127,30 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
           <AddDepartmentZoneForm departmentId={d.id} />
         </div>
       </div>
+
+      <div className="mt-3 border-t border-slate-100 pt-3">
+        <h3 className="text-xs font-medium uppercase text-slate-500">
+          Coverage minimums
+        </h3>
+        <p className="mt-1 text-xs text-slate-500">
+          Used on the manager coverage report. Department-wide rules count everyone
+          scheduled in this department that day. Zone rules count only shifts tagged
+          with that zone. If several rules apply, the report uses the tightest
+          shortfall. Dates are optional (UTC calendar days).
+        </p>
+        <ul className="mt-3 space-y-4">
+          {d.coverageRules.map((rule) => (
+            <CoverageRuleEditRow
+              key={rule.id}
+              rule={rule}
+              departmentId={d.id}
+              zones={d.zones}
+            />
+          ))}
+        </ul>
+        <AddCoverageRuleForm departmentId={d.id} zones={d.zones} />
+      </div>
+
       <div className="mt-3 border-t border-slate-100 pt-3">
         <DeleteResourceForm action={deleteDepartment} id={d.id} />
       </div>
@@ -154,6 +189,195 @@ function AddDepartmentZoneForm({ departmentId }: { departmentId: string }) {
       </button>
       {state?.error ? (
         <p className="w-full text-xs text-red-600">{state.error}</p>
+      ) : null}
+    </form>
+  );
+}
+
+function isoDateOnly(d: Date | string | null | undefined): string {
+  if (d == null) return "";
+  const s = typeof d === "string" ? d : d.toISOString();
+  return s.slice(0, 10);
+}
+
+function CoverageRuleEditRow({
+  rule,
+  departmentId,
+  zones,
+}: {
+  rule: CoverageRule;
+  departmentId: string;
+  zones: DepartmentZone[];
+}) {
+  const [state, formAction, pending] = useActionState(
+    updateCoverageRule,
+    null as { ok?: boolean; error?: string } | null,
+  );
+
+  return (
+    <li className="rounded-lg border border-slate-200 bg-slate-50/80 p-3">
+      <form action={formAction} className="space-y-2">
+        <input type="hidden" name="id" value={rule.id} />
+        <input type="hidden" name="departmentId" value={departmentId} />
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="text-xs font-medium text-slate-600">
+            <span className="block">Min staff</span>
+            <input
+              name="minStaffCount"
+              type="number"
+              min={1}
+              max={999}
+              required
+              defaultValue={rule.minStaffCount}
+              className="mt-1 w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm tabular-nums"
+            />
+          </label>
+          <label className="text-xs font-medium text-slate-600">
+            <span className="block">Zone (optional)</span>
+            <select
+              name="zoneId"
+              defaultValue={rule.zoneId ?? ""}
+              className="mt-1 min-w-[10rem] rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            >
+              <option value="">Whole department</option>
+              {zones.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-medium text-slate-600">
+            <span className="block">Valid from</span>
+            <input
+              name="validFrom"
+              type="date"
+              defaultValue={isoDateOnly(rule.validFrom)}
+              className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            />
+          </label>
+          <label className="text-xs font-medium text-slate-600">
+            <span className="block">Valid to</span>
+            <input
+              name="validTo"
+              type="date"
+              defaultValue={isoDateOnly(rule.validTo)}
+              className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            />
+          </label>
+        </div>
+        <label className="block text-xs font-medium text-slate-600">
+          <span className="block">Note (optional)</span>
+          <input
+            name="note"
+            type="text"
+            defaultValue={rule.note ?? ""}
+            className="mt-1 w-full max-w-xl rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            placeholder="e.g. Weekend minimum"
+          />
+        </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            disabled={pending}
+            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          >
+            {pending ? "…" : "Save rule"}
+          </button>
+          <DeleteResourceForm
+            action={deleteCoverageRule}
+            id={rule.id}
+            label="Delete rule"
+          />
+        </div>
+        {state?.error ? (
+          <p className="text-xs text-red-600">{state.error}</p>
+        ) : null}
+      </form>
+    </li>
+  );
+}
+
+function AddCoverageRuleForm({
+  departmentId,
+  zones,
+}: {
+  departmentId: string;
+  zones: DepartmentZone[];
+}) {
+  const [state, formAction, pending] = useActionState(
+    createCoverageRule,
+    null as { ok?: boolean; error?: string } | null,
+  );
+
+  return (
+    <form
+      action={formAction}
+      className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4"
+    >
+      <input type="hidden" name="departmentId" value={departmentId} />
+      <p className="text-xs font-medium text-slate-600">Add coverage rule</p>
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="text-xs font-medium text-slate-600">
+          <span className="block">Min staff</span>
+          <input
+            name="minStaffCount"
+            type="number"
+            min={1}
+            max={999}
+            defaultValue={1}
+            required
+            className="mt-1 w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm tabular-nums"
+          />
+        </label>
+        <label className="text-xs font-medium text-slate-600">
+          <span className="block">Zone (optional)</span>
+          <select
+            name="zoneId"
+            className="mt-1 min-w-[10rem] rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          >
+            <option value="">Whole department</option>
+            {zones.map((z) => (
+              <option key={z.id} value={z.id}>
+                {z.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-xs font-medium text-slate-600">
+          <span className="block">Valid from</span>
+          <input
+            name="validFrom"
+            type="date"
+            className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </label>
+        <label className="text-xs font-medium text-slate-600">
+          <span className="block">Valid to</span>
+          <input
+            name="validTo"
+            type="date"
+            className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </label>
+      </div>
+      <label className="block text-xs font-medium text-slate-600">
+        <span className="block">Note (optional)</span>
+        <input
+          name="note"
+          type="text"
+          className="mt-1 w-full max-w-xl rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+        />
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="w-fit rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+      >
+        {pending ? "…" : "Add rule"}
+      </button>
+      {state?.error ? (
+        <p className="text-xs text-red-600">{state.error}</p>
       ) : null}
     </form>
   );

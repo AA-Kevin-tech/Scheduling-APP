@@ -21,6 +21,7 @@ export function EmployeeHrDetailsForm({
   initialHourlyRate,
   initialAnnualSalary,
   initialEmploymentType,
+  initialHolidayPayEligible,
   adminUserIdForRevalidate,
 }: {
   employeeId: string;
@@ -29,6 +30,7 @@ export function EmployeeHrDetailsForm({
   initialHourlyRate: { toString(): string } | null | undefined;
   initialAnnualSalary: { toString(): string } | null | undefined;
   initialEmploymentType: EmploymentType;
+  initialHolidayPayEligible?: boolean;
   adminUserIdForRevalidate?: string;
 }) {
   const [compensationType, setCompensationType] =
@@ -110,6 +112,26 @@ export function EmployeeHrDetailsForm({
             <option value="FULL_TIME">Full time</option>
             <option value="PART_TIME">Part time</option>
           </select>
+        </FieldRow>
+
+        <FieldRow label="Holiday pay" alignTop>
+          <div className="space-y-1">
+            <label className="flex items-center gap-2 text-sm text-slate-800">
+              <input
+                type="checkbox"
+                name="holidayPayEligible"
+                value="on"
+                defaultChecked={initialHolidayPayEligible !== false}
+                className="rounded border-slate-300"
+              />
+              Eligible for company holiday rules
+            </label>
+            <p className="text-xs text-slate-500">
+              Paid holiday hours (when not working) and work premiums use admin
+              holiday settings. Uncheck for contractors or others excluded from
+              holiday pay.
+            </p>
+          </div>
         </FieldRow>
       </div>
 

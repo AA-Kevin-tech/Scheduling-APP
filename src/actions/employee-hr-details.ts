@@ -18,6 +18,7 @@ const schema = z.object({
   hourlyRate: z.string().optional(),
   annualSalary: z.string().optional(),
   employmentType: z.nativeEnum(EmploymentType),
+  holidayPayEligible: z.enum(["on", "off"]),
   adminUserIdForRevalidate: z.string().optional(),
 });
 
@@ -42,6 +43,8 @@ export async function updateEmployeeHrDetails(
     hourlyRate: formData.get("hourlyRate") ?? undefined,
     annualSalary: formData.get("annualSalary") ?? undefined,
     employmentType: formData.get("employmentType"),
+    holidayPayEligible:
+      formData.get("holidayPayEligible") === "on" ? "on" : "off",
     adminUserIdForRevalidate: formData.get("adminUserIdForRevalidate") ?? undefined,
   });
 
@@ -82,6 +85,7 @@ export async function updateEmployeeHrDetails(
       hourlyRate: compensationType === CompensationType.HOURLY ? hourlyRate : null,
       annualSalary: compensationType === CompensationType.SALARY ? annualSalary : null,
       employmentType: parsed.data.employmentType,
+      holidayPayEligible: parsed.data.holidayPayEligible === "on",
     },
   });
 
@@ -93,11 +97,13 @@ export async function updateEmployeeHrDetails(
     payload: {
       employmentType: parsed.data.employmentType,
       compensationType,
+      holidayPayEligible: parsed.data.holidayPayEligible === "on",
     },
   });
 
   revalidatePath("/manager/employees");
   revalidatePath(`/manager/employees/${parsed.data.employeeId}`);
+  revalidatePath("/manager/holiday-pay");
   revalidatePath("/admin/users");
   if (parsed.data.adminUserIdForRevalidate) {
     revalidatePath(`/admin/users/${parsed.data.adminUserIdForRevalidate}`);

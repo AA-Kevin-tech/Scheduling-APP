@@ -152,6 +152,8 @@ model Employee {
   hourlyRate     Decimal?  @db.Decimal(10, 2)
   annualSalary   Decimal?  @db.Decimal(12, 2)
   employmentType EmploymentType @default(FULL_TIME)
+  /// When true, company holiday paid-absence and premium rules apply (if configured).
+  holidayPayEligible Boolean @default(true)
   /// Bcrypt hash of time clock PIN (terminal login); set by manager/admin only.
   timeClockPinHash String?
   createdAt      DateTime  @default(now())
@@ -168,6 +170,21 @@ model Employee {
   swapRequestsIn   SwapRequest[]    @relation("SwapTarget")
   hourLimits       HourLimit[]
   locations        EmployeeLocation[]
+}
+
+/// Org-wide paid holiday calendar (interpret `holidayDateYmd` in the default schedule timezone).
+model CompanyHoliday {
+  id                    String   @id @default(cuid())
+  holidayDateYmd        String
+  name                  String
+  workPremiumMultiplier Decimal  @default(1) @db.Decimal(4, 2)
+  paidAbsenceHours      Decimal? @db.Decimal(5, 2)
+  notes                 String?  @db.Text
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([holidayDateYmd])
+  @@index([holidayDateYmd])
 }
 
 /// M2M: employee ↔ department with optional role and primary flag

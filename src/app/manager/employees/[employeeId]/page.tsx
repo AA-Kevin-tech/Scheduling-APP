@@ -117,6 +117,7 @@ export default async function ManagerEmployeeHourLimitsPage({
             initialHourlyRate={employee.hourlyRate}
             initialAnnualSalary={employee.annualSalary}
             initialEmploymentType={employee.employmentType}
+            initialHolidayPayEligible={employee.holidayPayEligible}
           />
         </div>
       </section>
