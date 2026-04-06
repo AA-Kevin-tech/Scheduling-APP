@@ -38,6 +38,7 @@ export async function computeDepartmentCoverage(input: {
         AND: [
           { startsAt: { lt: input.rangeEnd } },
           { endsAt: { gt: input.rangeStart } },
+          { publishedAt: { not: null } },
           ...(input.departmentId
             ? [{ departmentId: input.departmentId } as const]
             : []),

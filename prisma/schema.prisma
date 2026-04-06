@@ -223,6 +223,8 @@ model Shift {
   title          String?
   startsAt       DateTime
   endsAt         DateTime
+  /// When null, the shift is a manager-only draft until published.
+  publishedAt    DateTime?
   recurrenceRule String?   @db.Text
   parentShiftId  String?
   createdAt      DateTime  @default(now())

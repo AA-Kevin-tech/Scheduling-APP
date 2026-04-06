@@ -11,6 +11,7 @@ import { listEligibilityForShift } from "@/lib/services/eligible-employees";
 import { deleteShift, removeShiftAssignment } from "@/actions/shifts";
 import { AssignEmployeeForm } from "@/components/manager/assign-employee-form";
 import { EditShiftForm } from "@/components/manager/edit-shift-form";
+import { PublishShiftForm } from "@/components/manager/publish-shift-form";
 import {
   formatDatetimeLocalInTimezone,
   getDefaultScheduleTimezone,
@@ -69,6 +70,23 @@ export default async function ShiftDetailPage({
         )}
         {shift.zone && (
           <p className="text-sm text-slate-500">Zone: {shift.zone.name}</p>
+        )}
+        {shift.publishedAt == null ? (
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+            <p className="font-medium">Draft</p>
+            <p className="mt-1 text-xs text-amber-900/85">
+              This shift is not visible to assigned staff until you publish it.
+            </p>
+            <PublishShiftForm shiftId={shift.id} />
+          </div>
+        ) : (
+          <p className="mt-3 text-xs text-slate-500">
+            Published{" "}
+            {shift.publishedAt.toLocaleString(undefined, {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </p>
         )}
       </div>
 

@@ -73,6 +73,7 @@ export async function createShift(
       title: title ?? null,
       startsAt,
       endsAt,
+      publishedAt: null,
       recurrenceRule: recurrenceMeta,
       parentShiftId: null,
     },
@@ -95,6 +96,7 @@ export async function createShift(
         title: title ?? null,
         startsAt: addWeeksUtc(startsAt, w),
         endsAt: addWeeksUtc(endsAt, w),
+        publishedAt: null,
         parentShiftId: root.id,
       },
     });
@@ -293,6 +295,112 @@ export async function removeShiftAssignment(formData: FormData): Promise<void> {
   revalidatePath(`/manager/shifts/${row.shiftId}`);
   revalidatePath("/employee/schedule");
   revalidatePath("/manager/coverage");
+}
+
+const publishRangeSchema = z.object({
+  weekStart: z.string().min(1),
+  weekEnd: z.string().min(1),
+  departmentId: z.string().optional(),
+  roleId: z.string().optional(),
+});
+
+export async function publishDraftShiftsForRange(
+  _prev: { ok?: boolean; error?: string; count?: number },
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string; count?: number }> {
+  const session = await requireManager();
+  const parsed = publishRangeSchema.safeParse({
+    weekStart: formData.get("weekStart"),
+    weekEnd: formData.get("weekEnd"),
+    departmentId: emptyToNull(formData.get("departmentId")) ?? undefined,
+    roleId: emptyToNull(formData.get("roleId")) ?? undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().formErrors.join(", ") };
+  }
+
+  const rangeStart = new Date(parsed.data.weekStart);
+  const rangeEnd = new Date(parsed.data.weekEnd);
+  if (
+    Number.isNaN(rangeStart.getTime()) ||
+    Number.isNaN(rangeEnd.getTime())
+  ) {
+    return { error: "Invalid week range." };
+  }
+
+  const { departmentId, roleId } = parsed.data;
+  const result = await prisma.shift.updateMany({
+    where: {
+      publishedAt: null,
+      AND: [
+        { startsAt: { lt: rangeEnd } },
+        { endsAt: { gt: rangeStart } },
+        ...(departmentId ? [{ departmentId } as const] : []),
+        ...(roleId ? [{ roleId } as const] : []),
+      ],
+    },
+    data: { publishedAt: new Date() },
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    entityType: "Shift",
+    entityId: "batch",
+    action: "PUBLISH_RANGE",
+    payload: {
+      count: result.count,
+      rangeStart: rangeStart.toISOString(),
+      rangeEnd: rangeEnd.toISOString(),
+      departmentId: departmentId ?? null,
+      roleId: roleId ?? null,
+    },
+  });
+
+  revalidatePath("/manager/schedule");
+  revalidatePath("/manager/coverage");
+  revalidatePath("/employee/schedule");
+  revalidatePath("/employee/swaps");
+  revalidatePath("/terminal");
+  return { ok: true, count: result.count };
+}
+
+export async function publishShift(
+  _prev: { ok?: boolean; error?: string },
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const session = await requireManager();
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) {
+    return { error: "Missing shift id." };
+  }
+
+  const row = await prisma.shift.findUnique({
+    where: { id },
+    select: { id: true, publishedAt: true },
+  });
+  if (!row) return { error: "Shift not found." };
+  if (row.publishedAt) return { error: "Shift is already published." };
+
+  await prisma.shift.update({
+    where: { id },
+    data: { publishedAt: new Date() },
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    entityType: "Shift",
+    entityId: id,
+    action: "PUBLISH",
+    payload: {},
+  });
+
+  revalidatePath("/manager/schedule");
+  revalidatePath(`/manager/shifts/${id}`);
+  revalidatePath("/manager/coverage");
+  revalidatePath("/employee/schedule");
+  revalidatePath("/employee/swaps");
+  revalidatePath("/terminal");
+  return { ok: true };
 }
 
 function emptyToNull(v: FormDataEntryValue | null): string | null {

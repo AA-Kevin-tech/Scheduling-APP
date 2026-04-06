@@ -45,6 +45,7 @@ export async function getShiftsForEmployee(params: {
       AND: [
         { startsAt: { lt: params.to } },
         { endsAt: { gt: params.from } },
+        { publishedAt: { not: null } },
         { assignments: { some: { employeeId: params.employeeId } } },
       ],
     },
@@ -96,6 +97,7 @@ export async function getShiftForEmployee(params: {
   return prisma.shift.findFirst({
     where: {
       id: params.shiftId,
+      publishedAt: { not: null },
       assignments: { some: { employeeId: params.employeeId } },
     },
     include: {

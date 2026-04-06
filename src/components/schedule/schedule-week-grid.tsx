@@ -24,6 +24,8 @@ export type ScheduleWeekBlock = {
   dayIso?: string;
   /** Assigned: employee is not on this shift's department in their profile. */
   outOfDepartment?: boolean;
+  /** Manager: shift is draft until published (lighter / dashed card). */
+  isDraft?: boolean;
 };
 
 export type ScheduleWeekRow = {
@@ -86,6 +88,11 @@ function BlockCard({
         ? "border-amber-300/80 bg-amber-100/90 text-amber-950"
         : "border-amber-400/70 bg-[#e8dcc8] text-amber-950";
 
+  const draftClass =
+    block.kind === "shift" && block.isDraft
+      ? "border-dashed opacity-[0.78] ring-1 ring-inset ring-slate-400/25 brightness-[1.02]"
+      : "";
+
   const isOpenDraggable =
     enableDragAssign &&
     block.variant === "open" &&
@@ -95,7 +102,7 @@ function BlockCard({
 
   const cardInner = (
     <div
-      className={`relative rounded-md border px-2 py-1.5 text-left text-xs shadow-sm ${base} ${
+      className={`relative rounded-md border px-2 py-1.5 text-left text-xs shadow-sm ${base} ${draftClass} ${
         isOpenDraggable ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
@@ -118,6 +125,11 @@ function BlockCard({
     return (
       <Link
         href={block.href}
+        title={
+          block.isDraft
+            ? "Draft — not visible to staff until you publish the schedule"
+            : undefined
+        }
         draggable={Boolean(isOpenDraggable)}
         onDragStart={(e) => {
           if (!isOpenDraggable || !block.shiftId || !block.dayIso) return;

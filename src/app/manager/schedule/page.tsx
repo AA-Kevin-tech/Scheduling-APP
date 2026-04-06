@@ -23,6 +23,7 @@ import {
   getShiftsForRange,
 } from "@/lib/queries/schedule";
 import { firstSearchParam } from "@/lib/search-params";
+import { PublishScheduleBar } from "@/components/manager/publish-schedule-bar";
 
 export default async function ManagerSchedulePage({
   searchParams,
@@ -105,6 +106,7 @@ export default async function ManagerSchedulePage({
   });
 
   const footerHoursByDay = buildFooterHoursByDay(shifts, weekDays, scheduleTz);
+  const draftCount = shifts.filter((s) => s.publishedAt == null).length;
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
@@ -210,6 +212,14 @@ export default async function ManagerSchedulePage({
         </button>
       </form>
 
+      <PublishScheduleBar
+        draftCount={draftCount}
+        weekStartIso={weekStart.toISOString()}
+        weekEndIso={weekEnd.toISOString()}
+        {...(departmentId ? { departmentId } : {})}
+        {...(roleId ? { roleId } : {})}
+      />
+
       <ScheduleWeekGrid
         weekDays={weekDays}
         todayIso={todayIso}
@@ -277,6 +287,7 @@ function shiftToBlock(
     line2: sub || undefined,
     variant,
     dayIso,
+    isDraft: shift.publishedAt == null,
   };
 
   if (variant === "open") {

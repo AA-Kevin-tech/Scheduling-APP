@@ -54,7 +54,7 @@ export async function getSwapRequestById(id: string) {
 
 export async function getAssignmentsForEmployee(employeeId: string) {
   return prisma.shiftAssignment.findMany({
-    where: { employeeId },
+    where: { employeeId, shift: { publishedAt: { not: null } } },
     orderBy: { shift: { startsAt: "asc" } },
     include: {
       shift: {

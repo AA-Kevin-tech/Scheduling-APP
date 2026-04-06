@@ -56,6 +56,9 @@ export function NewShiftForm({
       <p className="text-xs text-slate-500">
         Times are saved in{" "}
         <span className="font-medium text-slate-700">{scheduleTimeZone}</span>.
+        New shifts are saved as{" "}
+        <span className="font-medium text-slate-700">drafts</span> until you
+        publish them from the schedule.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">

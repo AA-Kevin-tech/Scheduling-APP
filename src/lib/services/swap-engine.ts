@@ -16,6 +16,13 @@ export async function validateCompleteSwapRequest(input: {
     return { ok: false, reasons: ["You can only offer shifts that are assigned to you."] };
   }
 
+  if (!from.shift.publishedAt) {
+    return {
+      ok: false,
+      reasons: ["Draft shifts cannot be swapped. Publish the schedule first."],
+    };
+  }
+
   if (!input.toAssignmentId) {
     return validateEmployeeTakingShift({
       takerEmployeeId: input.targetEmployeeId,
@@ -33,6 +40,13 @@ export async function validateCompleteSwapRequest(input: {
     return {
       ok: false,
       reasons: ["The selected exchange shift must belong to the other employee."],
+    };
+  }
+
+  if (!to.shift.publishedAt) {
+    return {
+      ok: false,
+      reasons: ["Draft shifts cannot be swapped. Publish the schedule first."],
     };
   }
 

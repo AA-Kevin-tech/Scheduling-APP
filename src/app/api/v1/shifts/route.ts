@@ -12,6 +12,7 @@ function mapShift(s: Awaited<ReturnType<typeof getShiftsForRange>>[number]) {
     title: s.title,
     startsAt: s.startsAt.toISOString(),
     endsAt: s.endsAt.toISOString(),
+    publishedAt: s.publishedAt?.toISOString() ?? null,
     parentShiftId: s.parentShiftId,
     recurrenceRule: s.recurrenceRule,
     department: {

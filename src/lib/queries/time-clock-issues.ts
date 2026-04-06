@@ -51,7 +51,7 @@ export async function getOpenPunchesPastShiftEnd(
     where: {
       clockOutAt: null,
       assignment: {
-        shift: { endsAt: { lt: now } },
+        shift: { endsAt: { lt: now }, publishedAt: { not: null } },
       },
     },
     include: {
@@ -87,6 +87,7 @@ export async function getMissingClockInsDuringShift(
     where: {
       timePunch: null,
       shift: {
+        publishedAt: { not: null },
         startsAt: { lt: new Date(now.getTime() - afterMs) },
         endsAt: { gt: now },
       },
@@ -123,7 +124,10 @@ export async function getMissedShiftsWithoutPunch(
   const rows = await prisma.shiftAssignment.findMany({
     where: {
       timePunch: null,
-      shift: { endsAt: { lt: now, gte: recentStart } },
+      shift: {
+        publishedAt: { not: null },
+        endsAt: { lt: now, gte: recentStart },
+      },
     },
     include: {
       employee: { include: { user: userSelect } },

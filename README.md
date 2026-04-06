@@ -34,7 +34,7 @@
 
    For active schema development you can use `npx prisma migrate dev` instead of `deploy`.
 
-   The seeded **admin** (`admin@austin-aquarium.local`) uses its own password (set in `prisma/seed.ts`, overridable with `SEED_ADMIN_ACCOUNT_PASSWORD`). Other sample users use `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` if set, otherwise `changeme`. The seed creates seven departments (Attendant + Lead roles each), zones under Guest Services, sample coverage rules and hour limits (including one department-role limit), locations, and users: admin, manager, and three employees (multi- and single-department).
+   The seeded **admin** uses its own password (set in `prisma/seed.ts`, overridable with `SEED_ADMIN_ACCOUNT_PASSWORD`). Other sample users use `SEED_PASSWORD` or `SEED_ADMIN_PASSWORD` if set, otherwise `changeme`. Seeded login emails are defined in `prisma/seed.ts`. The seed creates seven departments (Attendant + Lead roles each), zones under Guest Services, sample coverage rules and hour limits (including one department-role limit), locations, and users: admin, manager, and three employees (multi- and single-department).
 
 4. **Run**
 
@@ -42,11 +42,7 @@
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000). Sign in with seeded accounts:
-
-   - `admin@austin-aquarium.local`
-   - `manager@austin-aquarium.local`
-   - `alex@austin-aquarium.local` / `sam@austin-aquarium.local` (employees)
+   Open [http://localhost:3000](http://localhost:3000). Sign in with the admin, manager, and employee accounts defined in `prisma/seed.ts` (passwords per the setup step above).
 
 ## Scripts
 

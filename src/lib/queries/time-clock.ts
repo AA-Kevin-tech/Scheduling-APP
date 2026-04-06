@@ -73,6 +73,7 @@ export async function getClockableAssignmentsForEmployee(
       employeeId,
       shift: {
         endsAt: { gt: now },
+        publishedAt: { not: null },
       },
     },
     include: {
@@ -93,7 +94,11 @@ export async function getShiftAssignmentForEmployee(
   employeeId: string,
 ) {
   return prisma.shiftAssignment.findFirst({
-    where: { id: assignmentId, employeeId },
+    where: {
+      id: assignmentId,
+      employeeId,
+      shift: { publishedAt: { not: null } },
+    },
     include: assignmentTerminalInclude,
   });
 }

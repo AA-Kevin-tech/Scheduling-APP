@@ -16,7 +16,10 @@ export default async function EmployeeSwapsPage() {
       orderBy: { user: { email: "asc" } },
     }),
     prisma.shiftAssignment.findMany({
-      where: { employeeId },
+      where: {
+        employeeId,
+        shift: { publishedAt: { not: null } },
+      },
       orderBy: { shift: { startsAt: "asc" } },
       include: {
         shift: { include: { department: true, role: true } },
@@ -27,6 +30,7 @@ export default async function EmployeeSwapsPage() {
         employeeId: {
           not: employeeId,
         },
+        shift: { publishedAt: { not: null } },
       },
       include: {
         shift: { include: { department: true } },
