@@ -106,15 +106,6 @@ export default async function ManagerSchedulePage({
 
   const footerHoursByDay = buildFooterHoursByDay(shifts, weekDays, scheduleTz);
 
-  function newShiftHref(dayIso: string): string {
-    const q = new URLSearchParams();
-    q.set("day", dayIso);
-    q.set("week", mondayIso);
-    if (departmentId) q.set("departmentId", departmentId);
-    if (roleId) q.set("roleId", roleId);
-    return `/manager/shifts/new?${q.toString()}`;
-  }
-
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -225,7 +216,11 @@ export default async function ManagerSchedulePage({
         rows={rows}
         footerHoursByDay={footerHoursByDay}
         timezoneLabel={scheduleTz}
-        getEmptyCellHref={({ dayIso }) => newShiftHref(dayIso)}
+        newShiftQuery={{
+          weekMondayIso: mondayIso,
+          ...(departmentId ? { departmentId } : {}),
+          ...(roleId ? { roleId } : {}),
+        }}
         enableDragAssign
         emptyMessage={
           shifts.length === 0
