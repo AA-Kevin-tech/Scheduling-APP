@@ -11,9 +11,10 @@ export default async function AdminDepartmentsPage() {
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="text-xl font-semibold text-slate-900">Departments</h1>
       <p className="text-sm text-slate-600">
-        New departments get default roles (Attendant, Lead). Delete is only
-        allowed when no shifts, employees, or coverage rules reference the
-        department.
+        New departments get default roles (Attendant, Lead). Add or remove
+        zones under each department; removing a zone clears it from shifts and
+        coverage rules that referenced it. Deleting a department is only allowed
+        when no shifts, employees, or coverage rules reference it.
       </p>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

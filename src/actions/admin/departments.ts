@@ -179,3 +179,97 @@ export async function deleteDepartment(
   revalidatePath("/manager/schedule");
   return { ok: true };
 }
+
+const zoneNameSchema = z.object({
+  departmentId: z.string().min(1),
+  name: z.string().min(1),
+});
+
+async function uniqueZoneSlug(departmentId: string, base: string): Promise<string> {
+  let slug = slugify(base);
+  let n = 0;
+  while (true) {
+    const hit = await prisma.departmentZone.findFirst({
+      where: { departmentId, slug },
+    });
+    if (!hit) return slug;
+    n += 1;
+    slug = `${slugify(base)}-${n}`;
+  }
+}
+
+export async function createDepartmentZone(
+  _prev: unknown,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const session = await requireAdmin();
+  const parsed = zoneNameSchema.safeParse({
+    departmentId: formData.get("departmentId"),
+    name: formData.get("name"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().formErrors.join(", ") };
+  }
+
+  const name = parsed.data.name.trim();
+  const dept = await prisma.department.findUnique({
+    where: { id: parsed.data.departmentId },
+    select: { id: true },
+  });
+  if (!dept) return { error: "Department not found." };
+
+  const slug = await uniqueZoneSlug(parsed.data.departmentId, name);
+
+  const zone = await prisma.departmentZone.create({
+    data: {
+      departmentId: parsed.data.departmentId,
+      name,
+      slug,
+    },
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    entityType: "DepartmentZone",
+    entityId: zone.id,
+    action: "CREATE",
+    payload: { departmentId: parsed.data.departmentId, name, slug },
+  });
+
+  revalidatePath("/admin/departments");
+  revalidatePath("/manager/departments");
+  revalidatePath("/manager/schedule");
+  revalidatePath("/manager/coverage");
+  return { ok: true };
+}
+
+export async function deleteDepartmentZone(
+  _prev: unknown,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const session = await requireAdmin();
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) return { error: "Missing id." };
+
+  const zone = await prisma.departmentZone.findUnique({
+    where: { id },
+    select: { id: true, departmentId: true, name: true },
+  });
+  if (!zone) return { error: "Zone not found." };
+
+  await prisma.departmentZone.delete({ where: { id } });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    entityType: "DepartmentZone",
+    entityId: id,
+    action: "DELETE",
+    payload: { departmentId: zone.departmentId, name: zone.name },
+  });
+
+  revalidatePath("/admin/departments");
+  revalidatePath("/manager/departments");
+  revalidatePath("/manager/schedule");
+  revalidatePath("/manager/coverage");
+  return { ok: true };
+}

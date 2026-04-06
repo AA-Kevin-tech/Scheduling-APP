@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import type { Department, DepartmentZone, Role } from "@prisma/client";
 import {
+  createDepartmentZone,
   deleteDepartment,
+  deleteDepartmentZone,
   updateDepartment,
 } from "@/actions/admin/departments";
 import { DeleteResourceForm } from "@/components/admin/delete-resource-form";
@@ -89,23 +91,70 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
         </div>
         <div>
           <h3 className="text-xs font-medium uppercase text-slate-500">Zones</h3>
-          <ul className="mt-1 text-sm text-slate-700">
+          <ul className="mt-1 space-y-1 text-sm text-slate-700">
             {d.zones.length === 0 ? (
-              <li className="text-slate-400">None</li>
+              <li className="text-slate-400">None yet</li>
             ) : (
               d.zones.map((z) => (
-                <li key={z.id}>
-                  {z.name}{" "}
-                  <span className="text-slate-400">({z.slug})</span>
+                <li
+                  key={z.id}
+                  className="flex flex-wrap items-center justify-between gap-2"
+                >
+                  <span>
+                    {z.name}{" "}
+                    <span className="text-slate-400">({z.slug})</span>
+                  </span>
+                  <DeleteResourceForm
+                    action={deleteDepartmentZone}
+                    id={z.id}
+                    label="Remove"
+                  />
                 </li>
               ))
             )}
           </ul>
+          <AddDepartmentZoneForm departmentId={d.id} />
         </div>
       </div>
       <div className="mt-3 border-t border-slate-100 pt-3">
         <DeleteResourceForm action={deleteDepartment} id={d.id} />
       </div>
     </li>
+  );
+}
+
+function AddDepartmentZoneForm({ departmentId }: { departmentId: string }) {
+  const [state, formAction, pending] = useActionState(
+    createDepartmentZone,
+    null as { ok?: boolean; error?: string } | null,
+  );
+
+  return (
+    <form
+      action={formAction}
+      className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:flex-wrap sm:items-end"
+    >
+      <input type="hidden" name="departmentId" value={departmentId} />
+      <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600">
+        <span className="block">Add zone</span>
+        <input
+          name="name"
+          required
+          placeholder="e.g. Stingray touch"
+          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-normal"
+          autoComplete="off"
+        />
+      </label>
+      <button
+        type="submit"
+        disabled={pending}
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+      >
+        {pending ? "…" : "Add zone"}
+      </button>
+      {state?.error ? (
+        <p className="w-full text-xs text-red-600">{state.error}</p>
+      ) : null}
+    </form>
   );
 }
