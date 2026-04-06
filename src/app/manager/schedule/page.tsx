@@ -226,6 +226,7 @@ export default async function ManagerSchedulePage({
         footerHoursByDay={footerHoursByDay}
         timezoneLabel={scheduleTz}
         getEmptyCellHref={({ dayIso }) => newShiftHref(dayIso)}
+        enableDragAssign
         emptyMessage={
           shifts.length === 0
             ? "No shifts this week. Create one to get started."
@@ -269,16 +270,30 @@ function shiftToBlock(
   shift: ShiftRow,
   variant: "assigned" | "open",
   scheduleTz: string,
+  opts?: { employee?: EmpRow },
 ): ScheduleWeekBlock {
+  const dayIso = shiftDayIso(shift, scheduleTz);
   const sub = [shift.role?.name, shift.department.name].filter(Boolean).join(" · ");
-  return {
+  const base: ScheduleWeekBlock = {
     key: shift.id + (variant === "open" ? "-open" : ""),
     kind: "shift",
     href: `/manager/shifts/${shift.id}`,
     line1: formatShiftTimeRange(shift.startsAt, shift.endsAt, scheduleTz),
     line2: sub || undefined,
     variant,
+    dayIso,
   };
+
+  if (variant === "open") {
+    return { ...base, shiftId: shift.id };
+  }
+
+  const emp = opts?.employee;
+  const outOfDepartment =
+    !!emp &&
+    !emp.departments.some((ed) => ed.departmentId === shift.departmentId);
+
+  return { ...base, outOfDepartment };
 }
 
 function sortShiftsChronological(shifts: ShiftRow[]): ShiftRow[] {
@@ -375,7 +390,7 @@ function buildManagerGridRows(opts: {
     for (const d of weekDays) {
       blocksByDay[d.isoKey] = sortShiftsChronological(
         byDay.get(d.isoKey) ?? [],
-      ).map((s) => shiftToBlock(s, "assigned", scheduleTz));
+      ).map((s) => shiftToBlock(s, "assigned", scheduleTz, { employee: emp }));
     }
 
     const hrs = Math.round((weekMinutes / 60) * 10) / 10;

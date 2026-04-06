@@ -1,5 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import { assignEmployeeToShift } from "@/actions/shifts";
 import type { WeekDayColumn } from "@/lib/schedule/week-grid";
+
+const DRAG_MIME = "application/x-schedule-shift";
 
 export type ScheduleWeekBlock = {
   key: string;
@@ -11,6 +18,12 @@ export type ScheduleWeekBlock = {
   line2?: string;
   /** Visual variant inside the cell. */
   variant: "assigned" | "open" | "time_off";
+  /** Open shift: drag-assign target (manager schedule). */
+  shiftId?: string;
+  /** Calendar day YYYY-MM-DD in schedule zone (drag same-column validation). */
+  dayIso?: string;
+  /** Assigned: employee is not on this shift's department in their profile. */
+  outOfDepartment?: boolean;
 };
 
 export type ScheduleWeekRow = {
@@ -37,9 +50,19 @@ type Props = {
     rowId: string;
     dayIso: string;
   }) => string | undefined;
+  /** Manager: drag open shifts onto employee rows to assign. */
+  enableDragAssign?: boolean;
 };
 
-function BlockCard({ block }: { block: ScheduleWeekBlock }) {
+type DragPayload = { shiftId: string; dayIso: string };
+
+function BlockCard({
+  block,
+  enableDragAssign,
+}: {
+  block: ScheduleWeekBlock;
+  enableDragAssign: boolean;
+}) {
   const base =
     block.variant === "time_off"
       ? "border-slate-300 bg-slate-200/90 text-slate-800"
@@ -47,10 +70,25 @@ function BlockCard({ block }: { block: ScheduleWeekBlock }) {
         ? "border-amber-300/80 bg-amber-100/90 text-amber-950"
         : "border-amber-400/70 bg-[#e8dcc8] text-amber-950";
 
-  const inner = (
+  const isOpenDraggable =
+    enableDragAssign &&
+    block.variant === "open" &&
+    block.kind === "shift" &&
+    block.shiftId &&
+    block.dayIso;
+
+  const cardInner = (
     <div
-      className={`rounded-md border px-2 py-1.5 text-left text-xs shadow-sm ${base}`}
+      className={`relative rounded-md border px-2 py-1.5 text-left text-xs shadow-sm ${base} ${
+        isOpenDraggable ? "cursor-grab active:cursor-grabbing" : ""
+      }`}
     >
+      {block.outOfDepartment && block.variant === "assigned" && (
+        <span
+          className="absolute right-0.5 top-0.5 z-10 h-2 w-2 rounded-sm bg-amber-300 ring-1 ring-amber-600/40"
+          title="This person is not assigned to this shift’s department on their profile. Assign them in Edit user or override when scheduling."
+        />
+      )}
       <p className="font-semibold leading-tight">{block.line1}</p>
       {block.line2 && (
         <p className="mt-0.5 truncate text-[11px] font-medium opacity-90">
@@ -64,14 +102,24 @@ function BlockCard({ block }: { block: ScheduleWeekBlock }) {
     return (
       <Link
         href={block.href}
+        draggable={Boolean(isOpenDraggable)}
+        onDragStart={(e) => {
+          if (!isOpenDraggable || !block.shiftId || !block.dayIso) return;
+          const payload: DragPayload = {
+            shiftId: block.shiftId,
+            dayIso: block.dayIso,
+          };
+          e.dataTransfer.setData(DRAG_MIME, JSON.stringify(payload));
+          e.dataTransfer.effectAllowed = "move";
+        }}
         className="block outline-none ring-sky-400 transition hover:opacity-95 focus-visible:ring-2"
       >
-        {inner}
+        {cardInner}
       </Link>
     );
   }
 
-  return inner;
+  return cardInner;
 }
 
 export function ScheduleWeekGrid({
@@ -82,13 +130,75 @@ export function ScheduleWeekGrid({
   emptyMessage,
   timezoneLabel,
   getEmptyCellHref,
+  enableDragAssign = false,
 }: Props) {
+  const router = useRouter();
+  const [assignError, setAssignError] = useState<string | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent, rowId: string, dayIso: string) => {
+      if (!enableDragAssign || rowId === "open") return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      setDragOverKey(`${rowId}:${dayIso}`);
+    },
+    [enableDragAssign],
+  );
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverKey(null);
+  }, []);
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent, employeeId: string, dayIso: string) => {
+      setDragOverKey(null);
+      if (!enableDragAssign || employeeId === "open") return;
+      e.preventDefault();
+      const raw = e.dataTransfer.getData(DRAG_MIME);
+      if (!raw) return;
+      let payload: DragPayload;
+      try {
+        payload = JSON.parse(raw) as DragPayload;
+      } catch {
+        return;
+      }
+      if (payload.dayIso !== dayIso) {
+        setAssignError("Drop on the same day column as the open shift.");
+        return;
+      }
+      setAssignError(null);
+      const fd = new FormData();
+      fd.set("shiftId", payload.shiftId);
+      fd.set("employeeId", employeeId);
+      fd.set(
+        "managerOverrideReason",
+        "Manager schedule drag-assign",
+      );
+      const result = await assignEmployeeToShift(null, fd);
+      if (result?.error) {
+        setAssignError(result.error);
+        return;
+      }
+      router.refresh();
+    },
+    [enableDragAssign, router],
+  );
+
   const hasAnyBlock = rows.some((r) =>
     weekDays.some((d) => (r.blocksByDay[d.isoKey]?.length ?? 0) > 0),
   );
 
   return (
     <div className="space-y-3">
+      {assignError && (
+        <p
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+          role="alert"
+        >
+          {assignError}
+        </p>
+      )}
       {!hasAnyBlock && emptyMessage && (
         <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600">
           {emptyMessage}
@@ -135,55 +245,73 @@ export function ScheduleWeekGrid({
                     ? "bg-white"
                     : "bg-slate-50/60";
               const stripeTh =
-                row.rowTone === "open" ? "bg-emerald-50" : rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50";
+                row.rowTone === "open"
+                  ? "bg-emerald-50"
+                  : rowIdx % 2 === 0
+                    ? "bg-white"
+                    : "bg-slate-50";
               return (
-              <tr key={row.rowId} className={stripe}>
-                <th
-                  scope="row"
-                  className={`sticky left-0 z-10 border-b border-r border-slate-200 px-3 py-2 text-left align-top ${stripeTh}`}
-                >
-                  <div className="font-semibold text-slate-900">{row.name}</div>
-                  {row.detail && (
-                    <div className="mt-0.5 text-xs font-normal text-slate-500">
-                      {row.detail}
-                    </div>
-                  )}
-                </th>
-                {weekDays.map((d) => {
-                  const isToday = d.isoKey === todayIso;
-                  const blocks = row.blocksByDay[d.isoKey] ?? [];
-                  const emptyHref = getEmptyCellHref?.({
-                    rowId: row.rowId,
-                    dayIso: d.isoKey,
-                  });
-                  return (
-                    <td
-                      key={d.isoKey}
-                      className={`border-b border-slate-200 px-1.5 py-2 align-top ${
-                        isToday ? "bg-sky-50/60" : ""
-                      }`}
-                    >
-                      <div className="flex min-h-[52px] flex-col gap-1">
-                        {blocks.length === 0 && emptyHref ? (
-                          <Link
-                            href={emptyHref}
-                            className="flex min-h-[52px] flex-1 items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/80 text-lg text-slate-300 transition hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600"
-                            title="Create shift"
-                          >
-                            <span className="sr-only">Create shift</span>
-                            +
-                          </Link>
-                        ) : blocks.length > 0 ? (
-                          blocks.map((b) => <BlockCard key={b.key} block={b} />)
-                        ) : (
-                          <div className="min-h-[52px]" />
-                        )}
+                <tr key={row.rowId} className={stripe}>
+                  <th
+                    scope="row"
+                    className={`sticky left-0 z-10 border-b border-r border-slate-200 px-3 py-2 text-left align-top ${stripeTh}`}
+                  >
+                    <div className="font-semibold text-slate-900">{row.name}</div>
+                    {row.detail && (
+                      <div className="mt-0.5 text-xs font-normal text-slate-500">
+                        {row.detail}
                       </div>
-                    </td>
-                  );
-                })}
-              </tr>
-            );
+                    )}
+                  </th>
+                  {weekDays.map((d) => {
+                    const isToday = d.isoKey === todayIso;
+                    const blocks = row.blocksByDay[d.isoKey] ?? [];
+                    const emptyHref = getEmptyCellHref?.({
+                      rowId: row.rowId,
+                      dayIso: d.isoKey,
+                    });
+                    const dropKey = `${row.rowId}:${d.isoKey}`;
+                    const isDragTarget =
+                      enableDragAssign &&
+                      row.rowId !== "open" &&
+                      dragOverKey === dropKey;
+                    return (
+                      <td
+                        key={d.isoKey}
+                        onDragOver={(e) => handleDragOver(e, row.rowId, d.isoKey)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, row.rowId, d.isoKey)}
+                        className={`border-b border-slate-200 px-1.5 py-2 align-top ${
+                          isToday ? "bg-sky-50/60" : ""
+                        } ${isDragTarget ? "ring-2 ring-inset ring-sky-400" : ""}`}
+                      >
+                        <div className="flex min-h-[52px] flex-col gap-1">
+                          {blocks.length === 0 && emptyHref ? (
+                            <Link
+                              href={emptyHref}
+                              className="flex min-h-[52px] flex-1 items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/80 text-lg text-slate-300 transition hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600"
+                              title="Create shift"
+                            >
+                              <span className="sr-only">Create shift</span>
+                              +
+                            </Link>
+                          ) : blocks.length > 0 ? (
+                            blocks.map((b) => (
+                              <BlockCard
+                                key={b.key}
+                                block={b}
+                                enableDragAssign={enableDragAssign}
+                              />
+                            ))
+                          ) : (
+                            <div className="min-h-[52px]" />
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
             })}
           </tbody>
           {footerHoursByDay && (
