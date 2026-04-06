@@ -51,7 +51,7 @@ export default async function ManagerEmployeesPage({
               <th className="px-3 py-2">#</th>
               <th className="px-3 py-2">Locations</th>
               <th className="px-3 py-2">Departments</th>
-              <th className="px-3 py-2">Hour limits</th>
+              <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody>
@@ -112,7 +112,7 @@ export default async function ManagerEmployeesPage({
                     href={`/manager/employees/${e.id}`}
                     className="text-sky-700 hover:underline"
                   >
-                    Set
+                    Edit
                   </Link>
                 </td>
               </tr>
