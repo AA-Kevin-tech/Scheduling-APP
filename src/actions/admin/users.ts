@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import type { UserRole } from "@prisma/client";
@@ -307,6 +308,71 @@ export async function updateEmployeeUser(
   revalidatePath("/manager/schedule");
   revalidatePath("/employee/schedule");
   return { ok: true };
+}
+
+const deleteUserSchema = z.object({
+  userId: z.string().min(1),
+  confirmEmail: z.string().min(1),
+});
+
+/**
+ * Permanently removes the user account (and cascaded profile data). Admin only.
+ * Managers use archive only (`setEmployeeArchivedFromUser`).
+ */
+export async function deleteUserFromAdmin(
+  _prev: unknown,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const session = await requireAdmin();
+
+  const parsed = deleteUserSchema.safeParse({
+    userId: formData.get("userId"),
+    confirmEmail: formData.get("confirmEmail"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().formErrors.join(", ") };
+  }
+
+  const userId = parsed.data.userId;
+  const confirmEmail = parsed.data.confirmEmail.toLowerCase().trim();
+
+  if (userId === session.user.id) {
+    return { error: "You cannot delete your own account." };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, role: true },
+  });
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  if (user.email.toLowerCase() !== confirmEmail) {
+    return { error: "Email does not match this account." };
+  }
+
+  if (user.role === "ADMIN") {
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) {
+      return { error: "Cannot delete the only admin account." };
+    }
+  }
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    entityType: "User",
+    entityId: user.id,
+    action: "DELETE",
+    payload: { email: user.email },
+  });
+
+  await prisma.user.delete({ where: { id: user.id } });
+
+  revalidatePath("/admin/users");
+  revalidatePath("/manager/employees");
+  revalidatePath("/manager/schedule");
+  redirect("/admin/users");
 }
 
 function emptyToNull(v: FormDataEntryValue | null): string | null {

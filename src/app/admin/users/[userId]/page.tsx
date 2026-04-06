@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HourLimitScope } from "@prisma/client";
+import { auth } from "@/auth";
+import { AdminDeleteUserSection } from "@/components/admin/admin-delete-user-section";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeUserForm } from "@/components/admin/employee-user-form";
@@ -19,6 +21,7 @@ export default async function AdminEditUserPage({
   params: Promise<{ userId: string }>;
 }) {
   await requireAdmin();
+  const session = await auth();
   const { userId } = await params;
 
   const [user, locations, departments] = await Promise.all([
@@ -155,6 +158,10 @@ export default async function AdminEditUserPage({
         userId={user.id}
         archivedAt={user.employee.archivedAt}
       />
+
+      {session?.user?.id && session.user.id !== user.id ? (
+        <AdminDeleteUserSection userId={user.id} userEmail={user.email} />
+      ) : null}
     </div>
   );
 }
