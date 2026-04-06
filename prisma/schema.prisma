@@ -1,4 +1,4 @@
-// Austin Aquarium Scheduling — PostgreSQL (Railway + local)
+// Scheduling app — PostgreSQL (Railway + local)
 
 generator client {
   provider = "prisma-client-js"

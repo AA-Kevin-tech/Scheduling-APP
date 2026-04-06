@@ -59,15 +59,15 @@ async function main() {
   const bySlug = Object.fromEntries(departments.map((d) => [d.slug, d]));
 
   const mainLocation = await prisma.location.upsert({
-    where: { slug: "austin-aquarium-main" },
+    where: { slug: "main" },
     create: {
-      name: "Austin Aquarium",
-      slug: "austin-aquarium-main",
-      address: "Austin, TX",
+      name: "Main location",
+      slug: "main",
+      address: "Local",
       sortOrder: 0,
     },
     update: {
-      name: "Austin Aquarium",
+      name: "Main location",
     },
   });
 
@@ -127,9 +127,9 @@ async function main() {
   }
 
   const adminUser = await prisma.user.upsert({
-    where: { email: "admin@austin-aquarium.local" },
+    where: { email: "admin@seed.local" },
     create: {
-      email: "admin@austin-aquarium.local",
+      email: "admin@seed.local",
       name: "Admin User",
       role: UserRole.ADMIN,
       passwordHash: adminPasswordHash,
@@ -142,9 +142,9 @@ async function main() {
   });
 
   const managerUser = await prisma.user.upsert({
-    where: { email: "manager@austin-aquarium.local" },
+    where: { email: "manager@seed.local" },
     create: {
-      email: "manager@austin-aquarium.local",
+      email: "manager@seed.local",
       name: "Jamie Manager",
       role: UserRole.MANAGER,
       passwordHash,
@@ -153,9 +153,9 @@ async function main() {
   });
 
   const emp1User = await prisma.user.upsert({
-    where: { email: "alex@austin-aquarium.local" },
+    where: { email: "alex@seed.local" },
     create: {
-      email: "alex@austin-aquarium.local",
+      email: "alex@seed.local",
       name: "Alex Rivera",
       role: UserRole.EMPLOYEE,
       passwordHash,
@@ -164,9 +164,9 @@ async function main() {
   });
 
   const emp2User = await prisma.user.upsert({
-    where: { email: "sam@austin-aquarium.local" },
+    where: { email: "sam@seed.local" },
     create: {
-      email: "sam@austin-aquarium.local",
+      email: "sam@seed.local",
       name: "Sam Chen",
       role: UserRole.EMPLOYEE,
       passwordHash,
@@ -175,9 +175,9 @@ async function main() {
   });
 
   const emp3User = await prisma.user.upsert({
-    where: { email: "jordan@austin-aquarium.local" },
+    where: { email: "jordan@seed.local" },
     create: {
-      email: "jordan@austin-aquarium.local",
+      email: "jordan@seed.local",
       name: "Jordan Lee",
       role: UserRole.EMPLOYEE,
       passwordHash,
