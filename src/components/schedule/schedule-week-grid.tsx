@@ -35,6 +35,25 @@ export type ScheduleWeekRow = {
   blocksByDay: Record<string, ScheduleWeekBlock[]>;
 };
 
+/** Serializable; used client-side to build “create shift” links for empty cells (manager schedule). */
+export type NewShiftQueryContext = {
+  weekMondayIso: string;
+  departmentId?: string;
+  roleId?: string;
+};
+
+function managerNewShiftHref(
+  dayIso: string,
+  ctx: NewShiftQueryContext,
+): string {
+  const q = new URLSearchParams();
+  q.set("day", dayIso);
+  q.set("week", ctx.weekMondayIso);
+  if (ctx.departmentId) q.set("departmentId", ctx.departmentId);
+  if (ctx.roleId) q.set("roleId", ctx.roleId);
+  return `/manager/shifts/new?${q.toString()}`;
+}
+
 type Props = {
   weekDays: WeekDayColumn[];
   /** Calendar date `YYYY-MM-DD` in the schedule timezone for “today” highlight. */
@@ -45,11 +64,8 @@ type Props = {
   emptyMessage?: string;
   /** Shown in the header corner (e.g. IANA zone). */
   timezoneLabel?: string;
-  /** Empty cells link to create a shift (manager schedule). */
-  getEmptyCellHref?: (ctx: {
-    rowId: string;
-    dayIso: string;
-  }) => string | undefined;
+  /** When set, empty cells link to create-shift (manager schedule). */
+  newShiftQuery?: NewShiftQueryContext;
   /** Manager: drag open shifts onto employee rows to assign. */
   enableDragAssign?: boolean;
 };
@@ -129,7 +145,7 @@ export function ScheduleWeekGrid({
   footerHoursByDay,
   emptyMessage,
   timezoneLabel,
-  getEmptyCellHref,
+  newShiftQuery,
   enableDragAssign = false,
 }: Props) {
   const router = useRouter();
@@ -266,10 +282,9 @@ export function ScheduleWeekGrid({
                   {weekDays.map((d) => {
                     const isToday = d.isoKey === todayIso;
                     const blocks = row.blocksByDay[d.isoKey] ?? [];
-                    const emptyHref = getEmptyCellHref?.({
-                      rowId: row.rowId,
-                      dayIso: d.isoKey,
-                    });
+                    const emptyHref = newShiftQuery
+                      ? managerNewShiftHref(d.isoKey, newShiftQuery)
+                      : undefined;
                     const dropKey = `${row.rowId}:${d.isoKey}`;
                     const isDragTarget =
                       enableDragAssign &&
