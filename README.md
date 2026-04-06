@@ -76,8 +76,13 @@
    | `MIN_REST_MINUTES` | Optional; minimum rest between shifts for swap/assignment validation (default 480) |
    | `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` | Optional; IANA zone for the manager schedule grid and create-shift defaults (default `America/Chicago`) |
    | `TIME_CLOCK_*` | Optional; see `.env.example` — early clock-in window, late/missing-in thresholds, weekly hour-cap alert threshold, kiosk and worker session cookies |
+   | `INTUIT_CLIENT_ID`, `INTUIT_CLIENT_SECRET` | Optional; QuickBooks Online OAuth (see note below) |
+   | `INTUIT_REDIRECT_URI` | Optional; defaults to `{AUTH_URL}/api/integrations/quickbooks/callback` (must match the Intuit app redirect URI exactly) |
+   | `INTUIT_USE_PRODUCTION` | Optional; set to `true` for the live QuickBooks API hostname (omit for sandbox with development keys) |
 
-   Do **not** expose secrets with `NEXT_PUBLIC_`. Only non-sensitive values belong in `NEXT_PUBLIC_*`.
+   Do **not** expose secrets with `NEXT_PUBLIC_*`. Only non-sensitive values belong in `NEXT_PUBLIC_*`.
+
+   **QuickBooks Online:** Administrators connect a company file under **Admin → Integrations**. OAuth tokens are stored in Postgres (`QuickBooksConnection`) for future pay-period export to QuickBooks Payroll; connecting does not send hours by itself. Create an app in the [Intuit Developer](https://developer.intuit.com/) portal, add the redirect URI `https://your-domain.com/api/integrations/quickbooks/callback` (local: `http://localhost:3000/api/integrations/quickbooks/callback`), set `INTUIT_CLIENT_*` and `AUTH_URL`, run migrations, then sign in as admin and use **Connect QuickBooks**. Optional: `INTUIT_SCOPES` (default `com.intuit.quickbooks.accounting`).
 
 4. **Migrations**
 

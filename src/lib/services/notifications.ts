@@ -41,3 +41,25 @@ export async function getUnreadCount(userId: string) {
     where: { userId, readAt: null },
   });
 }
+
+/** In-app alerts when published shifts become visible to assignees. */
+export async function notifyUsersSchedulePublished(
+  userIds: string[],
+  singleShift: boolean,
+) {
+  const ids = [...new Set(userIds)];
+  if (ids.length === 0) return;
+  const body = singleShift
+    ? "A shift assigned to you is now visible on your schedule."
+    : "Your schedule has updates — new shifts were published. Open Schedule to review.";
+  await Promise.all(
+    ids.map((userId) =>
+      createNotification({
+        userId,
+        title: "Schedule published",
+        body,
+        type: "SCHEDULE_PUBLISHED",
+      }),
+    ),
+  );
+}

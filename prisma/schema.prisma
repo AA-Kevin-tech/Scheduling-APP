@@ -26,8 +26,26 @@ model User {
   sessions      Session[]
   notifications Notification[]
   auditLogs     AuditLog[] @relation("AuditActor")
+  /// Admin who last completed QuickBooks OAuth (org-wide integration).
+  quickBooksConnections QuickBooksConnection[] @relation("QuickBooksConnectedBy")
 
   employee Employee?
+}
+
+/// Single-tenant QuickBooks Online link (OAuth tokens for payroll/time export).
+model QuickBooksConnection {
+  id                   String   @id @default("singleton")
+  realmId              String   @unique
+  accessToken          String   @db.Text
+  refreshToken         String   @db.Text
+  accessTokenExpiresAt DateTime
+  scope                String?
+  companyName          String?
+  connectedByUserId    String?
+  connectedAt          DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  connectedBy User? @relation("QuickBooksConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
 }
 
 /// Physical venue / job site (e.g. main building, annex).

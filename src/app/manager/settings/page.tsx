@@ -34,6 +34,12 @@ export default function ManagerSettingsPage() {
           — record of scheduling and approval actions.
         </li>
       </ul>
+      <p className="text-sm text-slate-600">
+        <span className="font-medium text-slate-800">Payroll:</span>{" "}
+        administrators connect QuickBooks Online under{" "}
+        <span className="text-slate-800">Admin → Integrations</span> (not shown
+        in the manager sidebar).
+      </p>
       <p className="text-xs text-slate-500">
         Minimum rest between shifts defaults to 480 minutes unless{" "}
         <code className="rounded bg-slate-100 px-1">MIN_REST_MINUTES</code> is

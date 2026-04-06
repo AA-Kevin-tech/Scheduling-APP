@@ -7,6 +7,7 @@ import { requireManager } from "@/lib/auth/guards";
 import { addWeeksUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
+import { notifyUsersSchedulePublished } from "@/lib/services/notifications";
 import { validateShiftAssignment } from "@/lib/services/shift-assignment";
 import {
   normalizeIanaTimezone,
@@ -329,18 +330,38 @@ export async function publishDraftShiftsForRange(
   }
 
   const { departmentId, roleId } = parsed.data;
-  const result = await prisma.shift.updateMany({
-    where: {
-      publishedAt: null,
-      AND: [
-        { startsAt: { lt: rangeEnd } },
-        { endsAt: { gt: rangeStart } },
-        ...(departmentId ? [{ departmentId } as const] : []),
-        ...(roleId ? [{ roleId } as const] : []),
-      ],
+  const draftWhere = {
+    publishedAt: null,
+    AND: [
+      { startsAt: { lt: rangeEnd } },
+      { endsAt: { gt: rangeStart } },
+      ...(departmentId ? [{ departmentId } as const] : []),
+      ...(roleId ? [{ roleId } as const] : []),
+    ],
+  };
+
+  const toPublish = await prisma.shift.findMany({
+    where: draftWhere,
+    include: {
+      assignments: {
+        include: { employee: { select: { userId: true } } },
+      },
     },
+  });
+
+  const notifyUserIds = new Set<string>();
+  for (const s of toPublish) {
+    for (const a of s.assignments) {
+      notifyUserIds.add(a.employee.userId);
+    }
+  }
+
+  const result = await prisma.shift.updateMany({
+    where: draftWhere,
     data: { publishedAt: new Date() },
   });
+
+  await notifyUsersSchedulePublished([...notifyUserIds], false);
 
   await writeAuditLog({
     actorUserId: session.user.id,
@@ -359,6 +380,7 @@ export async function publishDraftShiftsForRange(
   revalidatePath("/manager/schedule");
   revalidatePath("/manager/coverage");
   revalidatePath("/employee/schedule");
+  revalidatePath("/employee/notifications");
   revalidatePath("/employee/swaps");
   revalidatePath("/terminal");
   return { ok: true, count: result.count };
@@ -374,17 +396,24 @@ export async function publishShift(
     return { error: "Missing shift id." };
   }
 
-  const row = await prisma.shift.findUnique({
+  const shift = await prisma.shift.findUnique({
     where: { id },
-    select: { id: true, publishedAt: true },
+    include: {
+      assignments: {
+        include: { employee: { select: { userId: true } } },
+      },
+    },
   });
-  if (!row) return { error: "Shift not found." };
-  if (row.publishedAt) return { error: "Shift is already published." };
+  if (!shift) return { error: "Shift not found." };
+  if (shift.publishedAt) return { error: "Shift is already published." };
 
   await prisma.shift.update({
     where: { id },
     data: { publishedAt: new Date() },
   });
+
+  const userIds = shift.assignments.map((a) => a.employee.userId);
+  await notifyUsersSchedulePublished(userIds, true);
 
   await writeAuditLog({
     actorUserId: session.user.id,
@@ -398,6 +427,7 @@ export async function publishShift(
   revalidatePath(`/manager/shifts/${id}`);
   revalidatePath("/manager/coverage");
   revalidatePath("/employee/schedule");
+  revalidatePath("/employee/notifications");
   revalidatePath("/employee/swaps");
   revalidatePath("/terminal");
   return { ok: true };

@@ -1,5 +1,21 @@
 import { prisma } from "@/lib/db";
 
+const shiftTeamInclude = {
+  department: true,
+  role: true,
+  zone: true,
+  location: true,
+  assignments: {
+    include: {
+      employee: {
+        include: {
+          user: { select: { name: true, email: true } },
+        },
+      },
+    },
+  },
+} as const;
+
 export async function getShiftsForRange(params: {
   from: Date;
   to: Date;
@@ -31,6 +47,59 @@ export async function getShiftsForRange(params: {
         },
       },
     },
+    orderBy: [{ startsAt: "asc" }, { id: "asc" }],
+  });
+}
+
+/** Published shifts only — for employee team schedule views. */
+export async function getPublishedShiftsInRange(params: {
+  from: Date;
+  to: Date;
+  /** If set, only these departments. */
+  departmentIds?: string[];
+  /**
+   * Shifts at one of these locations, OR unlocated shifts in these departments.
+   * Omit both departmentIds and locationScope for org-wide.
+   */
+  locationScope?: {
+    locationIds: string[];
+    departmentIdsForUnlocated: string[];
+  };
+}) {
+  const andClause: object[] = [
+    { startsAt: { lt: params.to } },
+    { endsAt: { gt: params.from } },
+    { publishedAt: { not: null } },
+  ];
+
+  if (params.departmentIds?.length) {
+    andClause.push({ departmentId: { in: params.departmentIds } });
+  }
+
+  if (params.locationScope) {
+    const { locationIds, departmentIdsForUnlocated } = params.locationScope;
+    const orBranches: object[] = [];
+    if (locationIds.length > 0) {
+      orBranches.push({ locationId: { in: locationIds } });
+    }
+    if (departmentIdsForUnlocated.length > 0) {
+      orBranches.push({
+        AND: [
+          { locationId: null },
+          { departmentId: { in: departmentIdsForUnlocated } },
+        ],
+      });
+    }
+    if (orBranches.length > 0) {
+      andClause.push({ OR: orBranches });
+    } else {
+      andClause.push({ id: { in: [] } });
+    }
+  }
+
+  return prisma.shift.findMany({
+    where: { AND: andClause },
+    include: shiftTeamInclude,
     orderBy: [{ startsAt: "asc" }, { id: "asc" }],
   });
 }

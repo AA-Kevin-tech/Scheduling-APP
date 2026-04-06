@@ -8,8 +8,16 @@ import {
 } from "@/components/schedule/schedule-week-grid";
 import { intervalsOverlap } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
-import { getShiftsForEmployee } from "@/lib/queries/schedule";
+import {
+  getEmployeesWithDepartments,
+  getPublishedShiftsInRange,
+  getShiftsForEmployee,
+} from "@/lib/queries/schedule";
 import { getApprovedTimeOffOverlappingRange } from "@/lib/queries/time-off";
+import {
+  buildEmployeeTeamScheduleRows,
+  buildTeamFooterHoursByDay,
+} from "@/lib/schedule/employee-team-grid";
 import {
   buildWeekColumns,
   formatShiftTimeRange,
@@ -24,21 +32,54 @@ import {
 } from "@/lib/schedule/tz";
 import { firstSearchParam } from "@/lib/search-params";
 
+export type EmployeeScheduleView = "me" | "location" | "department" | "venue";
+
+function parseScheduleView(raw: string | undefined): EmployeeScheduleView {
+  if (
+    raw === "location" ||
+    raw === "department" ||
+    raw === "venue"
+  ) {
+    return raw;
+  }
+  return "me";
+}
+
+function weekHref(mondayIso: string, view: EmployeeScheduleView): string {
+  const p = new URLSearchParams();
+  p.set("week", mondayIso);
+  if (view !== "me") p.set("view", view);
+  return `/employee/schedule?${p.toString()}`;
+}
+
 export default async function EmployeeSchedulePage({
   searchParams,
 }: {
-  searchParams: Promise<{ week?: string | string[] }>;
+  searchParams: Promise<{
+    week?: string | string[];
+    view?: string | string[];
+  }>;
 }) {
   const { session, employeeId } = await requireEmployeeProfile();
   const user = session.user;
   const raw = await searchParams;
   const week = firstSearchParam(raw.week);
+  const view = parseScheduleView(firstSearchParam(raw.view));
 
   const empRow = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { timezone: true },
+    select: {
+      timezone: true,
+      locations: { select: { locationId: true } },
+      departments: { select: { departmentId: true } },
+    },
   });
   const scheduleTz = normalizeIanaTimezone(empRow?.timezone);
+
+  const myLocationIds = [...new Set(empRow?.locations.map((l) => l.locationId) ?? [])];
+  const myDepartmentIds = [
+    ...new Set(empRow?.departments.map((d) => d.departmentId) ?? []),
+  ];
 
   const now = new Date();
   const { from: weekStart, to: weekEnd, mondayIso } = resolveWeekRangeFromQuery(
@@ -46,15 +87,6 @@ export default async function EmployeeSchedulePage({
     scheduleTz,
     now,
   );
-
-  const [shifts, timeOff] = await Promise.all([
-    getShiftsForEmployee({
-      employeeId,
-      from: weekStart,
-      to: weekEnd,
-    }),
-    getApprovedTimeOffOverlappingRange(employeeId, weekStart, weekEnd),
-  ]);
 
   const prevMonday = addWeeksToMondayIso(mondayIso, -1, scheduleTz);
   const nextMonday = addWeeksToMondayIso(mondayIso, 1, scheduleTz);
@@ -66,16 +98,6 @@ export default async function EmployeeSchedulePage({
 
   const name = user.name?.trim() || user.email || "Me";
 
-  const rows = buildEmployeeGridRow({
-    name,
-    shifts,
-    timeOff,
-    weekDays,
-    scheduleTz,
-  });
-
-  const footerHoursByDay = buildEmployeeFooterHours(shifts, weekDays, scheduleTz);
-
   const lastCol = weekDays[6];
   const rangeLabel = `${formatInTimeZone(weekStart, scheduleTz, "MMM d, yyyy")} – ${formatInTimeZone(
     lastCol?.date ?? weekStart,
@@ -83,22 +105,235 @@ export default async function EmployeeSchedulePage({
     "MMM d, yyyy",
   )}`;
 
-  let weekMinutes = 0;
-  for (const s of shifts) {
-    weekMinutes += (s.endsAt.getTime() - s.startsAt.getTime()) / 60000;
-  }
-  const weekHrs = Math.round((weekMinutes / 60) * 10) / 10;
-  const detail =
-    weekMinutes > 0 ? `${weekHrs} hrs scheduled` : "No shifts this week";
+  if (view === "me") {
+    const [shifts, timeOff] = await Promise.all([
+      getShiftsForEmployee({
+        employeeId,
+        from: weekStart,
+        to: weekEnd,
+      }),
+      getApprovedTimeOffOverlappingRange(employeeId, weekStart, weekEnd),
+    ]);
 
-  const rowsWithDetail = rows.map((r) =>
-    r.rowId === "me" ? { ...r, detail } : r,
+    const rows = buildEmployeeGridRow({
+      name,
+      shifts,
+      timeOff,
+      weekDays,
+      scheduleTz,
+    });
+
+    const footerHoursByDay = buildEmployeeFooterHours(shifts, weekDays, scheduleTz);
+
+    let weekMinutes = 0;
+    for (const s of shifts) {
+      weekMinutes += (s.endsAt.getTime() - s.startsAt.getTime()) / 60000;
+    }
+    const weekHrs = Math.round((weekMinutes / 60) * 10) / 10;
+    const detail =
+      weekMinutes > 0 ? `${weekHrs} hrs scheduled` : "No shifts this week";
+
+    const rowsWithDetail = rows.map((r) =>
+      r.rowId === "me" ? { ...r, detail } : r,
+    );
+
+    return (
+      <SchedulePageShell
+        view={view}
+        mondayIso={mondayIso}
+        rangeLabel={rangeLabel}
+        prevMonday={prevMonday}
+        nextMonday={nextMonday}
+        thisWeekMonday={thisWeekMonday}
+        blurb="Your assigned shifts and approved time off. When managers publish the schedule, you get an in-app alert under Alerts."
+      >
+        <ScheduleWeekGrid
+          weekDays={weekDays}
+          todayIso={todayIso}
+          rows={rowsWithDetail}
+          footerHoursByDay={footerHoursByDay}
+          timezoneLabel={scheduleTz}
+          emptyMessage={
+            shifts.length === 0 && timeOff.length === 0
+              ? "Nothing scheduled this week."
+              : undefined
+          }
+        />
+      </SchedulePageShell>
+    );
+  }
+
+  let teamShifts: Awaited<ReturnType<typeof getPublishedShiftsInRange>> = [];
+  let teamEmployees: Awaited<ReturnType<typeof getEmployeesWithDepartments>> = [];
+  let viewTitle = "";
+  let viewBlurb = "";
+
+  if (view === "department") {
+    if (myDepartmentIds.length === 0) {
+      return (
+        <SchedulePageShell
+          view={view}
+          mondayIso={mondayIso}
+          rangeLabel={rangeLabel}
+          prevMonday={prevMonday}
+          nextMonday={nextMonday}
+          thisWeekMonday={thisWeekMonday}
+          blurb=""
+        >
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            You are not assigned to a department yet. Ask a manager to add you
+            to a department to use this view, or stay on <strong>My schedule</strong>.
+          </p>
+        </SchedulePageShell>
+      );
+    }
+    teamShifts = await getPublishedShiftsInRange({
+      from: weekStart,
+      to: weekEnd,
+      departmentIds: myDepartmentIds,
+    });
+    const deptSet = new Set(myDepartmentIds);
+    const all = await getEmployeesWithDepartments();
+    teamEmployees = all.filter((e) =>
+      e.departments.some((d) => deptSet.has(d.departmentId)),
+    );
+    viewTitle = "Department schedule";
+    viewBlurb =
+      "Published shifts in departments you belong to. Open shifts and coworkers; tap a block only when it is your shift.";
+  } else if (view === "location") {
+    if (myLocationIds.length === 0 && myDepartmentIds.length === 0) {
+      return (
+        <SchedulePageShell
+          view={view}
+          mondayIso={mondayIso}
+          rangeLabel={rangeLabel}
+          prevMonday={prevMonday}
+          nextMonday={nextMonday}
+          thisWeekMonday={thisWeekMonday}
+          title="My location(s) schedule"
+          blurb=""
+        >
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            Add at least one work location or department on your profile (ask a
+            manager) to use this view, or use <strong>Full venue</strong> or{" "}
+            <strong>My schedule</strong>.
+          </p>
+        </SchedulePageShell>
+      );
+    }
+    teamShifts = await getPublishedShiftsInRange({
+      from: weekStart,
+      to: weekEnd,
+      locationScope: {
+        locationIds: myLocationIds,
+        departmentIdsForUnlocated: myDepartmentIds,
+      },
+    });
+    const locSet = new Set(myLocationIds);
+    const deptSet = new Set(myDepartmentIds);
+    const all = await getEmployeesWithDepartments();
+    teamEmployees = all.filter(
+      (e) =>
+        e.locations.some((l) => locSet.has(l.locationId)) ||
+        e.departments.some((d) => deptSet.has(d.departmentId)),
+    );
+    viewTitle = "My location(s) schedule";
+    viewBlurb =
+      "Shifts at your work locations (or unlocated shifts in your departments). Add locations on your profile if this looks empty.";
+  } else {
+    teamShifts = await getPublishedShiftsInRange({
+      from: weekStart,
+      to: weekEnd,
+    });
+    teamEmployees = await getEmployeesWithDepartments();
+    viewTitle = "Full venue schedule";
+    viewBlurb =
+      "All published shifts for the week. Use for big-picture coverage; only your own shifts are clickable.";
+  }
+
+  const rows = buildEmployeeTeamScheduleRows({
+    viewerEmployeeId: employeeId,
+    shifts: teamShifts,
+    employees: teamEmployees,
+    weekDays,
+    scheduleTz,
+  });
+
+  const footerHoursByDay = buildTeamFooterHoursByDay(
+    teamShifts,
+    weekDays,
+    scheduleTz,
   );
+
+  const openCount = teamShifts.filter((s) => s.assignments.length === 0).length;
+
+  return (
+    <SchedulePageShell
+      view={view}
+      mondayIso={mondayIso}
+      rangeLabel={rangeLabel}
+      prevMonday={prevMonday}
+      nextMonday={nextMonday}
+      thisWeekMonday={thisWeekMonday}
+      title={viewTitle}
+      blurb={`${viewBlurb} Managers publish drafts before they appear here. When they publish, assigned staff receive an in-app alert (Alerts).`}
+    >
+      <ScheduleWeekGrid
+        weekDays={weekDays}
+        todayIso={todayIso}
+        rows={rows}
+        footerHoursByDay={footerHoursByDay}
+        timezoneLabel={scheduleTz}
+        emptyMessage={
+          teamShifts.length === 0
+            ? "No published shifts match this view for this week."
+            : undefined
+        }
+      />
+      {openCount > 0 && (
+        <p className="text-xs text-slate-500">
+          {openCount} open shift{openCount === 1 ? "" : "s"} this week — ask a
+          manager if you want to pick one up.
+        </p>
+      )}
+    </SchedulePageShell>
+  );
+}
+
+function SchedulePageShell({
+  children,
+  view,
+  mondayIso,
+  rangeLabel,
+  prevMonday,
+  nextMonday,
+  thisWeekMonday,
+  title,
+  blurb,
+}: {
+  children: React.ReactNode;
+  view: EmployeeScheduleView;
+  mondayIso: string;
+  rangeLabel: string;
+  prevMonday: string;
+  nextMonday: string;
+  thisWeekMonday: string;
+  title?: string;
+  blurb: string;
+}) {
+  const viewLabel: Record<EmployeeScheduleView, string> = {
+    me: "My schedule",
+    location: "My location(s)",
+    department: "My departments",
+    venue: "Full venue",
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold text-slate-900">My schedule</h1>
+        <h1 className="text-xl font-semibold text-slate-900">
+          {title ?? "My schedule"}
+        </h1>
         <Link
           href="/employee/availability"
           className="text-sm text-sky-700 hover:underline"
@@ -107,9 +342,37 @@ export default async function EmployeeSchedulePage({
         </Link>
       </div>
 
+      <nav
+        className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm"
+        aria-label="Schedule view"
+      >
+        {(
+          [
+            ["me", viewLabel.me],
+            ["location", viewLabel.location],
+            ["department", viewLabel.department],
+            ["venue", viewLabel.venue],
+          ] as const
+        ).map(([v, label]) => (
+          <Link
+            key={v}
+            href={weekHref(mondayIso, v)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+              view === v
+                ? "bg-sky-700 text-white"
+                : "text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+
+      {blurb ? <p className="text-sm text-slate-600">{blurb}</p> : null}
+
       <div className="flex flex-wrap items-center gap-2">
         <Link
-          href={`/employee/schedule?week=${prevMonday}`}
+          href={weekHref(prevMonday, view)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
           aria-label="Previous week"
         >
@@ -119,32 +382,21 @@ export default async function EmployeeSchedulePage({
           {rangeLabel}
         </span>
         <Link
-          href={`/employee/schedule?week=${nextMonday}`}
+          href={weekHref(nextMonday, view)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
           aria-label="Next week"
         >
           →
         </Link>
         <Link
-          href={`/employee/schedule?week=${thisWeekMonday}`}
+          href={weekHref(thisWeekMonday, view)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
         >
           Today
         </Link>
       </div>
 
-      <ScheduleWeekGrid
-        weekDays={weekDays}
-        todayIso={todayIso}
-        rows={rowsWithDetail}
-        footerHoursByDay={footerHoursByDay}
-        timezoneLabel={scheduleTz}
-        emptyMessage={
-          shifts.length === 0 && timeOff.length === 0
-            ? "Nothing scheduled this week."
-            : undefined
-        }
-      />
+      {children}
     </div>
   );
 }
