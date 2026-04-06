@@ -1,6 +1,6 @@
 # Pulse - Scheduling
 
-**Pulse** is production-oriented **staff scheduling**: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, and a **kiosk time clock** with alerts for managers and admins. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
+**Pulse** is production-oriented **staff scheduling**: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, a **kiosk time clock** with alerts for managers and admins, and optional **QuickBooks Online** linking (admin **Integrations**) for future payroll export. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@
    cp .env.example .env
    ```
 
-   Set `DATABASE_URL` to your Postgres connection string. Generate `AUTH_SECRET` (e.g. `openssl rand -base64 32`). Optional time clock and schedule variables are documented in `.env.example` (kiosk window, late/missing-in grace, weekly cap warning, default schedule timezone).
+   Set `DATABASE_URL` to your Postgres connection string. Generate `AUTH_SECRET` (e.g. `openssl rand -base64 32`). Optional **time clock**, **schedule**, and **Intuit / QuickBooks** variables are documented in `.env.example`.
 
 3. **Database**
 
@@ -49,7 +49,7 @@
 | Script | Description |
 |--------|-------------|
 | `npm run dev` | Next.js dev server |
-| `npm run build` | `prisma generate` + production build |
+| `npm run build` | `prisma generate` + production build (does not require Postgres to be running; see **Builds and CI** below) |
 | `npm run start` | Start production server |
 | `npm run db:migrate` | `prisma migrate dev` |
 | `npm run db:push` | `prisma db push` (prototyping only) |
@@ -93,12 +93,21 @@
 
    Railway can use `GET /api/health` — returns `{ ok: true, db: "up" }` when the database is reachable.
 
+## Builds and CI
+
+`npm run build` runs `next build`, which can prerender some routes. Without care, that could run Prisma against `DATABASE_URL` during the build even when no database is available (noisy logs or flaky CI).
+
+The **manager dashboard** (`/manager`), **Clock issues** (`/manager/time-clock`), and **Coverage** (`/manager/coverage`) server components call **`await connection()`** from `next/server` before querying the database so that work runs on real requests, not during static prerender. You can run a production build with a placeholder `DATABASE_URL` when Postgres is down; **runtime** still needs a live database.
+
 ## Project layout
 
-- `src/app/` — App Router pages (employee vs manager areas, **`/terminal`** kiosk, auth, API routes)
+- `src/app/` — App Router pages (employee vs manager vs **admin**, **`/terminal`** kiosk, auth)
+- `src/app/admin/integrations/` — QuickBooks Online connect UI (admins only)
+- `src/app/api/integrations/quickbooks/` — OAuth connect + callback routes
+- `src/lib/integrations/` — Intuit OAuth helpers (server-only)
 - `src/auth.ts` — Auth.js (NextAuth v5) configuration
-- `src/lib/` — DB client, validation helpers, shared utilities
-- `prisma/schema.prisma` — Data model
+- `src/lib/` — DB client, validation helpers, schedule/swaps utilities, queries
+- `prisma/schema.prisma` — Data model (includes `QuickBooksConnection` after migrations are applied)
 - `prisma/seed.ts` — Sample departments and users
 
 ## Phases
@@ -111,7 +120,7 @@ All six phases below are **implemented in this repo**. Use the paths and API not
 
 - Shifts: create (with optional weekly materialization for `repeatWeeks`), edit, delete; assignments enforce qualification, no double-booking, hour caps, and minimum rest (aligned with swap rules); manager override with reason + audit when rules would block the assign.
 - Manager **schedule** (`/manager/schedule`): week grid in `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` (or `America/Chicago`), filters (department, role, **staff rows**: scheduled-only vs all, name search), **empty cells** link to create a shift for that day; shift times shown in that zone.
-- Each **employee** has a profile **time zone** (set when provisioning users or on **Profile**); **my schedule** (`/employee/schedule`) and **shift detail** (`/employee/shifts/[id]`) use it.
+- Each **employee** has a profile **time zone** (set when provisioning users or on **Profile**); **my schedule** (`/employee/schedule`) and **shift detail** (`/employee/shifts/[id]`) use it. The schedule page offers a **week grid** with views filtered by **me**, **location**, **department**, or **venue** (team-style rows for published shifts in range).
 - **Coverage** view (`/manager/coverage`) vs `CoverageRule` minimums (per day × department).
 - **Employees** and **Departments** directory (read-focused).
 - Employee **my schedule** and **availability** CRUD.
@@ -144,6 +153,8 @@ All six phases below are **implemented in this repo**. Use the paths and API not
 - **`/terminal`** — After a manager locks the browser at **`/terminal/setup`**, employees authenticate and clock in or out against their shift assignments (shared tablet / kiosk; no geofence).
 - **Alerts** — **Managers** and **admins** receive in-app notifications (under **Alerts**) for late clock-in, weekly hour-limit approach or exceed (uses configured **`HourLimit`** caps), still clocked in after shift end, missing clock-in while a shift is in progress, and ended shifts with no punch. The manager **Clock issues** page (`/manager/time-clock`) lists current issues; the dashboard shows a total count. Admins can open the same page from the admin nav.
 - **Configuration** — See `.env.example` for `TIME_CLOCK_EARLY_MINUTES`, `TIME_CLOCK_LATE_AFTER_MINUTES`, `TIME_CLOCK_MISSING_IN_AFTER_MINUTES`, `TIME_CLOCK_WEEKLY_CAP_WARN_PERCENT`, and kiosk/session cookie lifetime.
+
+**QuickBooks Online (payroll prep)** — Admins use **Admin → Integrations** to connect a company via Intuit OAuth (`INTUIT_CLIENT_*`, redirect URI, `AUTH_URL`). Tokens are stored in **`QuickBooksConnection`**; exporting approved pay-period hours to QuickBooks Payroll is not implemented yet. For a step-by-step setup you can keep locally, create **`Intuit-Connection.md`** in the repo root — this project lists that filename in **`.gitignore`** so it is not committed if you add it.
 
 ## License
 
