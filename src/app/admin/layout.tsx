@@ -8,6 +8,7 @@ const links = [
   { href: "/admin/departments", label: "Departments" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/holidays", label: "Holidays" },
+  { href: "/admin/payroll-corrections", label: "Payroll corrections" },
   { href: "/admin/integrations", label: "Integrations" },
   { href: "/manager/time-clock", label: "Time clock issues" },
 ];
