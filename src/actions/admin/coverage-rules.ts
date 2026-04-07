@@ -6,19 +6,6 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 
-function parseOptionalDate(
-  raw: FormDataEntryValue | null,
-  endOfDay: boolean,
-): Date | null {
-  if (raw === null || raw === "") return null;
-  const s = String(raw).trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  if (endOfDay) {
-    return new Date(`${s}T23:59:59.999Z`);
-  }
-  return new Date(`${s}T00:00:00.000Z`);
-}
-
 function emptyToNull(v: FormDataEntryValue | null): string | null {
   if (v === null || v === "") return null;
   return String(v);
@@ -47,12 +34,6 @@ export async function createCoverageRule(
     return { error: parsed.error.flatten().formErrors.join(", ") };
   }
 
-  const validFrom = parseOptionalDate(formData.get("validFrom"), false);
-  const validTo = parseOptionalDate(formData.get("validTo"), true);
-  if (validFrom && validTo && validTo < validFrom) {
-    return { error: "Valid to must be on or after valid from." };
-  }
-
   const dept = await prisma.department.findUnique({
     where: { id: parsed.data.departmentId },
     select: { id: true },
@@ -73,8 +54,8 @@ export async function createCoverageRule(
       departmentId: parsed.data.departmentId,
       zoneId: requestedZoneId,
       minStaffCount: parsed.data.minStaffCount,
-      validFrom,
-      validTo,
+      validFrom: null,
+      validTo: null,
       note: parsed.data.note?.trim() || null,
     },
   });
@@ -120,12 +101,6 @@ export async function updateCoverageRule(
     return { error: parsed.error.flatten().formErrors.join(", ") };
   }
 
-  const validFrom = parseOptionalDate(formData.get("validFrom"), false);
-  const validTo = parseOptionalDate(formData.get("validTo"), true);
-  if (validFrom && validTo && validTo < validFrom) {
-    return { error: "Valid to must be on or after valid from." };
-  }
-
   const existing = await prisma.coverageRule.findUnique({
     where: { id: parsed.data.id },
     select: { id: true, departmentId: true },
@@ -148,8 +123,8 @@ export async function updateCoverageRule(
     data: {
       zoneId: requestedZoneId,
       minStaffCount: parsed.data.minStaffCount,
-      validFrom,
-      validTo,
+      validFrom: null,
+      validTo: null,
       note: parsed.data.note?.trim() || null,
     },
   });

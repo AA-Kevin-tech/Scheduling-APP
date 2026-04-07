@@ -136,7 +136,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
           Used on the manager coverage report. Department-wide rules count everyone
           scheduled in this department that day. Zone rules count only shifts tagged
           with that zone. If several rules apply, the report uses the tightest
-          shortfall. Dates are optional (UTC calendar days).
+          shortfall.
         </p>
         <ul className="mt-3 space-y-4">
           {d.coverageRules.map((rule) => (
@@ -194,12 +194,6 @@ function AddDepartmentZoneForm({ departmentId }: { departmentId: string }) {
   );
 }
 
-function isoDateOnly(d: Date | string | null | undefined): string {
-  if (d == null) return "";
-  const s = typeof d === "string" ? d : d.toISOString();
-  return s.slice(0, 10);
-}
-
 function CoverageRuleEditRow({
   rule,
   departmentId,
@@ -246,24 +240,6 @@ function CoverageRuleEditRow({
                 </option>
               ))}
             </select>
-          </label>
-          <label className="text-xs font-medium text-slate-600">
-            <span className="block">Valid from</span>
-            <input
-              name="validFrom"
-              type="date"
-              defaultValue={isoDateOnly(rule.validFrom)}
-              className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-            />
-          </label>
-          <label className="text-xs font-medium text-slate-600">
-            <span className="block">Valid to</span>
-            <input
-              name="validTo"
-              type="date"
-              defaultValue={isoDateOnly(rule.validTo)}
-              className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-            />
           </label>
         </div>
         <label className="block text-xs font-medium text-slate-600">
@@ -343,22 +319,6 @@ function AddCoverageRuleForm({
               </option>
             ))}
           </select>
-        </label>
-        <label className="text-xs font-medium text-slate-600">
-          <span className="block">Valid from</span>
-          <input
-            name="validFrom"
-            type="date"
-            className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-          />
-        </label>
-        <label className="text-xs font-medium text-slate-600">
-          <span className="block">Valid to</span>
-          <input
-            name="validTo"
-            type="date"
-            className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-          />
         </label>
       </div>
       <label className="block text-xs font-medium text-slate-600">
