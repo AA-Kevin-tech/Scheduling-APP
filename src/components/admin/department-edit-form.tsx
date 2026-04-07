@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useState } from "react";
 import type {
   CoverageRule,
   Department,
@@ -285,7 +285,27 @@ function AddCoverageRuleForm({
   departmentId: string;
   zones: DepartmentZone[];
 }) {
-  const formRef = useRef<HTMLFormElement>(null);
+  /** Remount inner UI so fields and action state reset (native form.reset() is unreliable with React). */
+  const [instanceKey, setInstanceKey] = useState(0);
+  return (
+    <AddCoverageRuleFormInner
+      key={instanceKey}
+      departmentId={departmentId}
+      zones={zones}
+      onDeleteDraft={() => setInstanceKey((k) => k + 1)}
+    />
+  );
+}
+
+function AddCoverageRuleFormInner({
+  departmentId,
+  zones,
+  onDeleteDraft,
+}: {
+  departmentId: string;
+  zones: DepartmentZone[];
+  onDeleteDraft: () => void;
+}) {
   const [state, formAction, pending] = useActionState(
     createCoverageRule,
     null as { ok?: boolean; error?: string } | null,
@@ -293,7 +313,6 @@ function AddCoverageRuleForm({
 
   return (
     <form
-      ref={formRef}
       action={formAction}
       className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4"
     >
@@ -347,9 +366,7 @@ function AddCoverageRuleForm({
           type="button"
           className="text-sm text-red-600 hover:underline disabled:opacity-50"
           disabled={pending}
-          onClick={() => {
-            formRef.current?.reset();
-          }}
+          onClick={onDeleteDraft}
         >
           Delete draft
         </button>
