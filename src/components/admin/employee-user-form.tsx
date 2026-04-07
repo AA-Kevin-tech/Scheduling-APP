@@ -30,7 +30,8 @@ type Props = {
   locations: { id: string; name: string }[];
   initial?: {
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: UserRole;
     employeeNumber: string | null;
     timezone?: string;
@@ -175,7 +176,7 @@ export function EmployeeUserForm(props: Props) {
         <input key={id} type="hidden" name="locationIds" value={id} />
       ))}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label className="block text-sm font-medium text-slate-700">
             Email
@@ -192,13 +193,26 @@ export function EmployeeUserForm(props: Props) {
         </div>
         <div>
           <label className="block text-sm font-medium text-slate-700">
-            Name
+            First name
           </label>
           <input
-            name="name"
+            name="firstName"
             required
-            defaultValue={initial?.name}
+            autoComplete="given-name"
+            defaultValue={initial?.firstName}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700">
+            Last name
+          </label>
+          <input
+            name="lastName"
+            autoComplete="family-name"
+            defaultValue={initial?.lastName}
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            placeholder="Optional"
           />
         </div>
       </div>

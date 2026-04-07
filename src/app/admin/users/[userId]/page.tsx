@@ -14,6 +14,7 @@ import { prisma } from "@/lib/db";
 import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
+import { initialFirstLastFromUser } from "@/lib/user-display-name";
 
 export default async function AdminEditUserPage({
   params,
@@ -56,9 +57,16 @@ export default async function AdminEditUserPage({
       ? `${Math.floor(effectiveCaps.weeklyMaxMinutes / 60)}h`
       : "—";
 
+  const { firstName, lastName } = initialFirstLastFromUser({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    name: user.name,
+  });
+
   const initial = {
     email: user.email,
-    name: user.name ?? "",
+    firstName,
+    lastName,
     role: user.role,
     employeeNumber: user.employee.employeeNumber,
     timezone: user.employee.timezone,

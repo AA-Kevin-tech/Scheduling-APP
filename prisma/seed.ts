@@ -130,11 +130,15 @@ async function main() {
     where: { email: "admin@seed.local" },
     create: {
       email: "admin@seed.local",
+      firstName: "Admin",
+      lastName: "User",
       name: "Admin User",
       role: UserRole.ADMIN,
       passwordHash: adminPasswordHash,
     },
     update: {
+      firstName: "Admin",
+      lastName: "User",
       name: "Admin User",
       role: UserRole.ADMIN,
       passwordHash: adminPasswordHash,
@@ -145,44 +149,76 @@ async function main() {
     where: { email: "manager@seed.local" },
     create: {
       email: "manager@seed.local",
+      firstName: "Jamie",
+      lastName: "Manager",
       name: "Jamie Manager",
       role: UserRole.MANAGER,
       passwordHash,
     },
-    update: { name: "Jamie Manager", role: UserRole.MANAGER, passwordHash },
+    update: {
+      firstName: "Jamie",
+      lastName: "Manager",
+      name: "Jamie Manager",
+      role: UserRole.MANAGER,
+      passwordHash,
+    },
   });
 
   const emp1User = await prisma.user.upsert({
     where: { email: "alex@seed.local" },
     create: {
       email: "alex@seed.local",
+      firstName: "Alex",
+      lastName: "Rivera",
       name: "Alex Rivera",
       role: UserRole.EMPLOYEE,
       passwordHash,
     },
-    update: { name: "Alex Rivera", role: UserRole.EMPLOYEE, passwordHash },
+    update: {
+      firstName: "Alex",
+      lastName: "Rivera",
+      name: "Alex Rivera",
+      role: UserRole.EMPLOYEE,
+      passwordHash,
+    },
   });
 
   const emp2User = await prisma.user.upsert({
     where: { email: "sam@seed.local" },
     create: {
       email: "sam@seed.local",
+      firstName: "Sam",
+      lastName: "Chen",
       name: "Sam Chen",
       role: UserRole.EMPLOYEE,
       passwordHash,
     },
-    update: { name: "Sam Chen", role: UserRole.EMPLOYEE, passwordHash },
+    update: {
+      firstName: "Sam",
+      lastName: "Chen",
+      name: "Sam Chen",
+      role: UserRole.EMPLOYEE,
+      passwordHash,
+    },
   });
 
   const emp3User = await prisma.user.upsert({
     where: { email: "jordan@seed.local" },
     create: {
       email: "jordan@seed.local",
+      firstName: "Jordan",
+      lastName: "Lee",
       name: "Jordan Lee",
       role: UserRole.EMPLOYEE,
       passwordHash,
     },
-    update: { name: "Jordan Lee", role: UserRole.EMPLOYEE, passwordHash },
+    update: {
+      firstName: "Jordan",
+      lastName: "Lee",
+      name: "Jordan Lee",
+      role: UserRole.EMPLOYEE,
+      passwordHash,
+    },
   });
 
   await prisma.employee.upsert({

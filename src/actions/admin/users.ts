@@ -9,6 +9,7 @@ import { requireAdmin, requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import { normalizeIanaTimezone } from "@/lib/schedule/tz";
+import { userDisplayName } from "@/lib/user-display-name";
 
 const assignmentSchema = z.array(
   z.object({
@@ -20,7 +21,8 @@ const assignmentSchema = z.array(
 
 const createUserSchema = z.object({
   email: z.string().email(),
-  name: z.string().min(1),
+  firstName: z.string().trim().min(1),
+  lastName: z.string().trim(),
   password: z.string().min(8),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   employeeNumber: z.string().nullable().optional(),
@@ -63,7 +65,8 @@ export async function createEmployeeUser(
 
   const parsed = createUserSchema.safeParse({
     email: formData.get("email"),
-    name: formData.get("name"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
     password: formData.get("password"),
     role,
     employeeNumber: emptyToNull(formData.get("employeeNumber")),
@@ -73,7 +76,7 @@ export async function createEmployeeUser(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.flatten().formErrors.join(", ") };
+    return { error: zodFormError(parsed.error) };
   }
 
   const email = parsed.data.email.toLowerCase().trim();
@@ -104,6 +107,9 @@ export async function createEmployeeUser(
   }
 
   const passwordHash = await hash(parsed.data.password, 12);
+  const firstName = parsed.data.firstName.trim();
+  const lastName = parsed.data.lastName.trim();
+  const displayName = userDisplayName({ firstName, lastName });
 
   let primarySet = false;
   const deptRows = parsed.data.assignments.map((a) => {
@@ -123,7 +129,9 @@ export async function createEmployeeUser(
     const u = await tx.user.create({
       data: {
         email,
-        name: parsed.data.name.trim(),
+        firstName,
+        lastName: lastName || null,
+        name: displayName,
         passwordHash,
         role: parsed.data.role,
       },
@@ -173,7 +181,8 @@ export async function createEmployeeUser(
 
 const updateUserSchema = z.object({
   userId: z.string().min(1),
-  name: z.string().min(1),
+  firstName: z.string().trim().min(1),
+  lastName: z.string().trim(),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   employeeNumber: z.string().nullable().optional(),
   timezone: z.string().optional(),
@@ -199,7 +208,8 @@ export async function updateEmployeeUser(
 
   const parsed = updateUserSchema.safeParse({
     userId: formData.get("userId"),
-    name: formData.get("name"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
     role: formData.get("role"),
     employeeNumber: emptyToNull(formData.get("employeeNumber")),
     timezone: formData.get("timezone"),
@@ -208,7 +218,7 @@ export async function updateEmployeeUser(
   });
 
   if (!parsed.success) {
-    return { error: parsed.error.flatten().formErrors.join(", ") };
+    return { error: zodFormError(parsed.error) };
   }
 
   const user = await prisma.user.findUnique({
@@ -255,12 +265,17 @@ export async function updateEmployeeUser(
   }
 
   const empId = user.employee.id;
+  const firstName = parsed.data.firstName.trim();
+  const lastName = parsed.data.lastName.trim();
+  const displayName = userDisplayName({ firstName, lastName });
 
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id: parsed.data.userId },
       data: {
-        name: parsed.data.name.trim(),
+        firstName,
+        lastName: lastName || null,
+        name: displayName,
         role: parsed.data.role,
       },
     });
@@ -378,4 +393,13 @@ export async function deleteUserFromAdmin(
 function emptyToNull(v: FormDataEntryValue | null): string | null {
   if (v === null || v === "") return null;
   return String(v);
+}
+
+function zodFormError(err: z.ZodError): string {
+  const flat = err.flatten();
+  const parts = [
+    ...flat.formErrors,
+    ...Object.values(flat.fieldErrors).flat(),
+  ];
+  return parts.filter(Boolean).join(", ") || "Invalid form.";
 }
