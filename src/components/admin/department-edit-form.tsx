@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import type {
   CoverageRule,
   Department,
@@ -152,7 +152,11 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
       </div>
 
       <div className="mt-3 border-t border-slate-100 pt-3">
-        <DeleteResourceForm action={deleteDepartment} id={d.id} />
+        <DeleteResourceForm
+          action={deleteDepartment}
+          id={d.id}
+          label="Delete department"
+        />
       </div>
     </li>
   );
@@ -281,6 +285,7 @@ function AddCoverageRuleForm({
   departmentId: string;
   zones: DepartmentZone[];
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(
     createCoverageRule,
     null as { ok?: boolean; error?: string } | null,
@@ -288,6 +293,7 @@ function AddCoverageRuleForm({
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4"
     >
@@ -329,13 +335,25 @@ function AddCoverageRuleForm({
           />
         </label>
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex h-9 w-fit items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
-      >
-        {pending ? "…" : "Add rule"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex h-9 w-fit items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {pending ? "…" : "Add rule"}
+        </button>
+        <button
+          type="button"
+          className="text-sm text-red-600 hover:underline disabled:opacity-50"
+          disabled={pending}
+          onClick={() => {
+            formRef.current?.reset();
+          }}
+        >
+          Delete draft
+        </button>
+      </div>
       {state?.error ? (
         <p className="text-xs text-red-600">{state.error}</p>
       ) : null}
