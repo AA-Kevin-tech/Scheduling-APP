@@ -210,12 +210,12 @@ function CoverageRuleEditRow({
 
   return (
     <li className="rounded-lg border border-slate-200 bg-slate-50/80 p-3">
-      <form action={formAction} className="space-y-2">
+      <form action={formAction} className="space-y-3">
         <input type="hidden" name="id" value={rule.id} />
         <input type="hidden" name="departmentId" value={departmentId} />
-        <div className="flex flex-wrap items-end gap-3">
-          <label className="text-xs font-medium text-slate-600">
-            <span className="block">Min staff</span>
+        <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+            <span>Min staff</span>
             <input
               name="minStaffCount"
               type="number"
@@ -223,15 +223,15 @@ function CoverageRuleEditRow({
               max={999}
               required
               defaultValue={rule.minStaffCount}
-              className="mt-1 w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm tabular-nums"
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm tabular-nums shadow-sm"
             />
           </label>
-          <label className="text-xs font-medium text-slate-600">
-            <span className="block">Zone (optional)</span>
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+            <span>Zone (optional)</span>
             <select
               name="zoneId"
               defaultValue={rule.zoneId ?? ""}
-              className="mt-1 min-w-[10rem] rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+              className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
             >
               <option value="">Whole department</option>
               {zones.map((z) => (
@@ -241,22 +241,22 @@ function CoverageRuleEditRow({
               ))}
             </select>
           </label>
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 sm:col-span-2">
+            <span>Note (optional)</span>
+            <input
+              name="note"
+              type="text"
+              defaultValue={rule.note ?? ""}
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
+              placeholder="e.g. Weekend minimum"
+            />
+          </label>
         </div>
-        <label className="block text-xs font-medium text-slate-600">
-          <span className="block">Note (optional)</span>
-          <input
-            name="note"
-            type="text"
-            defaultValue={rule.note ?? ""}
-            className="mt-1 w-full max-w-xl rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-            placeholder="e.g. Weekend minimum"
-          />
-        </label>
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={pending}
-            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
           >
             {pending ? "…" : "Save rule"}
           </button>
@@ -289,13 +289,13 @@ function AddCoverageRuleForm({
   return (
     <form
       action={formAction}
-      className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4"
+      className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4"
     >
       <input type="hidden" name="departmentId" value={departmentId} />
       <p className="text-xs font-medium text-slate-600">Add coverage rule</p>
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="text-xs font-medium text-slate-600">
-          <span className="block">Min staff</span>
+      <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+          <span>Min staff</span>
           <input
             name="minStaffCount"
             type="number"
@@ -303,14 +303,14 @@ function AddCoverageRuleForm({
             max={999}
             defaultValue={1}
             required
-            className="mt-1 w-20 rounded-md border border-slate-300 px-2 py-1.5 text-sm tabular-nums"
+            className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm tabular-nums shadow-sm"
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
-          <span className="block">Zone (optional)</span>
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+          <span>Zone (optional)</span>
           <select
             name="zoneId"
-            className="mt-1 min-w-[10rem] rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
           >
             <option value="">Whole department</option>
             {zones.map((z) => (
@@ -320,19 +320,19 @@ function AddCoverageRuleForm({
             ))}
           </select>
         </label>
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 sm:col-span-2">
+          <span>Note (optional)</span>
+          <input
+            name="note"
+            type="text"
+            className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
+          />
+        </label>
       </div>
-      <label className="block text-xs font-medium text-slate-600">
-        <span className="block">Note (optional)</span>
-        <input
-          name="note"
-          type="text"
-          className="mt-1 w-full max-w-xl rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        />
-      </label>
       <button
         type="submit"
         disabled={pending}
-        className="w-fit rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        className="inline-flex h-9 w-fit items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
       >
         {pending ? "…" : "Add rule"}
       </button>
