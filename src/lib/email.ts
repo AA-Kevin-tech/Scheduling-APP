@@ -33,3 +33,72 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
     throw new Error(`Email send failed: ${res.status} ${text}`);
   }
 }
+
+function appOrigin(): string {
+  const base =
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
+    process.env.AUTH_URL?.trim() ||
+    "";
+  return base.replace(/\/$/, "");
+}
+
+/** Transactional alert (schedule, swaps, time off) when Resend is configured. */
+export async function sendNotificationEmail(opts: {
+  to: string;
+  subject: string;
+  title: string;
+  body: string;
+  actionUrl: string;
+}) {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+
+  const origin = appOrigin();
+  const actionLink = opts.actionUrl.startsWith("http")
+    ? opts.actionUrl
+    : origin
+      ? `${origin}${opts.actionUrl.startsWith("/") ? "" : "/"}${opts.actionUrl}`
+      : opts.actionUrl;
+
+  if (!key || !from) {
+    console.warn(
+      "[email] Notification (set RESEND_API_KEY + EMAIL_FROM to send):",
+      {
+        to: opts.to,
+        subject: opts.subject,
+        actionLink,
+      },
+    );
+    return;
+  }
+
+  const safeBody = escapeHtml(opts.body);
+  const safeTitle = escapeHtml(opts.title);
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [opts.to],
+      subject: opts.subject,
+      html: `<p><strong>${safeTitle}</strong></p><p>${safeBody.replace(/\n/g, "<br/>")}</p><p><a href="${actionLink}">Open in app</a></p><p style="color:#64748b;font-size:12px">If you did not expect this message, you can ignore it.</p>`,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Email send failed: ${res.status} ${text}`);
+  }
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}

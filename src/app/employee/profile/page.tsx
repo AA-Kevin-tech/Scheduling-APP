@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireEmployeeProfile } from "@/lib/auth/guards";
 import { ProfilePhoneForm } from "@/components/employee/profile-phone-form";
 import { ProfileTimezoneForm } from "@/components/employee/profile-timezone-form";
+import { NotificationPreferencesForm } from "@/components/settings/notification-preferences-form";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { prisma } from "@/lib/db";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
@@ -55,6 +56,19 @@ export default async function EmployeeProfilePage() {
           Your week view and shift times use this zone.
         </p>
         <ProfileTimezoneForm currentTimezone={employee.timezone} />
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">Alert preferences</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Email and SMS when schedules publish, swaps change, or time off is
+          decided. SMS uses the phone number above.
+        </p>
+        <NotificationPreferencesForm
+          notifyEmail={employee.user.notifyEmail}
+          notifySms={employee.user.notifySms}
+          smsOptInAt={employee.user.smsOptInAt}
+        />
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

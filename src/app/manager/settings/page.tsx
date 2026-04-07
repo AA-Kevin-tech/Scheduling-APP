@@ -1,6 +1,28 @@
 import Link from "next/link";
+import { requireManager } from "@/lib/auth/guards";
+import { ManagerAccountPhoneForm } from "@/components/settings/manager-account-phone-form";
+import { NotificationPreferencesForm } from "@/components/settings/notification-preferences-form";
+import { prisma } from "@/lib/db";
 
-export default function ManagerSettingsPage() {
+export default async function ManagerSettingsPage() {
+  const session = await requireManager();
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      notifyEmail: true,
+      notifySms: true,
+      smsOptInAt: true,
+      phoneE164: true,
+    },
+  });
+
+  if (!user) {
+    return <p className="text-sm text-slate-600">Account not found.</p>;
+  }
+
+  const noEmployee = !session.user.employeeId;
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="text-xl font-semibold text-slate-900">Settings</h1>
@@ -8,6 +30,41 @@ export default function ManagerSettingsPage() {
         Scheduling rules and structure are managed in the sections below. There
         is no separate organization-wide settings form yet.
       </p>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">Alert preferences</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Email and SMS for swap requests, time off, schedule publishes, and
+          time-clock alerts. Requires Resend (email) and Twilio (SMS) on the
+          server.
+        </p>
+        <NotificationPreferencesForm
+          notifyEmail={user.notifyEmail}
+          notifySms={user.notifySms}
+          smsOptInAt={user.smsOptInAt}
+        />
+        {noEmployee ? (
+          <>
+            <h3 className="mt-6 text-xs font-medium uppercase tracking-wide text-slate-500">
+              Mobile for text alerts
+            </h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Manager-only accounts do not have an employee profile. Save a
+              mobile number here so SMS can reach you.
+            </p>
+            <ManagerAccountPhoneForm currentPhoneE164={user.phoneE164} />
+          </>
+        ) : (
+          <p className="mt-4 text-xs text-slate-500">
+            SMS uses the phone on your{" "}
+            <Link href="/employee/profile" className="text-sky-700 hover:underline">
+              employee profile
+            </Link>
+            .
+          </p>
+        )}
+      </section>
+
       <ul className="list-inside list-disc space-y-2 text-sm text-slate-700">
         <li>
           <Link href="/manager/departments" className="text-sky-700 hover:underline">

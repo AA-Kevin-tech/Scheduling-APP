@@ -21,6 +21,13 @@ model User {
   role              UserRole  @default(EMPLOYEE)
   /// Bumped on password reset; JWT must match or session is cleared.
   credentialVersion Int       @default(0)
+  /// Send scheduling alerts to this address (same as login email).
+  notifyEmail       Boolean   @default(true)
+  notifySms         Boolean   @default(false)
+  /// When the user consented to SMS; required for outbound texts.
+  smsOptInAt        DateTime?
+  /// Best mobile for SMS when this user has no Employee row (e.g. manager-only). E.164 when saved.
+  phoneE164         String?
 
   accounts      Account[]
   sessions      Session[]
@@ -440,6 +447,8 @@ model Notification {
   body      String    @db.Text
   type      String
   readAt    DateTime?
+  emailSentAt DateTime?
+  smsSentAt   DateTime?
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

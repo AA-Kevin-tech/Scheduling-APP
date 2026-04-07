@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { dispatchNotificationOutbound } from "@/lib/services/notification-dispatch";
 
 export async function createNotification(input: {
   userId: string;
@@ -6,7 +7,7 @@ export async function createNotification(input: {
   body: string;
   type: string;
 }) {
-  return prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: {
       userId: input.userId,
       title: input.title,
@@ -14,6 +15,12 @@ export async function createNotification(input: {
       type: input.type,
     },
   });
+
+  void dispatchNotificationOutbound(notification.id).catch((err) => {
+    console.error("[notifications] outbound dispatch error", notification.id, err);
+  });
+
+  return notification;
 }
 
 export async function notifyManagersExcept(
