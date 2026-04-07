@@ -2,7 +2,7 @@ import type { UserRole } from "@prisma/client";
 import { sendNotificationEmail } from "@/lib/email";
 import { parseToE164 } from "@/lib/phone-e164";
 import { prisma } from "@/lib/db";
-import { sendSms } from "@/lib/sms";
+import { isTwilioSmsConfigured, sendSms } from "@/lib/sms";
 
 /** In-app relative path for deep-linking by notification type and recipient role. */
 export function notificationAppPath(type: string, role: UserRole): string {
@@ -90,9 +90,7 @@ export async function dispatchNotificationOutbound(
     row.user.notifySms &&
     row.user.smsOptInAt != null &&
     smsTo &&
-    process.env.TWILIO_ACCOUNT_SID &&
-    process.env.TWILIO_AUTH_TOKEN &&
-    process.env.TWILIO_PHONE_NUMBER
+    isTwilioSmsConfigured()
   ) {
     try {
       const smsBody = `${row.title}: ${row.body} ${actionUrl}`.slice(0, 1600);
