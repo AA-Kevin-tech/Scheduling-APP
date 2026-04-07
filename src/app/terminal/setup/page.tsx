@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import {
+  getRequestOrigin,
+  isLoopbackOrigin,
+} from "@/lib/request-origin";
 import { getTerminalCookieState } from "@/lib/terminal/server-state";
 import { TerminalSetupForm } from "@/components/terminal/terminal-setup-form";
 
@@ -16,6 +20,16 @@ export default async function TerminalSetupPage() {
   }
 
   const { kioskActive } = await getTerminalCookieState();
+
+  const envBase =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "").trim() || null;
+  const requestOrigin = await getRequestOrigin();
+  const baseForTerminal = requestOrigin ?? envBase;
+  const employeeTerminalUrl = baseForTerminal
+    ? `${baseForTerminal}/terminal`
+    : null;
+  const showLoopbackTip =
+    employeeTerminalUrl != null && isLoopbackOrigin(employeeTerminalUrl);
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
@@ -49,14 +63,22 @@ export default async function TerminalSetupPage() {
         <p className="mt-2 text-sm text-slate-600">
           After locking, bookmark or set the home page to:
         </p>
-        <p className="mt-2 font-mono text-sm text-slate-900">
-          {process.env.NEXT_PUBLIC_APP_URL ?? ""}/terminal
+        <p className="mt-2 break-all font-mono text-sm text-slate-900">
+          {employeeTerminalUrl ?? (
+            <span className="text-amber-900">
+              Set{" "}
+              <span className="font-mono">NEXT_PUBLIC_APP_URL</span> so this link
+              can be shown.
+            </span>
+          )}
         </p>
-        {!process.env.NEXT_PUBLIC_APP_URL ? (
+        {showLoopbackTip ? (
           <p className="mt-2 text-xs text-amber-800">
-            Set{" "}
-            <span className="font-mono">NEXT_PUBLIC_APP_URL</span> in production
-            so this link is correct.
+            <span className="font-mono">localhost</span> only works on this
+            computer. For a shared time clock PC, open this setup page using that
+            machine&apos;s LAN IP or hostname (or set{" "}
+            <span className="font-mono">NEXT_PUBLIC_APP_URL</span> to your public
+            site URL).
           </p>
         ) : null}
       </section>

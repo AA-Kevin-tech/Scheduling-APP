@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import type {
   CoverageRule,
@@ -285,6 +286,7 @@ function AddCoverageRuleForm({
   departmentId: string;
   zones: DepartmentZone[];
 }) {
+  const router = useRouter();
   /** Remount inner UI so fields and action state reset (native form.reset() is unreliable with React). */
   const [instanceKey, setInstanceKey] = useState(0);
   return (
@@ -292,7 +294,10 @@ function AddCoverageRuleForm({
       key={instanceKey}
       departmentId={departmentId}
       zones={zones}
-      onDeleteDraft={() => setInstanceKey((k) => k + 1)}
+      onDeleteDraft={() => {
+        setInstanceKey((k) => k + 1);
+        router.refresh();
+      }}
     />
   );
 }
@@ -310,52 +315,54 @@ function AddCoverageRuleFormInner({
     createCoverageRule,
     null as { ok?: boolean; error?: string } | null,
   );
+  /** Must be unique per department card; also keeps "Delete draft" outside the form (Next form actions + labels can swallow inner button clicks). */
+  const formId = `add-coverage-rule-${departmentId}`;
 
   return (
-    <form
-      action={formAction}
-      className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4"
-    >
-      <input type="hidden" name="departmentId" value={departmentId} />
-      <p className="text-xs font-medium text-slate-600">Add coverage rule</p>
-      <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
-        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
-          <span>Min staff</span>
-          <input
-            name="minStaffCount"
-            type="number"
-            min={1}
-            max={999}
-            defaultValue={1}
-            required
-            className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm tabular-nums shadow-sm"
-          />
-        </label>
-        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
-          <span>Zone (optional)</span>
-          <select
-            name="zoneId"
-            className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
-          >
-            <option value="">Whole department</option>
-            {zones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 sm:col-span-2">
-          <span>Note (optional)</span>
-          <input
-            name="note"
-            type="text"
-            className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
-          />
-        </label>
-      </div>
+    <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4">
+      <form id={formId} action={formAction} className="flex flex-col gap-3">
+        <input type="hidden" name="departmentId" value={departmentId} />
+        <p className="text-xs font-medium text-slate-600">Add coverage rule</p>
+        <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+            <span>Min staff</span>
+            <input
+              name="minStaffCount"
+              type="number"
+              min={1}
+              max={999}
+              defaultValue={1}
+              required
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm tabular-nums shadow-sm"
+            />
+          </label>
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+            <span>Zone (optional)</span>
+            <select
+              name="zoneId"
+              className="h-9 w-full min-w-0 rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
+            >
+              <option value="">Whole department</option>
+              {zones.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {z.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 sm:col-span-2">
+            <span>Note (optional)</span>
+            <input
+              name="note"
+              type="text"
+              className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm shadow-sm"
+            />
+          </label>
+        </div>
+      </form>
       <div className="flex flex-wrap items-center gap-3">
         <button
+          form={formId}
           type="submit"
           disabled={pending}
           className="inline-flex h-9 w-fit items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
@@ -364,9 +371,8 @@ function AddCoverageRuleFormInner({
         </button>
         <button
           type="button"
-          className="text-sm text-red-600 hover:underline disabled:opacity-50"
-          disabled={pending}
-          onClick={onDeleteDraft}
+          className="text-sm text-red-600 hover:underline"
+          onClick={() => onDeleteDraft()}
         >
           Delete draft
         </button>
@@ -374,6 +380,6 @@ function AddCoverageRuleFormInner({
       {state?.error ? (
         <p className="text-xs text-red-600">{state.error}</p>
       ) : null}
-    </form>
+    </div>
   );
 }
