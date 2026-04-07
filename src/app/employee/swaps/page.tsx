@@ -12,7 +12,10 @@ export default async function EmployeeSwapsPage() {
     listSwapRequestsForEmployee(employeeId),
     prisma.employee.findMany({
       where: { id: { not: employeeId }, archivedAt: null },
-      include: { user: { select: { name: true, email: true } } },
+      include: {
+        user: { select: { name: true, email: true } },
+        departments: { select: { departmentId: true } },
+      },
       orderBy: { user: { email: "asc" } },
     }),
     prisma.shiftAssignment.findMany({
@@ -58,7 +61,11 @@ export default async function EmployeeSwapsPage() {
 
       <SwapRequestForm
         myAssignments={myAssignments}
-        colleagues={colleagues}
+        colleagues={colleagues.map((c) => ({
+          id: c.id,
+          user: c.user,
+          departmentIds: c.departments.map((d) => d.departmentId),
+        }))}
         peerAssignments={peerFormatted}
       />
 
