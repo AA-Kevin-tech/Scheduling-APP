@@ -92,7 +92,7 @@ export function defaultTimeOffDraftDatetimeLocals(
   const z = toZonedTime(firstAllowedStartUtc, scheduleTz);
   const startZ = new Date(z);
   startZ.setHours(9, 0, 0, 0);
-  let startUtc = fromZonedTime(startZ, scheduleTz);
+  const startUtc = fromZonedTime(startZ, scheduleTz);
 
   const endZ = toZonedTime(startUtc, scheduleTz);
   endZ.setHours(17, 0, 0, 0);
