@@ -296,7 +296,7 @@ function AddCoverageRuleForm({
   /** Remount inner UI so fields and action state reset (native form.reset() is unreliable with React). */
   const [instanceKey, setInstanceKey] = useState(0);
   /** Hiding the block makes "Delete draft" visibly remove the draft; remount-only looked like a no-op when values matched defaults. */
-  const [draftOpen, setDraftOpen] = useState(true);
+  const [draftOpen, setDraftOpen] = useState(false);
 
   const openDraft = () => {
     setInstanceKey((k) => k + 1);
