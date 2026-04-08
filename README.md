@@ -25,7 +25,7 @@
 
 3. **Database**
 
-   The repo includes an initial migration under `prisma/migrations/`. Apply it, then seed:
+   The repo includes migrations under `prisma/migrations/`. Prisma reads `prisma.config.ts` for the seed command and paths (with `dotenv` so local `.env` is loaded for CLI commands). Apply migrations, then seed:
 
    ```bash
    npx prisma migrate deploy
@@ -89,6 +89,8 @@
    - Preferred: run migrations in CI or a **release command** / one-off job: `npx prisma migrate deploy`.
    - Alternatively: `start` script `npx prisma migrate deploy && npm run start` so deploys apply migrations before serving (acceptable for small teams; watch for concurrent deploys).
 
+   Deploy logs may show `npm warn config production Use '--omit=dev' instead` — that comes from npm’s config on the host; it does not indicate a failed deploy. Prisma’s old `package.json#prisma` warning is addressed in this repo via root `prisma.config.ts`.
+
 5. **Health check**
 
    Railway can use `GET /api/health` — returns `{ ok: true, db: "up" }` when the database is reachable.
@@ -108,6 +110,7 @@ The **manager dashboard** (`/manager`), **Clock issues** (`/manager/time-clock`)
 - `src/lib/integrations/` — Intuit OAuth helpers (server-only)
 - `src/auth.ts` — Auth.js (NextAuth v5) configuration
 - `src/lib/` — DB client, validation helpers, schedule/swaps utilities, queries
+- `prisma.config.ts` — Prisma CLI config (schema path, migrations dir, seed command); replaces deprecated `package.json#prisma`
 - `prisma/schema.prisma` — Data model (includes `QuickBooksConnection`, `TimeOffBlackout`, etc., after migrations are applied)
 - `prisma/seed.ts` — Sample departments and users
 
