@@ -1,14 +1,22 @@
 import Link from "next/link";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { listSwapRequestsForManager } from "@/lib/queries/swaps";
 import { SwapManagerActions } from "@/components/manager/swap-manager-actions";
 
 export default async function ManagerSwapsPage() {
-  await requireManager();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
 
-  const pending = await listSwapRequestsForManager(["PENDING"]);
-  const ready = await listSwapRequestsForManager(["ACCEPTED_BY_TARGET"]);
+  const pending = await listSwapRequestsForManager(
+    ["PENDING"],
+    locationIds,
+  );
+  const ready = await listSwapRequestsForManager(
+    ["ACCEPTED_BY_TARGET"],
+    locationIds,
+  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">

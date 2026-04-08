@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import {
   approveTimeOffRequest,
@@ -10,8 +11,9 @@ import {
 } from "@/lib/queries/time-off";
 
 export default async function ManagerTimeOffPage() {
-  await requireManager();
-  const pending = await listPendingTimeOffForManager();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
+  const pending = await listPendingTimeOffForManager(locationIds);
   const overlaps = await Promise.all(
     pending.map((p) => getOverlapCountForRequest(p.id)),
   );

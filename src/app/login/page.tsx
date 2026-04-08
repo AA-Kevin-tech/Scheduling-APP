@@ -1,6 +1,8 @@
+import type { UserRole } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { loginHomePath } from "@/lib/auth/roles";
 import { safeCallbackUrl } from "@/lib/auth/safe-callback-url";
 import { LoginForm } from "./login-form";
 
@@ -13,12 +15,7 @@ export default async function LoginPage({
   const params = await searchParams;
 
   if (session?.user) {
-    const dest =
-      session.user.role === "ADMIN"
-        ? "/admin"
-        : session.user.role === "MANAGER"
-          ? "/manager"
-          : "/employee";
+    const dest = loginHomePath(session.user.role as UserRole);
     redirect(safeCallbackUrl(params.callbackUrl, dest));
   }
 

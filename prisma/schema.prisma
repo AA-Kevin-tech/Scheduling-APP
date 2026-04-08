@@ -41,6 +41,8 @@ model User {
   employee Employee?
   /// Invites sent to prospective employees (self-onboarding).
   sentEmployeeInvites EmployeeInvite[]
+  /// Venues this manager may schedule and view (managers without rows fall back to EmployeeLocation).
+  managerLocations ManagerLocation[]
 }
 
 /// Single-tenant QuickBooks Online link (OAuth tokens for payroll/time export).
@@ -70,7 +72,22 @@ model Location {
   updatedAt DateTime @updatedAt
 
   employeeLocations EmployeeLocation[]
+  managerLocations  ManagerLocation[]
+  departments       Department[]
   shifts            Shift[]
+}
+
+/// Manager access to a venue (scheduling, roster, shifts). Synced from user provisioning when role is MANAGER.
+model ManagerLocation {
+  id         String   @id @default(cuid())
+  userId     String
+  locationId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, locationId])
 }
 
 model Account {
@@ -116,12 +133,15 @@ model VerificationToken {
 
 model Department {
   id         String   @id @default(cuid())
+  locationId String
   name       String
-  slug       String   @unique
+  slug       String
   colorToken String
   sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
 
   zones               DepartmentZone[]
   roles               Role[]
@@ -130,6 +150,8 @@ model Department {
   certifications      Certification[]
   coverageRules       CoverageRule[]
   hourLimits          HourLimit[]
+
+  @@unique([locationId, slug])
 }
 
 model DepartmentZone {
@@ -428,6 +450,8 @@ model SwapRequest {
 
 enum UserRole {
   ADMIN
+  IT
+  PAYROLL
   MANAGER
   EMPLOYEE
 }

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { auth } from "@/auth";
+import {
+  getSchedulingLocationIdsForSession,
+  shiftsWhereForLocations,
+} from "@/lib/auth/location-scope";
+import { requireManager } from "@/lib/auth/guards";
 import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
 import { getTimeClockIssueCounts } from "@/lib/queries/time-clock-issues";
@@ -11,30 +15,35 @@ import { countPendingTimeOffRequests } from "@/lib/queries/time-off";
 
 export default async function ManagerDashboardPage() {
   await connection();
-  const session = await auth();
-  const name = session?.user?.name ?? session?.user?.email ?? "Manager";
+  const session = await requireManager();
+  const name = session.user?.name ?? session.user?.email ?? "Manager";
 
   const weekStart = startOfWeekMondayUtc(new Date());
   const weekEnd = addWeeksUtc(weekStart, 1);
   const now = new Date();
+  const locScope = await getSchedulingLocationIdsForSession(session);
 
   const [swapCounts, coverageRows, openShifts, pendingTimeOff, timeClock] =
     await Promise.all([
-      countPendingSwapsForManager(),
+      countPendingSwapsForManager(locScope),
       computeDepartmentCoverage({
         rangeStart: weekStart,
         rangeEnd: weekEnd,
+        onlyAtLocations: locScope ?? undefined,
       }),
       prisma.shift.count({
         where: {
           startsAt: { gte: new Date() },
           assignments: { none: {} },
+          ...(locScope !== null
+            ? { AND: [shiftsWhereForLocations(locScope)] }
+            : {}),
         },
       }),
-      countPendingTimeOffRequests(),
+      countPendingTimeOffRequests(locScope),
       (async () => {
         await ensureTimeClockIssueNotifications(now);
-        return getTimeClockIssueCounts(now);
+        return getTimeClockIssueCounts(now, locScope);
       })(),
     ]);
 

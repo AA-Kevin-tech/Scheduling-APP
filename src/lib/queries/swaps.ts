@@ -1,4 +1,5 @@
-import type { SwapRequestStatus } from "@prisma/client";
+import type { Prisma, SwapRequestStatus } from "@prisma/client";
+import { swapRequestTouchesLocationsWhere } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 
 const swapInclude = {
@@ -24,9 +25,20 @@ const swapInclude = {
   },
 } as const;
 
-export async function listSwapRequestsForManager(status?: SwapRequestStatus[]) {
+export async function listSwapRequestsForManager(
+  status?: SwapRequestStatus[],
+  /** `null` = all venues (admin). Omit = same as null. */
+  locationIds?: string[] | null,
+) {
+  const scope = swapRequestTouchesLocationsWhere(
+    locationIds === undefined ? null : locationIds,
+  );
+  const where: Prisma.SwapRequestWhereInput = {
+    ...(status?.length ? { status: { in: status } } : {}),
+    ...scope,
+  };
   return prisma.swapRequest.findMany({
-    where: status?.length ? { status: { in: status } } : undefined,
+    where,
     orderBy: { createdAt: "desc" },
     include: swapInclude,
   });
@@ -64,12 +76,15 @@ export async function getAssignmentsForEmployee(employeeId: string) {
   });
 }
 
-export async function countPendingSwapsForManager() {
+export async function countPendingSwapsForManager(
+  locationIds: string[] | null,
+) {
+  const scope = swapRequestTouchesLocationsWhere(locationIds);
   const pending = await prisma.swapRequest.count({
-    where: { status: "PENDING" },
+    where: { status: "PENDING", ...scope },
   });
   const awaitingManager = await prisma.swapRequest.count({
-    where: { status: "ACCEPTED_BY_TARGET" },
+    where: { status: "ACCEPTED_BY_TARGET", ...scope },
   });
   return { pending, awaitingManager };
 }

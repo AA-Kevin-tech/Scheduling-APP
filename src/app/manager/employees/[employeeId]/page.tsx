@@ -6,6 +6,7 @@ import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
 import { FieldRow } from "@/components/ui/field-row";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
@@ -15,17 +16,32 @@ export default async function ManagerEmployeeHourLimitsPage({
 }: {
   params: Promise<{ employeeId: string }>;
 }) {
-  await requireManager();
+  const session = await requireManager();
+  const scope = await getSchedulingLocationIdsForSession(session);
   const { employeeId } = await params;
 
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
     include: {
       user: { select: { name: true, email: true } },
+      locations: { select: { locationId: true } },
+      departments: {
+        select: { department: { select: { locationId: true } } },
+      },
     },
   });
 
   if (!employee) notFound();
+
+  if (scope !== null) {
+    if (scope.length === 0) notFound();
+    const empVenues = new Set([
+      ...employee.locations.map((l) => l.locationId),
+      ...employee.departments.map((d) => d.department.locationId),
+    ]);
+    const overlap = [...empVenues].some((id) => scope.includes(id));
+    if (!overlap) notFound();
+  }
 
   const [employeeRow, effective] = await Promise.all([
     prisma.hourLimit.findFirst({

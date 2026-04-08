@@ -32,16 +32,14 @@ import {
 } from "@/lib/schedule/tz";
 import { firstSearchParam } from "@/lib/search-params";
 
-export type EmployeeScheduleView = "me" | "location" | "department" | "venue";
+export type EmployeeScheduleView = "me" | "location" | "department" | "venues";
 
 function parseScheduleView(raw: string | undefined): EmployeeScheduleView {
-  if (
-    raw === "location" ||
-    raw === "department" ||
-    raw === "venue"
-  ) {
+  if (raw === "location" || raw === "department" || raw === "venues") {
     return raw;
   }
+  /** Legacy URL param — same as “my venues”. */
+  if (raw === "venue") return "venues";
   return "me";
 }
 
@@ -71,7 +69,12 @@ export default async function EmployeeSchedulePage({
     select: {
       timezone: true,
       locations: { select: { locationId: true } },
-      departments: { select: { departmentId: true } },
+      departments: {
+        select: {
+          departmentId: true,
+          department: { select: { locationId: true } },
+        },
+      },
     },
   });
   const scheduleTz = normalizeIanaTimezone(empRow?.timezone);
@@ -79,6 +82,12 @@ export default async function EmployeeSchedulePage({
   const myLocationIds = [...new Set(empRow?.locations.map((l) => l.locationId) ?? [])];
   const myDepartmentIds = [
     ...new Set(empRow?.departments.map((d) => d.departmentId) ?? []),
+  ];
+  const myVenueIds = [
+    ...new Set([
+      ...myLocationIds,
+      ...(empRow?.departments.map((d) => d.department.locationId) ?? []),
+    ]),
   ];
 
   const now = new Date();
@@ -193,7 +202,9 @@ export default async function EmployeeSchedulePage({
       departmentIds: myDepartmentIds,
     });
     const deptSet = new Set(myDepartmentIds);
-    const all = await getEmployeesWithDepartments();
+    const all = await getEmployeesWithDepartments({
+      onlyAtLocations: myVenueIds.length > 0 ? myVenueIds : undefined,
+    });
     teamEmployees = all.filter((e) =>
       e.departments.some((d) => deptSet.has(d.departmentId)),
     );
@@ -231,7 +242,9 @@ export default async function EmployeeSchedulePage({
     });
     const locSet = new Set(myLocationIds);
     const deptSet = new Set(myDepartmentIds);
-    const all = await getEmployeesWithDepartments();
+    const all = await getEmployeesWithDepartments({
+      onlyAtLocations: myVenueIds.length > 0 ? myVenueIds : undefined,
+    });
     teamEmployees = all.filter(
       (e) =>
         e.locations.some((l) => locSet.has(l.locationId)) ||
@@ -241,14 +254,40 @@ export default async function EmployeeSchedulePage({
     viewBlurb =
       "Shifts at your work locations (or unlocated shifts in your departments). Add locations on your profile if this looks empty.";
   } else {
+    if (myVenueIds.length === 0) {
+      return (
+        <SchedulePageShell
+          view={view}
+          mondayIso={mondayIso}
+          rangeLabel={rangeLabel}
+          prevMonday={prevMonday}
+          nextMonday={nextMonday}
+          thisWeekMonday={thisWeekMonday}
+          title="My venues"
+          blurb=""
+        >
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            Add at least one work location or department on your profile (ask a
+            manager) to see team schedules for your venues, or use{" "}
+            <strong>My schedule</strong>.
+          </p>
+        </SchedulePageShell>
+      );
+    }
     teamShifts = await getPublishedShiftsInRange({
       from: weekStart,
       to: weekEnd,
+      locationScope: {
+        locationIds: myVenueIds,
+        departmentIdsForUnlocated: myDepartmentIds,
+      },
     });
-    teamEmployees = await getEmployeesWithDepartments();
-    viewTitle = "Full venue schedule";
+    teamEmployees = await getEmployeesWithDepartments({
+      onlyAtLocations: myVenueIds,
+    });
+    viewTitle = "My venues";
     viewBlurb =
-      "All published shifts for the week. Use for big-picture coverage; only your own shifts are clickable.";
+      "Published shifts at your work locations this week. Only your own shifts are clickable.";
   }
 
   const rows = buildEmployeeTeamScheduleRows({
@@ -325,7 +364,7 @@ function SchedulePageShell({
     me: "My schedule",
     location: "My location(s)",
     department: "My departments",
-    venue: "Full venue",
+    venues: "My venues",
   };
 
   return (
@@ -351,7 +390,7 @@ function SchedulePageShell({
             ["me", viewLabel.me],
             ["location", viewLabel.location],
             ["department", viewLabel.department],
-            ["venue", viewLabel.venue],
+            ["venues", viewLabel.venues],
           ] as const
         ).map(([v, label]) => (
           <Link

@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+import { employeeTiedToLocationsWhere } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 
 export async function listTimeOffForEmployee(employeeId: string) {
@@ -7,9 +9,16 @@ export async function listTimeOffForEmployee(employeeId: string) {
   });
 }
 
-export async function listPendingTimeOffForManager() {
+export async function listPendingTimeOffForManager(
+  locationIds: string[] | null,
+) {
+  const empWhere = employeeTiedToLocationsWhere(locationIds);
+  const where: Prisma.TimeOffRequestWhereInput = {
+    status: "PENDING",
+    ...(Object.keys(empWhere).length > 0 ? { employee: empWhere } : {}),
+  };
   return prisma.timeOffRequest.findMany({
-    where: { status: "PENDING" },
+    where,
     orderBy: [{ createdAt: "asc" }],
     include: {
       employee: {
@@ -19,10 +28,13 @@ export async function listPendingTimeOffForManager() {
   });
 }
 
-export async function countPendingTimeOffRequests() {
-  return prisma.timeOffRequest.count({
-    where: { status: "PENDING" },
-  });
+export async function countPendingTimeOffRequests(locationIds: string[] | null) {
+  const empWhere = employeeTiedToLocationsWhere(locationIds);
+  const where: Prisma.TimeOffRequestWhereInput = {
+    status: "PENDING",
+    ...(Object.keys(empWhere).length > 0 ? { employee: empWhere } : {}),
+  };
+  return prisma.timeOffRequest.count({ where });
 }
 
 export async function countOverlappingAssignments(

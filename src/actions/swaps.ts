@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { sessionMayAccessSwapRequest } from "@/lib/auth/location-scope";
 import { requireEmployeeProfile, requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
@@ -229,6 +230,10 @@ export async function approveSwapAsManager(
     return { error: "Swap not found or not ready." };
   }
 
+  if (!(await sessionMayAccessSwapRequest(session, parsed.data.id))) {
+    return { error: "Swap not found." };
+  }
+
   if (!swap.targetEmployeeId) return { error: "Missing target." };
 
   const check = await validateCompleteSwapRequest({
@@ -299,6 +304,7 @@ export async function denySwapAsManager(formData: FormData): Promise<void> {
     },
   });
   if (!swap) return;
+  if (!(await sessionMayAccessSwapRequest(session, id))) return;
 
   await prisma.swapRequest.update({
     where: { id },

@@ -1,0 +1,3 @@
+-- AlterEnum
+ALTER TYPE "UserRole" ADD VALUE 'IT';
+ALTER TYPE "UserRole" ADD VALUE 'PAYROLL';

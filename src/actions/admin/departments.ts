@@ -18,6 +18,7 @@ const COLOR_TOKENS = [
 ] as const;
 
 const createSchema = z.object({
+  locationId: z.string().min(1),
   name: z.string().min(1),
   colorToken: z.enum(COLOR_TOKENS).optional().default("slate"),
   sortOrder: z.coerce.number().int().optional().default(0),
@@ -25,6 +26,7 @@ const createSchema = z.object({
 
 async function uniqueDepartmentSlug(
   base: string,
+  locationId: string,
   excludeDepartmentId?: string,
 ): Promise<string> {
   let slug = slugify(base);
@@ -32,6 +34,7 @@ async function uniqueDepartmentSlug(
   while (true) {
     const hit = await prisma.department.findFirst({
       where: {
+        locationId,
         slug,
         ...(excludeDepartmentId
           ? { NOT: { id: excludeDepartmentId } }
@@ -50,6 +53,7 @@ export async function createDepartment(
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireAdmin();
   const parsed = createSchema.safeParse({
+    locationId: formData.get("locationId"),
     name: formData.get("name"),
     colorToken: formData.get("colorToken") || "slate",
     sortOrder: formData.get("sortOrder"),
@@ -58,10 +62,20 @@ export async function createDepartment(
     return { error: parsed.error.flatten().formErrors.join(", ") };
   }
 
-  const slug = await uniqueDepartmentSlug(parsed.data.name);
+  const loc = await prisma.location.findUnique({
+    where: { id: parsed.data.locationId },
+    select: { id: true },
+  });
+  if (!loc) return { error: "Venue not found." };
+
+  const slug = await uniqueDepartmentSlug(
+    parsed.data.name,
+    parsed.data.locationId,
+  );
 
   const dept = await prisma.department.create({
     data: {
+      locationId: parsed.data.locationId,
       name: parsed.data.name.trim(),
       slug,
       colorToken: parsed.data.colorToken,
@@ -118,7 +132,11 @@ export async function updateDepartment(
 
   let slug = existing.slug;
   if (parsed.data.name.trim() !== existing.name) {
-    slug = await uniqueDepartmentSlug(parsed.data.name, parsed.data.id);
+    slug = await uniqueDepartmentSlug(
+      parsed.data.name,
+      existing.locationId,
+      parsed.data.id,
+    );
   }
 
   await prisma.department.update({

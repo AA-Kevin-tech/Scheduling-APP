@@ -1,3 +1,4 @@
+import { shiftsWhereForLocations } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 import { endOfDayUtc, intervalsOverlap, startOfDayUtc } from "@/lib/datetime";
 
@@ -21,14 +22,30 @@ export async function computeDepartmentCoverage(input: {
   rangeStart: Date;
   rangeEnd: Date;
   departmentId?: string;
+  /** When set, only departments at these venues (omit for org-wide). */
+  onlyAtLocations?: string[];
 }): Promise<DayCoverage[]> {
+  const locIds = input.onlyAtLocations;
+  const deptWhere = {
+    ...(input.departmentId ? { id: input.departmentId } : {}),
+    ...(locIds === undefined
+      ? {}
+      : locIds.length === 0
+        ? { id: { in: [] as string[] } }
+        : { locationId: { in: locIds } }),
+  };
+
   const depts = await prisma.department.findMany({
-    where: input.departmentId ? { id: input.departmentId } : undefined,
+    where: deptWhere,
     orderBy: { sortOrder: "asc" },
     include: {
       coverageRules: true,
     },
   });
+
+  const shiftLocWhere = shiftsWhereForLocations(
+    locIds === undefined ? null : locIds,
+  );
 
   const rulesByDept = new Map(
     depts.map((d) => [d.id, d.coverageRules] as const),
@@ -44,6 +61,7 @@ export async function computeDepartmentCoverage(input: {
           ...(input.departmentId
             ? [{ departmentId: input.departmentId } as const]
             : []),
+          shiftLocWhere,
         ],
       },
     },

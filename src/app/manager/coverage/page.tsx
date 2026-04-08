@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import {
   addWeeksUtc,
@@ -15,7 +16,8 @@ export default async function ManagerCoveragePage({
   searchParams: Promise<{ week?: string | string[] }>;
 }) {
   await connection();
-  await requireManager();
+  const session = await requireManager();
+  const locScope = await getSchedulingLocationIdsForSession(session);
   const params = await searchParams;
   const anchor = parseDateParam(params.week, new Date());
   const weekStart = startOfWeekMondayUtc(anchor);
@@ -24,6 +26,7 @@ export default async function ManagerCoveragePage({
   const rows = await computeDepartmentCoverage({
     rangeStart: weekStart,
     rangeEnd: weekEnd,
+    onlyAtLocations: locScope ?? undefined,
   });
   const summary = summarizeCoverage(rows);
 

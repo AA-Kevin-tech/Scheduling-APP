@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { addHours } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { NewShiftForm } from "@/components/manager/new-shift-form";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
@@ -21,8 +22,11 @@ export default async function NewShiftPage({
     roleId?: string | string[];
   }>;
 }) {
-  await requireManager();
-  const departments = await getDepartmentsWithRoles();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
+  const departments = await getDepartmentsWithRoles({
+    onlyAtLocations: locationIds ?? undefined,
+  });
   const raw = await searchParams;
   const day = firstSearchParam(raw.day);
   const initialDepartmentId = firstSearchParam(raw.departmentId);

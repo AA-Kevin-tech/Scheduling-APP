@@ -1,11 +1,15 @@
 import Link from "next/link";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
 
 export default async function ManagerDepartmentsPage() {
-  await requireManager();
-  const departments = await getDepartmentsWithRoles();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
+  const departments = await getDepartmentsWithRoles({
+    onlyAtLocations: locationIds ?? undefined,
+  });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -33,7 +37,9 @@ export default async function ManagerDepartmentsPage() {
                 >
                   {d.name}
                 </span>
-                <span className="text-xs text-slate-500">{d.slug}</span>
+                <span className="text-xs text-slate-500">
+                  {d.location.name} · {d.slug}
+                </span>
               </div>
               <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 <div>

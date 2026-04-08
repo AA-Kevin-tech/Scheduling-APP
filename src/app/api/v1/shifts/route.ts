@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { addWeeksUtc, parseDateParam, startOfWeekMondayUtc } from "@/lib/datetime";
 import { getShiftsForEmployee, getShiftsForRange } from "@/lib/queries/schedule";
 
@@ -80,11 +81,13 @@ export async function GET(req: Request) {
     });
   }
 
+  const locationIds = await getSchedulingLocationIdsForSession(session);
   const shifts = await getShiftsForRange({
     from,
     to,
     departmentId,
     roleId,
+    locationIds,
   });
 
   return NextResponse.json({

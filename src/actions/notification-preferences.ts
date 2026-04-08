@@ -1,8 +1,10 @@
 "use server";
 
+import type { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/guards";
+import { canAccessManagerRoutes } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import { parseToE164 } from "@/lib/phone-e164";
 
@@ -100,7 +102,7 @@ export async function updateManagerAccountPhone(
   if (session.user.employeeId) {
     return { error: "Use your employee profile phone for SMS." };
   }
-  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+  if (!canAccessManagerRoutes(session.user.role as UserRole)) {
     return { error: "Not allowed." };
   }
 

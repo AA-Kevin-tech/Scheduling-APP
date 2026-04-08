@@ -35,6 +35,7 @@ type Dept = Department & {
   roles: Role[];
   zones: DepartmentZone[];
   coverageRules: CoverageRule[];
+  location: { id: string; name: string; slug: string };
 };
 
 export function DepartmentEditForm({ d }: { d: Dept }) {
@@ -42,6 +43,10 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
 
   return (
     <li className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="mb-2 text-xs text-slate-500">
+        Venue:{" "}
+        <span className="font-medium text-slate-700">{d.location.name}</span>
+      </p>
       <form
         action={formAction}
         className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end"

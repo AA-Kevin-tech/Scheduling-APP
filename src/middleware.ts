@@ -1,6 +1,11 @@
+import type { UserRole } from "@prisma/client";
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import authConfig from "@/auth.config";
+import {
+  canAccessAdminRoutes,
+  canAccessManagerRoutes,
+} from "@/lib/auth/roles";
 
 export default NextAuth(authConfig).auth((req) => {
   const { pathname } = req.nextUrl;
@@ -19,13 +24,13 @@ export default NextAuth(authConfig).auth((req) => {
     return NextResponse.next();
   }
 
-  const role = session.user.role;
+  const role = session.user.role as UserRole;
 
-  if (isAdminRoute && role !== "ADMIN") {
+  if (isAdminRoute && !canAccessAdminRoutes(role)) {
     return NextResponse.redirect(new URL("/employee", req.url));
   }
 
-  if (isManagerRoute && role !== "MANAGER" && role !== "ADMIN") {
+  if (isManagerRoute && !canAccessManagerRoutes(role)) {
     return NextResponse.redirect(new URL("/employee", req.url));
   }
 

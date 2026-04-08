@@ -1,6 +1,8 @@
+import type { UserRole } from "@prisma/client";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { canAccessAdminRoutes } from "@/lib/auth/roles";
 import {
   DEFAULT_INTUIT_SCOPE,
   exchangeAuthorizationCode,
@@ -23,7 +25,7 @@ function integrationsUrl(path: string): URL {
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user || !canAccessAdminRoutes(session.user.role as UserRole)) {
     return NextResponse.redirect(
       integrationsUrl("/admin/integrations?qb_error=forbidden"),
     );

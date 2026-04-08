@@ -1,6 +1,8 @@
+import type { UserRole } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { canAccessManagerRoutes } from "@/lib/auth/roles";
 import {
   getRequestOrigin,
   isLoopbackOrigin,
@@ -15,7 +17,7 @@ export default async function TerminalSetupPage() {
   if (!session?.user) {
     redirect("/login?callbackUrl=/terminal/setup");
   }
-  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+  if (!canAccessManagerRoutes(session.user.role as UserRole)) {
     redirect("/employee");
   }
 

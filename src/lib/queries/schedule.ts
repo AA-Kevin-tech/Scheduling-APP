@@ -1,7 +1,14 @@
 import { prisma } from "@/lib/db";
+import { shiftsWhereForLocations } from "@/lib/auth/location-scope";
+
+const departmentWithLocation = {
+  include: {
+    location: { select: { id: true, name: true, slug: true } },
+  },
+} as const;
 
 const shiftTeamInclude = {
-  department: true,
+  department: departmentWithLocation,
   role: true,
   zone: true,
   location: true,
@@ -21,7 +28,15 @@ export async function getShiftsForRange(params: {
   to: Date;
   departmentId?: string;
   roleId?: string;
+  /**
+   * When omitted, no location filter (admin / internal).
+   * Empty array = no shifts. Non-empty = those venues only.
+   */
+  locationIds?: string[] | null;
 }) {
+  const locWhere = shiftsWhereForLocations(
+    params.locationIds === undefined ? null : params.locationIds,
+  );
   return prisma.shift.findMany({
     where: {
       AND: [
@@ -31,10 +46,11 @@ export async function getShiftsForRange(params: {
           ? [{ departmentId: params.departmentId } as const]
           : []),
         ...(params.roleId ? [{ roleId: params.roleId } as const] : []),
+        locWhere,
       ],
     },
     include: {
-      department: true,
+      department: departmentWithLocation,
       role: true,
       zone: true,
       assignments: {
@@ -59,7 +75,7 @@ export async function getPublishedShiftsInRange(params: {
   departmentIds?: string[];
   /**
    * Shifts at one of these locations, OR unlocated shifts in these departments.
-   * Omit both departmentIds and locationScope for org-wide.
+   * Omit both departmentIds and locationScope for org-wide (avoid for employee views).
    */
   locationScope?: {
     locationIds: string[];
@@ -119,7 +135,7 @@ export async function getShiftsForEmployee(params: {
       ],
     },
     include: {
-      department: true,
+      department: departmentWithLocation,
       role: true,
       zone: true,
       assignments: {
@@ -141,7 +157,7 @@ export async function getShiftById(id: string) {
   return prisma.shift.findUnique({
     where: { id },
     include: {
-      department: true,
+      department: departmentWithLocation,
       role: true,
       zone: true,
       location: true,
@@ -170,7 +186,7 @@ export async function getShiftForEmployee(params: {
       assignments: { some: { employeeId: params.employeeId } },
     },
     include: {
-      department: true,
+      department: departmentWithLocation,
       role: true,
       zone: true,
       location: true,
@@ -190,25 +206,67 @@ export async function getShiftForEmployee(params: {
 
 export async function getEmployeesWithDepartments(options?: {
   includeArchived?: boolean;
+  /** If set, only staff tied to these venues (via work locations or department venue). */
+  onlyAtLocations?: string[];
 }) {
   const includeArchived = options?.includeArchived === true;
+  const only = options?.onlyAtLocations;
+
+  const locationWhere =
+    only === undefined
+      ? {}
+      : only.length === 0
+        ? { id: { in: [] as string[] } }
+        : {
+            OR: [
+              { locations: { some: { locationId: { in: only } } } },
+              {
+                departments: {
+                  some: {
+                    department: { locationId: { in: only } },
+                  },
+                },
+              },
+            ],
+          };
+
   return prisma.employee.findMany({
-    where: includeArchived ? undefined : { archivedAt: null },
+    where: {
+      AND: [
+        includeArchived ? {} : { archivedAt: null },
+        locationWhere,
+      ],
+    },
     orderBy: { user: { email: "asc" } },
     include: {
       user: { select: { name: true, email: true } },
       locations: { include: { location: true } },
       departments: {
-        include: { department: true, role: true },
+        include: {
+          department: { include: { location: true } },
+          role: true,
+        },
       },
     },
   });
 }
 
-export async function getDepartmentsWithRoles() {
+export async function getDepartmentsWithRoles(options?: {
+  onlyAtLocations?: string[];
+}) {
+  const only = options?.onlyAtLocations;
+  const locationFilter =
+    only === undefined
+      ? undefined
+      : only.length === 0
+        ? { id: { in: [] as string[] } }
+        : { locationId: { in: only } };
+
   return prisma.department.findMany({
-    orderBy: { sortOrder: "asc" },
+    where: locationFilter,
+    orderBy: [{ location: { sortOrder: "asc" } }, { sortOrder: "asc" }],
     include: {
+      location: { select: { id: true, name: true, slug: true } },
       roles: { orderBy: { name: "asc" } },
       zones: { orderBy: { name: "asc" } },
       coverageRules: { orderBy: [{ minStaffCount: "desc" }, { id: "asc" }] },

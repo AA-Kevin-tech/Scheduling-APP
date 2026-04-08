@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { auth } from "@/auth";
+import { getVenueSwitcherPayload } from "@/lib/auth/location-scope";
+import { VenueScopeSwitcher } from "@/components/venue-scope-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
 
@@ -15,11 +18,15 @@ const links = [
   { href: "/manager/time-clock", label: "Time clock issues" },
 ];
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  const venuePayload =
+    session != null ? await getVenueSwitcherPayload(session) : null;
+
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
       <aside className="border-b border-slate-200 bg-white lg:w-56 lg:border-b-0 lg:border-r">
@@ -65,6 +72,11 @@ export default function AdminLayout({
         </nav>
       </aside>
       <div className="flex-1 p-6">
+        {venuePayload ? (
+          <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
+            <VenueScopeSwitcher payload={venuePayload} />
+          </div>
+        ) : null}
         <RefreshBridge />
         {children}
       </div>

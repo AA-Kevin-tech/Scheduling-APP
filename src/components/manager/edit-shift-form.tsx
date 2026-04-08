@@ -12,6 +12,7 @@ type ShiftFields = Pick<
 type Dept = Department & {
   roles: Role[];
   zones: DepartmentZone[];
+  location?: { id: string; name: string; slug: string };
 };
 
 export function EditShiftForm({
@@ -58,7 +59,7 @@ export function EditShiftForm({
           >
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {d.location ? `${d.name} (${d.location.name})` : d.name}
               </option>
             ))}
           </select>

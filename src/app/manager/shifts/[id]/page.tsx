@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  getSchedulingLocationIdsForSession,
+  sessionMayAccessVenue,
+  shiftVenueId,
+} from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import {
@@ -22,16 +27,24 @@ export default async function ShiftDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireManager();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
   const { id } = await params;
   const [shift, departments, employees, eligible] = await Promise.all([
     getShiftById(id),
-    getDepartmentsWithRoles(),
-    getEmployeesWithDepartments(),
+    getDepartmentsWithRoles({
+      onlyAtLocations: locationIds ?? undefined,
+    }),
+    getEmployeesWithDepartments({
+      onlyAtLocations: locationIds ?? undefined,
+    }),
     listEligibilityForShift(id),
   ]);
 
   if (!shift) notFound();
+  if (!(await sessionMayAccessVenue(session, shiftVenueId(shift)))) {
+    notFound();
+  }
 
   const scheduleTz = getDefaultScheduleTimezone();
   const defaultStartsAtLocal = formatDatetimeLocalInTimezone(

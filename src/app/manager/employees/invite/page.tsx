@@ -1,19 +1,25 @@
 import Link from "next/link";
+import {
+  getSchedulingLocationIdsForSession,
+  locationsVisibleToSession,
+} from "@/lib/auth/location-scope";
 import { requireAdminOrManager } from "@/lib/auth/guards";
 import { EmployeeInviteForm } from "@/components/admin/employee-invite-form";
-import { getLocations } from "@/lib/queries/admin";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
 
 export default async function ManagerInviteEmployeePage() {
-  await requireAdminOrManager();
+  const session = await requireAdminOrManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
   const [locations, departments] = await Promise.all([
-    getLocations(),
-    getDepartmentsWithRoles(),
+    locationsVisibleToSession(session),
+    getDepartmentsWithRoles({
+      onlyAtLocations: locationIds ?? undefined,
+    }),
   ]);
 
   const deptOptions = departments.map((d) => ({
     id: d.id,
-    name: d.name,
+    name: d.location ? `${d.name} (${d.location.name})` : d.name,
     roles: d.roles.map((r) => ({ id: r.id, name: r.name })),
   }));
 

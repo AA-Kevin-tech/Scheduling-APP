@@ -48,7 +48,7 @@ export default async function AdminEditUserPage({
 
   const deptOptions = departments.map((d) => ({
     id: d.id,
-    name: d.name,
+    name: d.location ? `${d.name} (${d.location.name})` : d.name,
     roles: d.roles.map((r) => ({ id: r.id, name: r.name })),
   }));
 

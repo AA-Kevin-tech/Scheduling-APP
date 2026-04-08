@@ -131,14 +131,15 @@ export async function deleteLocation(
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return { error: "Missing id." };
 
-  const [shifts, links] = await Promise.all([
+  const [shifts, links, departments] = await Promise.all([
     prisma.shift.count({ where: { locationId: id } }),
     prisma.employeeLocation.count({ where: { locationId: id } }),
+    prisma.department.count({ where: { locationId: id } }),
   ]);
-  if (shifts > 0 || links > 0) {
+  if (shifts > 0 || links > 0 || departments > 0) {
     return {
       error:
-        "Remove employees and shifts from this location before deleting.",
+        "Remove departments, employees, and shifts from this venue before deleting.",
     };
   }
 

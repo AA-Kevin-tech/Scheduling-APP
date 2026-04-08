@@ -1,4 +1,10 @@
+import type { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
+import {
+  canAccessAdminRoutes,
+  canAccessManagerRoutes,
+  loginHomePath,
+} from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 
@@ -10,7 +16,7 @@ export async function requireSession() {
 
 export async function requireManager() {
   const session = await requireSession();
-  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+  if (!canAccessManagerRoutes(session.user.role as UserRole)) {
     redirect("/employee");
   }
   return session;
@@ -18,7 +24,7 @@ export async function requireManager() {
 
 export async function requireAdmin() {
   const session = await requireSession();
-  if (session.user.role !== "ADMIN") {
+  if (!canAccessAdminRoutes(session.user.role as UserRole)) {
     redirect("/manager");
   }
   return session;
@@ -27,7 +33,7 @@ export async function requireAdmin() {
 /** Admin or manager (for user provisioning, etc.). */
 export async function requireAdminOrManager() {
   const session = await requireSession();
-  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+  if (!canAccessManagerRoutes(session.user.role as UserRole)) {
     redirect("/employee");
   }
   return session;
@@ -37,8 +43,8 @@ export async function requireEmployeeProfile() {
   const session = await requireSession();
   const employeeId = session.user.employeeId;
   if (!employeeId) {
-    if (session.user.role === "MANAGER" || session.user.role === "ADMIN") {
-      redirect("/manager");
+    if (canAccessManagerRoutes(session.user.role as UserRole)) {
+      redirect(loginHomePath(session.user.role as UserRole));
     }
     redirect("/login");
   }

@@ -1,3 +1,4 @@
+import { shiftVenueId } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 import { validateEmployeeTakingShift } from "@/lib/services/swap-context";
 
@@ -13,12 +14,23 @@ export type EligibleRow = {
 export async function listEligibilityForShift(shiftId: string): Promise<EligibleRow[]> {
   const shift = await prisma.shift.findUnique({
     where: { id: shiftId },
-    include: { department: true, role: true },
+    include: {
+      department: true,
+      role: true,
+    },
   });
   if (!shift) return [];
 
+  const venueId = shiftVenueId(shift);
+
   const employees = await prisma.employee.findMany({
-    where: { archivedAt: null },
+    where: {
+      archivedAt: null,
+      OR: [
+        { locations: { some: { locationId: venueId } } },
+        { departments: { some: { department: { locationId: venueId } } } },
+      ],
+    },
     include: {
       user: { select: { name: true, email: true } },
     },

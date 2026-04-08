@@ -9,7 +9,10 @@ import {
 } from "@/lib/queries/time-clock-issues";
 import { getDefaultScheduleTimezone } from "@/lib/schedule/tz";
 import { weeklyHourCapWarnPercent } from "@/lib/time-clock/constants";
-import { notifyManagersExcept } from "@/lib/services/notifications";
+import {
+  notifyManagersAtLocationsExcept,
+  notifyManagersExcept,
+} from "@/lib/services/notifications";
 
 async function alreadyNotified(type: string, dedupeFragment: string) {
   const row = await prisma.notification.findFirst({
@@ -34,7 +37,8 @@ export async function ensureTimeClockIssueNotifications(now = new Date()) {
   for (const row of openPast) {
     const dedupe = `punch:${row.punchId}`;
     if (await alreadyNotified("TIME_CLOCK_OPEN_PAST_END", dedupe)) continue;
-    await notifyManagersExcept(
+    await notifyManagersAtLocationsExcept(
+      [row.venueId],
       null,
       "Time clock: open punch after shift ended",
       `${row.employeeLabel} (${row.departmentName}) is still clocked in after the scheduled end (${formatShiftRange(row.shiftStartsAt, row.shiftEndsAt, tz)}). [${dedupe}]`,
@@ -45,7 +49,8 @@ export async function ensureTimeClockIssueNotifications(now = new Date()) {
   for (const row of missing) {
     const dedupe = `assignment:${row.assignmentId}`;
     if (await alreadyNotified("TIME_CLOCK_MISSING_CLOCK_IN", dedupe)) continue;
-    await notifyManagersExcept(
+    await notifyManagersAtLocationsExcept(
+      [row.venueId],
       null,
       "Time clock: no clock-in yet",
       `${row.employeeLabel} (${row.departmentName}) has not clocked in for a shift that started ${row.minutesSinceStart} min ago (${formatShiftRange(row.shiftStartsAt, row.shiftEndsAt, tz)}). [${dedupe}]`,
@@ -56,7 +61,8 @@ export async function ensureTimeClockIssueNotifications(now = new Date()) {
   for (const row of missed) {
     const dedupe = `assignment:${row.assignmentId}`;
     if (await alreadyNotified("TIME_CLOCK_MISSED_NO_PUNCH", dedupe)) continue;
-    await notifyManagersExcept(
+    await notifyManagersAtLocationsExcept(
+      [row.venueId],
       null,
       "Time clock: ended shift with no punch",
       `${row.employeeLabel} (${row.departmentName}) has no clock-in/out for a shift that already ended (${formatShiftRange(row.shiftStartsAt, row.shiftEndsAt, tz)}). [${dedupe}]`,
@@ -68,12 +74,14 @@ export async function ensureTimeClockIssueNotifications(now = new Date()) {
 export async function notifyLateClockIn(opts: {
   employeeLabel: string;
   departmentName: string;
+  venueId: string;
   scheduledStart: Date;
   minutesAfterStart: number;
 }) {
   const tz = getDefaultScheduleTimezone();
   const startLabel = formatInTimeZone(opts.scheduledStart, tz, "MMM d, h:mm a");
-  await notifyManagersExcept(
+  await notifyManagersAtLocationsExcept(
+    [opts.venueId],
     null,
     "Time clock: late clock-in",
     `${opts.employeeLabel} (${opts.departmentName}) clocked in ${opts.minutesAfterStart} min after the scheduled start (${startLabel}).`,

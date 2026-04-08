@@ -1,4 +1,5 @@
 import type { UserRole } from "@prisma/client";
+import { canAccessManagerRoutes } from "@/lib/auth/roles";
 import { sendNotificationEmail } from "@/lib/email";
 import { parseToE164 } from "@/lib/phone-e164";
 import { prisma } from "@/lib/db";
@@ -6,7 +7,7 @@ import { isTwilioSmsConfigured, sendSms } from "@/lib/sms";
 
 /** In-app relative path for deep-linking by notification type and recipient role. */
 export function notificationAppPath(type: string, role: UserRole): string {
-  const isMgr = role === "MANAGER" || role === "ADMIN";
+  const isMgr = canAccessManagerRoutes(role);
   if (type === "SCHEDULE_PUBLISHED") {
     return isMgr ? "/manager/schedule" : "/employee/schedule";
   }

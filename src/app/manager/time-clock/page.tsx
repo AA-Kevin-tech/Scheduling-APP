@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
+import { requireManager } from "@/lib/auth/guards";
 import { TimeClockIssuesPanel } from "@/components/manager/time-clock-issues";
 import {
   getMissingClockInsDuringShift,
@@ -10,13 +12,15 @@ import { ensureTimeClockIssueNotifications } from "@/lib/services/time-clock-not
 
 export default async function ManagerTimeClockPage() {
   await connection();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
   const now = new Date();
   await ensureTimeClockIssueNotifications(now);
 
   const [openPastEnd, missingClockIn, missedNoPunch] = await Promise.all([
-    getOpenPunchesPastShiftEnd(now),
-    getMissingClockInsDuringShift(now),
-    getMissedShiftsWithoutPunch(now),
+    getOpenPunchesPastShiftEnd(now, locationIds),
+    getMissingClockInsDuringShift(now, locationIds),
+    getMissedShiftsWithoutPunch(now, locationIds),
   ]);
 
   const total = openPastEnd.length + missingClockIn.length + missedNoPunch.length;

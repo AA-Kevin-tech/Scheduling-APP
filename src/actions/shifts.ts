@@ -2,7 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { Session } from "next-auth";
 import { z } from "zod";
+import {
+  getSchedulingLocationIdsForSession,
+  sessionMayAccessVenue,
+  shiftVenueId,
+  shiftsWhereForLocations,
+} from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { addWeeksUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
@@ -13,6 +20,28 @@ import {
   normalizeIanaTimezone,
   parseDatetimeLocalInTimezone,
 } from "@/lib/schedule/tz";
+
+async function employeeTiedToVenue(
+  employeeId: string,
+  venueId: string,
+): Promise<boolean> {
+  const [atLoc, inDept] = await Promise.all([
+    prisma.employeeLocation.findFirst({
+      where: { employeeId, locationId: venueId },
+    }),
+    prisma.employeeDepartment.findFirst({
+      where: { employeeId, department: { locationId: venueId } },
+    }),
+  ]);
+  return !!(atLoc || inDept);
+}
+
+async function assertManagerVenue(session: Session, venueId: string) {
+  if (!(await sessionMayAccessVenue(session, venueId))) {
+    return { error: "You do not manage this venue." } as const;
+  }
+  return null;
+}
 
 const createShiftSchema = z.object({
   departmentId: z.string().min(1),
@@ -66,9 +95,20 @@ export async function createShift(
       ? JSON.stringify({ repeatWeeks, anchorStartsAt: startsAt.toISOString() })
       : null;
 
+  const dept = await prisma.department.findUnique({
+    where: { id: departmentId },
+    select: { id: true, locationId: true },
+  });
+  if (!dept) {
+    return { error: "Department not found." };
+  }
+  const venueErr = await assertManagerVenue(session, dept.locationId);
+  if (venueErr) return venueErr;
+
   const root = await prisma.shift.create({
     data: {
       departmentId,
+      locationId: dept.locationId,
       roleId: roleId ?? null,
       zoneId: zoneId ?? null,
       title: title ?? null,
@@ -92,6 +132,7 @@ export async function createShift(
     const child = await prisma.shift.create({
       data: {
         departmentId,
+        locationId: dept.locationId,
         roleId: roleId ?? null,
         zoneId: zoneId ?? null,
         title: title ?? null,
@@ -161,10 +202,32 @@ export async function updateShift(
     return { error: "End time must be after start time." };
   }
 
+  const existing = await prisma.shift.findUnique({
+    where: { id: parsed.data.id },
+    include: { department: { select: { locationId: true } } },
+  });
+  if (!existing) {
+    return { error: "Shift not found." };
+  }
+  const oldVenue = shiftVenueId(existing);
+  const oldVenueErr = await assertManagerVenue(session, oldVenue);
+  if (oldVenueErr) return oldVenueErr;
+
+  const newDept = await prisma.department.findUnique({
+    where: { id: parsed.data.departmentId },
+    select: { locationId: true },
+  });
+  if (!newDept) {
+    return { error: "Department not found." };
+  }
+  const newVenueErr = await assertManagerVenue(session, newDept.locationId);
+  if (newVenueErr) return newVenueErr;
+
   await prisma.shift.update({
     where: { id: parsed.data.id },
     data: {
       departmentId: parsed.data.departmentId,
+      locationId: newDept.locationId,
       roleId: parsed.data.roleId ?? null,
       zoneId: parsed.data.zoneId ?? null,
       title: parsed.data.title ?? null,
@@ -193,6 +256,13 @@ export async function deleteShift(formData: FormData): Promise<void> {
   const session = await requireManager();
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
+
+  const row = await prisma.shift.findUnique({
+    where: { id },
+    include: { department: { select: { locationId: true } } },
+  });
+  if (!row) return;
+  if (!(await sessionMayAccessVenue(session, shiftVenueId(row)))) return;
 
   await prisma.shift.delete({ where: { id } });
 
@@ -232,11 +302,30 @@ export async function assignEmployeeToShift(
 
   const { shiftId, employeeId, managerOverrideReason } = parsed.data;
 
+  const shift = await prisma.shift.findUnique({
+    where: { id: shiftId },
+    include: { department: { select: { locationId: true } } },
+  });
+  if (!shift) {
+    return { error: "Shift not found." };
+  }
+  const venueId = shiftVenueId(shift);
+  const venueErr = await assertManagerVenue(session, venueId);
+  if (venueErr) return venueErr;
+
   const dup = await prisma.shiftAssignment.findFirst({
     where: { shiftId, employeeId },
   });
   if (dup) {
     return { error: "Employee is already assigned to this shift." };
+  }
+
+  const atVenue = await employeeTiedToVenue(employeeId, venueId);
+  if (!atVenue && !managerOverrideReason?.trim()) {
+    return {
+      error:
+        "This employee is not assigned to this venue. Add a matching work location or department, or enter an override reason.",
+    };
   }
 
   const check = await validateShiftAssignment({ employeeId, shiftId });
@@ -278,9 +367,22 @@ export async function removeShiftAssignment(formData: FormData): Promise<void> {
 
   const row = await prisma.shiftAssignment.findUnique({
     where: { id: assignmentId },
-    select: { shiftId: true },
+    select: {
+      shiftId: true,
+      shift: {
+        select: {
+          locationId: true,
+          department: { select: { locationId: true } },
+        },
+      },
+    },
   });
   if (!row) return;
+  if (
+    !(await sessionMayAccessVenue(session, shiftVenueId(row.shift)))
+  ) {
+    return;
+  }
 
   await prisma.shiftAssignment.delete({ where: { id: assignmentId } });
 
@@ -330,13 +432,17 @@ export async function publishDraftShiftsForRange(
   }
 
   const { departmentId, roleId } = parsed.data;
+  const scope = await getSchedulingLocationIdsForSession(session);
+  const locWhere = shiftsWhereForLocations(scope);
+
   const draftWhere = {
-    publishedAt: null,
     AND: [
+      { publishedAt: null },
       { startsAt: { lt: rangeEnd } },
       { endsAt: { gt: rangeStart } },
       ...(departmentId ? [{ departmentId } as const] : []),
       ...(roleId ? [{ roleId } as const] : []),
+      locWhere,
     ],
   };
 
@@ -399,6 +505,7 @@ export async function publishShift(
   const shift = await prisma.shift.findUnique({
     where: { id },
     include: {
+      department: { select: { locationId: true } },
       assignments: {
         include: { employee: { select: { userId: true } } },
       },
@@ -406,6 +513,11 @@ export async function publishShift(
   });
   if (!shift) return { error: "Shift not found." };
   if (shift.publishedAt) return { error: "Shift is already published." };
+  const pubVenueErr = await assertManagerVenue(
+    session,
+    shiftVenueId(shift),
+  );
+  if (pubVenueErr) return pubVenueErr;
 
   await prisma.shift.update({
     where: { id },

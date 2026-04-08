@@ -5,6 +5,15 @@ import { redirect } from "next/navigation";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import type { UserRole } from "@prisma/client";
+import {
+  assertDepartmentsBelongToLocations,
+  getBaseSchedulingLocationIdsForSession,
+  syncManagerLocationsForUser,
+} from "@/lib/auth/location-scope";
+import {
+  isOrgWideSchedulingRole,
+  ORG_WIDE_USER_ROLES,
+} from "@/lib/auth/roles";
 import { requireAdmin, requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
@@ -24,7 +33,7 @@ const createUserSchema = z.object({
   firstName: z.string().trim().min(1),
   lastName: z.string().trim(),
   password: z.string().min(8),
-  role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
+  role: z.enum(["ADMIN", "IT", "PAYROLL", "MANAGER", "EMPLOYEE"]),
   employeeNumber: z.string().nullable().optional(),
   timezone: z.string().optional(),
   locationIds: z.array(z.string()).min(1),
@@ -97,6 +106,29 @@ export async function createEmployeeUser(
     return { error: "Invalid location selection." };
   }
 
+  if (session.user.role === "MANAGER") {
+    const allowed = await getBaseSchedulingLocationIdsForSession(session);
+    if (!allowed?.length) {
+      return { error: "Your account is not assigned to any venue." };
+    }
+    for (const id of parsed.data.locationIds) {
+      if (!allowed.includes(id)) {
+        return { error: "You can only assign locations you manage." };
+      }
+    }
+  }
+
+  const deptOkCreate = await assertDepartmentsBelongToLocations(
+    parsed.data.assignments.map((a) => a.departmentId),
+    parsed.data.locationIds,
+  );
+  if (!deptOkCreate) {
+    return {
+      error:
+        "Each department must belong to one of the work locations you selected.",
+    };
+  }
+
   for (const a of parsed.data.assignments) {
     if (a.roleId) {
       const ok = await prisma.role.findFirst({
@@ -136,6 +168,10 @@ export async function createEmployeeUser(
         role: parsed.data.role,
       },
     });
+
+    if (parsed.data.role === "MANAGER") {
+      await syncManagerLocationsForUser(tx, u.id, parsed.data.locationIds);
+    }
 
     const emp = await tx.employee.create({
       data: {
@@ -183,7 +219,7 @@ const updateUserSchema = z.object({
   userId: z.string().min(1),
   firstName: z.string().trim().min(1),
   lastName: z.string().trim(),
-  role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
+  role: z.enum(["ADMIN", "IT", "PAYROLL", "MANAGER", "EMPLOYEE"]),
   employeeNumber: z.string().nullable().optional(),
   timezone: z.string().optional(),
   locationIds: z.array(z.string()).min(1),
@@ -239,6 +275,17 @@ export async function updateEmployeeUser(
   });
   if (locCount !== parsed.data.locationIds.length) {
     return { error: "Invalid location selection." };
+  }
+
+  const deptOk = await assertDepartmentsBelongToLocations(
+    parsed.data.assignments.map((a) => a.departmentId),
+    parsed.data.locationIds,
+  );
+  if (!deptOk) {
+    return {
+      error:
+        "Each department must belong to one of the work locations you selected.",
+    };
   }
 
   for (const a of parsed.data.assignments) {
@@ -307,6 +354,14 @@ export async function updateEmployeeUser(
         isPrimary: d.isPrimary,
       })),
     });
+
+    if (parsed.data.role === "MANAGER") {
+      await syncManagerLocationsForUser(tx, parsed.data.userId, parsed.data.locationIds);
+    } else {
+      await tx.managerLocation.deleteMany({
+        where: { userId: parsed.data.userId },
+      });
+    }
   });
 
   await writeAuditLog({
@@ -367,10 +422,15 @@ export async function deleteUserFromAdmin(
     return { error: "Email does not match this account." };
   }
 
-  if (user.role === "ADMIN") {
-    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
-    if (adminCount <= 1) {
-      return { error: "Cannot delete the only admin account." };
+  if (isOrgWideSchedulingRole(user.role)) {
+    const elevatedCount = await prisma.user.count({
+      where: { role: { in: [...ORG_WIDE_USER_ROLES] } },
+    });
+    if (elevatedCount <= 1) {
+      return {
+        error:
+          "Cannot delete the only organization admin (admin, IT, or payroll) account.",
+      };
     }
   }
 

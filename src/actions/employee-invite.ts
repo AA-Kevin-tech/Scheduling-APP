@@ -8,6 +8,7 @@ import {
   type EmploymentType,
   Prisma,
 } from "@prisma/client";
+import { getBaseSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireAdminOrManager } from "@/lib/auth/guards";
 import {
   encryptPayrollVaultPayload,
@@ -81,6 +82,21 @@ async function validateAssignments(
     return "Invalid location selection.";
   }
 
+  const uniqueDeptIds = [...new Set(deptIds)];
+  const depts = await prisma.department.findMany({
+    where: { id: { in: uniqueDeptIds } },
+    select: { id: true, locationId: true },
+  });
+  if (depts.length !== uniqueDeptIds.length) {
+    return "Invalid department.";
+  }
+  const locSet = new Set(locationIds);
+  for (const d of depts) {
+    if (!locSet.has(d.locationId)) {
+      return "Each department must belong to a selected work location.";
+    }
+  }
+
   for (const a of assignments) {
     if (a.roleId) {
       const ok = await prisma.role.findFirst({
@@ -134,6 +150,18 @@ export async function createEmployeeInvite(
 
   const assignErr = await validateAssignments(parsed.data.assignments, locationIds);
   if (assignErr) return { error: assignErr };
+
+  if (session.user.role === "MANAGER") {
+    const allowed = await getBaseSchedulingLocationIdsForSession(session);
+    if (!allowed?.length) {
+      return { error: "Your account is not assigned to any venue." };
+    }
+    for (const id of parsed.data.locationIds) {
+      if (!allowed.includes(id)) {
+        return { error: "You can only invite people to venues you manage." };
+      }
+    }
+  }
 
   if (parsed.data.employeeNumber?.trim()) {
     const num = parsed.data.employeeNumber.trim();

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { auth } from "@/auth";
+import { getVenueSwitcherPayload } from "@/lib/auth/location-scope";
+import { getVenueLabelForEmployee } from "@/lib/queries/location-display";
+import { VenueScopeSwitcher } from "@/components/venue-scope-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
-import { getVenueLabelForEmployee } from "@/lib/queries/location-display";
 
 const nav = [
   { href: "/employee", label: "Home" },
@@ -21,6 +23,8 @@ export default async function EmployeeLayout({
 }) {
   const session = await auth();
   const employeeId = session?.user?.employeeId;
+  const venuePayload =
+    session != null ? await getVenueSwitcherPayload(session) : null;
   const venueLabel =
     employeeId != null
       ? await getVenueLabelForEmployee(employeeId)
@@ -30,11 +34,22 @@ export default async function EmployeeLayout({
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-lg items-center justify-between">
-          <span className="text-sm font-semibold text-slate-900">
+        <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <span className="shrink-0 text-sm font-semibold text-slate-900">
             {headerTitle}
           </span>
-          <SignOutButton />
+          <div className="flex min-w-0 flex-1 flex-col items-stretch gap-2 sm:max-w-xs sm:items-end">
+            {venuePayload ? (
+              <VenueScopeSwitcher
+                payload={venuePayload}
+                label="Location"
+                compact
+              />
+            ) : null}
+            <div className="flex justify-end">
+              <SignOutButton />
+            </div>
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6 pb-24">

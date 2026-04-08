@@ -7,6 +7,7 @@ import type { Department, DepartmentZone, Role } from "@prisma/client";
 type Dept = Department & {
   roles: Role[];
   zones: DepartmentZone[];
+  location?: { id: string; name: string; slug: string };
 };
 
 type Props = {
@@ -45,7 +46,8 @@ export function NewShiftForm({
   if (departments.length === 0) {
     return (
       <p className="text-sm text-slate-600">
-        No departments in the database. Run the seed script.
+        No departments for your venues. Ask an admin to add departments or assign
+        you to a location.
       </p>
     );
   }
@@ -72,7 +74,7 @@ export function NewShiftForm({
           >
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {d.location ? `${d.name} (${d.location.name})` : d.name}
               </option>
             ))}
           </select>

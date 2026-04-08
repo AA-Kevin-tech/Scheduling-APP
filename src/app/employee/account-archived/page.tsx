@@ -1,6 +1,11 @@
+import type { UserRole } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth/guards";
+import {
+  canAccessAdminRoutes,
+  canAccessManagerRoutes,
+} from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 
 export default async function EmployeeAccountArchivedPage() {
@@ -30,14 +35,22 @@ export default async function EmployeeAccountArchivedPage() {
         Signed in as {session.user.email}
       </p>
       <div className="flex flex-wrap gap-3 pt-2">
-        {(session.user.role === "MANAGER" || session.user.role === "ADMIN") && (
+        {canAccessManagerRoutes(session.user.role as UserRole) ? (
           <Link
             href="/manager"
             className="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
           >
             Open manager
           </Link>
-        )}
+        ) : null}
+        {canAccessAdminRoutes(session.user.role as UserRole) ? (
+          <Link
+            href="/admin"
+            className="inline-flex items-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+          >
+            Open admin
+          </Link>
+        ) : null}
       </div>
     </div>
   );

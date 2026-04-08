@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { getEmployeesWithDepartments } from "@/lib/queries/schedule";
@@ -9,11 +10,13 @@ export default async function ManagerEmployeesPage({
 }: {
   searchParams: Promise<{ staff?: string | string[] }>;
 }) {
-  await requireManager();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
   const raw = await searchParams;
   const showAllStaff = firstSearchParam(raw.staff) === "all";
   const employees = await getEmployeesWithDepartments({
     includeArchived: showAllStaff,
+    onlyAtLocations: locationIds ?? undefined,
   });
 
   return (

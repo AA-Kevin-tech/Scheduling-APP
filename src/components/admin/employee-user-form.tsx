@@ -251,6 +251,8 @@ export function EmployeeUserForm(props: Props) {
               <option value="EMPLOYEE">Employee</option>
               <option value="MANAGER">Manager</option>
               <option value="ADMIN">Admin</option>
+              <option value="IT">IT (all sites)</option>
+              <option value="PAYROLL">Payroll (all sites)</option>
             </select>
           </div>
         ) : (

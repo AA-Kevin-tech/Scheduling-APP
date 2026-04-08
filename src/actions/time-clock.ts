@@ -1,9 +1,11 @@
 "use server";
 
+import type { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { canAccessManagerRoutes } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 import {
   findEmployeeByTimeClockPin,
@@ -67,7 +69,7 @@ async function requireWorker(): Promise<WorkerPayload> {
 async function requireManagerForAction(): Promise<{ ok: true } | { error: string }> {
   const session = await auth();
   if (!session?.user) return { error: "Not signed in." };
-  if (session.user.role !== "MANAGER" && session.user.role !== "ADMIN") {
+  if (!canAccessManagerRoutes(session.user.role as UserRole)) {
     return { error: "Manager access required." };
   }
   return { ok: true };
@@ -234,12 +236,15 @@ export async function terminalClockIn(
   if (now.getTime() > assignment.shift.startsAt.getTime() + lateMs) {
     const u = assignment.employee.user;
     const employeeLabel = u.name?.trim() || u.email;
+    const sh = assignment.shift;
+    const venueId = sh.locationId ?? sh.department.locationId;
     await notifyLateClockIn({
       employeeLabel,
-      departmentName: assignment.shift.department.name,
-      scheduledStart: assignment.shift.startsAt,
+      departmentName: sh.department.name,
+      venueId,
+      scheduledStart: sh.startsAt,
       minutesAfterStart: Math.round(
-        (now.getTime() - assignment.shift.startsAt.getTime()) / 60000,
+        (now.getTime() - sh.startsAt.getTime()) / 60000,
       ),
     });
   }

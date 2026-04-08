@@ -1,7 +1,9 @@
+import type { UserRole } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { canAccessAdminRoutes } from "@/lib/auth/roles";
 import {
   buildQuickBooksAuthorizeUrl,
   isIntuitOAuthConfigured,
@@ -20,7 +22,7 @@ function integrationsUrl(path: string): URL {
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user || !canAccessAdminRoutes(session.user.role as UserRole)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

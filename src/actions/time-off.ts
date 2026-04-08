@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { sessionMayAccessTimeOffRequest } from "@/lib/auth/location-scope";
 import { requireEmployeeProfile, requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
@@ -151,6 +152,7 @@ export async function approveTimeOffRequest(formData: FormData): Promise<void> {
     },
   });
   if (!row) return;
+  if (!(await sessionMayAccessTimeOffRequest(session, id))) return;
 
   await prisma.timeOffRequest.update({
     where: { id },
@@ -194,6 +196,7 @@ export async function denyTimeOffRequest(formData: FormData): Promise<void> {
     },
   });
   if (!row) return;
+  if (!(await sessionMayAccessTimeOffRequest(session, id))) return;
 
   await prisma.timeOffRequest.update({
     where: { id },

@@ -1,18 +1,14 @@
+import type { UserRole } from "@prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { loginHomePath } from "@/lib/auth/roles";
 
 export default async function HomePage() {
   const session = await auth();
 
   if (session?.user) {
-    if (session.user.role === "ADMIN") {
-      redirect("/admin");
-    }
-    if (session.user.role === "MANAGER") {
-      redirect("/manager");
-    }
-    redirect("/employee");
+    redirect(loginHomePath(session.user.role as UserRole));
   }
 
   return (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatInTimeZone } from "date-fns-tz";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
 import {
   ScheduleWeekGrid,
@@ -36,7 +37,8 @@ export default async function ManagerSchedulePage({
     q?: string | string[];
   }>;
 }) {
-  await requireManager();
+  const session = await requireManager();
+  const locationIds = await getSchedulingLocationIdsForSession(session);
   const raw = await searchParams;
   const week = firstSearchParam(raw.week);
   const departmentId = firstSearchParam(raw.departmentId);
@@ -59,9 +61,14 @@ export default async function ManagerSchedulePage({
       to: weekEnd,
       departmentId,
       roleId,
+      locationIds,
     }),
-    getDepartmentsWithRoles(),
-    getEmployeesWithDepartments(),
+    getDepartmentsWithRoles({
+      onlyAtLocations: locationIds ?? undefined,
+    }),
+    getEmployeesWithDepartments({
+      onlyAtLocations: locationIds ?? undefined,
+    }),
   ]);
 
   const rosterMode = roster === "all" ? "all" : "scheduled";
@@ -161,7 +168,7 @@ export default async function ManagerSchedulePage({
             <option value="">All</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {d.location ? `${d.name} (${d.location.name})` : d.name}
               </option>
             ))}
           </select>
@@ -177,7 +184,8 @@ export default async function ManagerSchedulePage({
             {departments.flatMap((d) =>
               d.roles.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {d.name}: {r.name}
+                  {d.location ? `${d.name} (${d.location.name})` : d.name}:{" "}
+                  {r.name}
                 </option>
               )),
             )}

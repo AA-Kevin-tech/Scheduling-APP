@@ -37,11 +37,30 @@ async function main() {
   const passwordHash = await hash(plain, 12);
   const adminPasswordHash = await hash(seedAdminPasswordPlain(), 12);
 
+  const mainLocation = await prisma.location.upsert({
+    where: { slug: "main" },
+    create: {
+      name: "Main location",
+      slug: "main",
+      address: "Local",
+      sortOrder: 0,
+    },
+    update: {
+      name: "Main location",
+    },
+  });
+
   const departments = await Promise.all(
     DEPARTMENTS.map((d) =>
       prisma.department.upsert({
-        where: { slug: d.slug },
+        where: {
+          locationId_slug: {
+            locationId: mainLocation.id,
+            slug: d.slug,
+          },
+        },
         create: {
+          locationId: mainLocation.id,
           name: d.name,
           slug: d.slug,
           colorToken: d.colorToken,
@@ -56,20 +75,7 @@ async function main() {
     ),
   );
 
-  const bySlug = Object.fromEntries(departments.map((d) => [d.slug, d]));
-
-  const mainLocation = await prisma.location.upsert({
-    where: { slug: "main" },
-    create: {
-      name: "Main location",
-      slug: "main",
-      address: "Local",
-      sortOrder: 0,
-    },
-    update: {
-      name: "Main location",
-    },
-  });
+  const bySlug = Object.fromEntries(departments.map((dept) => [dept.slug, dept]));
 
   const roleRecords: { deptSlug: string; name: string; slug: string }[] = [];
   for (const d of DEPARTMENTS) {
@@ -161,6 +167,16 @@ async function main() {
       name: "Jamie Manager",
       role: UserRole.MANAGER,
       passwordHash,
+    },
+  });
+
+  await prisma.managerLocation.deleteMany({
+    where: { userId: managerUser.id },
+  });
+  await prisma.managerLocation.create({
+    data: {
+      userId: managerUser.id,
+      locationId: mainLocation.id,
     },
   });
 
@@ -385,6 +401,11 @@ async function main() {
         note: "At least one admissions desk during open hours",
       },
     ],
+  });
+
+  await prisma.shift.updateMany({
+    where: { locationId: null },
+    data: { locationId: mainLocation.id },
   });
 
   console.log(

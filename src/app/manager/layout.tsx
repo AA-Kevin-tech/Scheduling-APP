@@ -1,5 +1,9 @@
+import type { UserRole } from "@prisma/client";
 import Link from "next/link";
 import { auth } from "@/auth";
+import { getVenueSwitcherPayload } from "@/lib/auth/location-scope";
+import { canAccessAdminRoutes } from "@/lib/auth/roles";
+import { VenueScopeSwitcher } from "@/components/venue-scope-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
 
@@ -26,7 +30,11 @@ export default async function ManagerLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  const showAdmin = session?.user?.role === "ADMIN";
+  const showAdmin =
+    session?.user?.role != null &&
+    canAccessAdminRoutes(session.user.role as UserRole);
+  const venuePayload =
+    session != null ? await getVenueSwitcherPayload(session) : null;
 
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
@@ -83,6 +91,11 @@ export default async function ManagerLayout({
         </nav>
       </aside>
       <div className="flex-1 p-6">
+        {venuePayload ? (
+          <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
+            <VenueScopeSwitcher payload={venuePayload} />
+          </div>
+        ) : null}
         <RefreshBridge />
         {children}
       </div>

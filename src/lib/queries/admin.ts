@@ -27,7 +27,9 @@ export async function getUserForAdminEdit(userId: string) {
       employee: {
         include: {
           locations: true,
-          departments: true,
+          departments: {
+            include: { department: { include: { location: true } } },
+          },
         },
       },
     },
