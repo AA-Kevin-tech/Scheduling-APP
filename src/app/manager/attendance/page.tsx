@@ -7,6 +7,18 @@ const cards: {
   description: string;
 }[] = [
   {
+    href: "/manager/attendance/timesheets",
+    title: "Timesheets",
+    description:
+      "Week view per employee: scheduled vs punched hours; administrators can correct punches.",
+  },
+  {
+    href: "/manager/attendance/time-tracker",
+    title: "Time tracker",
+    description:
+      "Day timeline: who is scheduled and who has clocked in, across your venues.",
+  },
+  {
     href: "/manager/attendance/audit",
     title: "Audit log",
     description:
@@ -34,7 +46,7 @@ export default async function ManagerAttendanceHubPage() {
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Attendance</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Time clock operations and the scheduling audit trail.
+            Timesheets, day timeline, audit log, clock issues, and the kiosk terminal.
           </p>
         </div>
         <Link href="/manager" className="text-sm text-sky-700 hover:underline">

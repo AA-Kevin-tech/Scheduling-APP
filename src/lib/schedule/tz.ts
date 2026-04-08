@@ -118,6 +118,19 @@ export function zonedDayBoundsUtc(
   return { start, end };
 }
 
+/** Calendar date `YYYY-MM-DD` in `tz` plus `delta` whole days → new `YYYY-MM-DD` in `tz`. */
+export function addCalendarDaysInZone(
+  isoKey: string,
+  delta: number,
+  tz: string,
+): string {
+  const noonUtc = fromZonedTime(parseYmdTime(isoKey, 12, 0, 0), tz);
+  const z = toZonedTime(noonUtc, tz);
+  const shifted = addDays(z, delta);
+  shifted.setHours(12, 0, 0, 0);
+  return formatInTimeZone(fromZonedTime(shifted, tz), tz, "yyyy-MM-dd");
+}
+
 /** Move a Monday `YYYY-MM-DD` by `deltaWeeks` in `tz` (keeps Monday 00:00 alignment). */
 export function addWeeksToMondayIso(
   mondayIso: string,

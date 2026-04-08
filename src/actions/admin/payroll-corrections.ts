@@ -104,6 +104,9 @@ export async function adminCorrectTimePunch(
 
   revalidatePath("/admin/payroll-corrections");
   revalidatePath("/manager/time-clock");
+  revalidatePath("/manager/attendance/timesheets");
+  revalidatePath("/manager/attendance/time-tracker");
+  revalidatePath("/employee/attendance");
   return { ok: true };
 }
 
@@ -190,5 +193,8 @@ export async function adminCreateTimePunch(
 
   revalidatePath("/admin/payroll-corrections");
   revalidatePath("/manager/time-clock");
+  revalidatePath("/manager/attendance/timesheets");
+  revalidatePath("/manager/attendance/time-tracker");
+  revalidatePath("/employee/attendance");
   return { ok: true };
 }

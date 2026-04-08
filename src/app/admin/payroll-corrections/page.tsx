@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { addDays } from "date-fns";
-import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
 import { requireAdmin } from "@/lib/auth/guards";
 import {
   AdminCorrectPunchForm,
@@ -11,19 +9,11 @@ import {
   listPunchesOverlappingAdminDay,
 } from "@/lib/queries/admin-payroll-corrections";
 import {
+  addCalendarDaysInZone,
   formatDatetimeLocalInTimezone,
   getDefaultScheduleTimezone,
-  parseYmdTime,
   todayIsoInZone,
 } from "@/lib/schedule/tz";
-
-function addCalendarDaysInZone(isoKey: string, delta: number, tz: string): string {
-  const noonUtc = fromZonedTime(parseYmdTime(isoKey, 12, 0, 0), tz);
-  const z = toZonedTime(noonUtc, tz);
-  const shifted = addDays(z, delta);
-  shifted.setHours(12, 0, 0, 0);
-  return formatInTimeZone(fromZonedTime(shifted, tz), tz, "yyyy-MM-dd");
-}
 
 export default async function AdminPayrollCorrectionsPage({
   searchParams,
