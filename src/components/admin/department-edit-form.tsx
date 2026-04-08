@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import type {
   CoverageRule,
@@ -294,18 +293,41 @@ function AddCoverageRuleForm({
   departmentId: string;
   zones: DepartmentZone[];
 }) {
-  const router = useRouter();
   /** Remount inner UI so fields and action state reset (native form.reset() is unreliable with React). */
   const [instanceKey, setInstanceKey] = useState(0);
+  /** Hiding the block makes "Delete draft" visibly remove the draft; remount-only looked like a no-op when values matched defaults. */
+  const [draftOpen, setDraftOpen] = useState(true);
+
+  const openDraft = () => {
+    setInstanceKey((k) => k + 1);
+    setDraftOpen(true);
+  };
+
+  const discardDraft = () => {
+    setInstanceKey((k) => k + 1);
+    setDraftOpen(false);
+  };
+
+  if (!draftOpen) {
+    return (
+      <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4">
+        <button
+          type="button"
+          onClick={openDraft}
+          className="w-fit text-sm font-medium text-sky-700 hover:underline"
+        >
+          Add coverage rule
+        </button>
+      </div>
+    );
+  }
+
   return (
     <AddCoverageRuleFormInner
       key={instanceKey}
       departmentId={departmentId}
       zones={zones}
-      onDeleteDraft={() => {
-        setInstanceKey((k) => k + 1);
-        router.refresh();
-      }}
+      onDeleteDraft={discardDraft}
     />
   );
 }
