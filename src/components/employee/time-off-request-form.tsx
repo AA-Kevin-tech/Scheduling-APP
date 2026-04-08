@@ -1,29 +1,21 @@
 "use client";
 
-import { useActionState, useMemo } from "react";
+import { useActionState } from "react";
 import { createTimeOffRequest } from "@/actions/time-off";
 
-export function TimeOffRequestForm() {
+export function TimeOffRequestForm({
+  defaultStart,
+  defaultEnd,
+  minDatetimeLocal,
+}: {
+  defaultStart: string;
+  defaultEnd: string;
+  minDatetimeLocal: string;
+}) {
   const [state, formAction, pending] = useActionState(
     createTimeOffRequest,
     undefined as { error?: string } | undefined,
   );
-
-  const defaultStart = useMemo(() => {
-    const d = new Date();
-    d.setMinutes(0, 0, 0);
-    d.setDate(d.getDate() + 1);
-    d.setHours(9, 0, 0, 0);
-    return toLocalDatetimeValue(d);
-  }, []);
-
-  const defaultEnd = useMemo(() => {
-    const d = new Date();
-    d.setMinutes(0, 0, 0);
-    d.setDate(d.getDate() + 1);
-    d.setHours(17, 0, 0, 0);
-    return toLocalDatetimeValue(d);
-  }, []);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -34,6 +26,7 @@ export function TimeOffRequestForm() {
             name="startsAt"
             type="datetime-local"
             required
+            min={minDatetimeLocal}
             defaultValue={defaultStart}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
@@ -44,6 +37,7 @@ export function TimeOffRequestForm() {
             name="endsAt"
             type="datetime-local"
             required
+            min={minDatetimeLocal}
             defaultValue={defaultEnd}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
@@ -72,9 +66,4 @@ export function TimeOffRequestForm() {
       </button>
     </form>
   );
-}
-
-function toLocalDatetimeValue(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

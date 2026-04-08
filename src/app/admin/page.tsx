@@ -58,6 +58,17 @@ export default async function AdminHomePage() {
         </li>
         <li>
           <Link
+            href="/admin/time-off-blackouts"
+            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+          >
+            <span className="font-medium text-slate-900">Time off blackouts</span>
+            <p className="mt-1 text-sm text-slate-600">
+              Block employee time-off requests on specific dates
+            </p>
+          </Link>
+        </li>
+        <li>
+          <Link
             href="/admin/payroll-corrections"
             className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
           >

@@ -6,6 +6,15 @@ import { requireEmployeeProfile, requireManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import {
+  leadTimeBlockLastYmd,
+  timeOffOverlapsBlackout,
+  timeOffOverlapsMinimumLeadTimeBlock,
+} from "@/lib/services/time-off-rules";
+import {
+  getDefaultScheduleTimezone,
+  parseDatetimeLocalInTimezone,
+} from "@/lib/schedule/tz";
+import {
   createNotification,
   notifyManagersExcept,
 } from "@/lib/services/notifications";
@@ -29,13 +38,36 @@ export async function createTimeOffRequest(
   });
   if (!parsed.success) return { error: "Check start and end times." };
 
-  const startsAt = new Date(parsed.data.startsAt);
-  const endsAt = new Date(parsed.data.endsAt);
-  if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
+  const scheduleTz = getDefaultScheduleTimezone();
+  const startsAt = parseDatetimeLocalInTimezone(parsed.data.startsAt, scheduleTz);
+  const endsAt = parseDatetimeLocalInTimezone(parsed.data.endsAt, scheduleTz);
+  if (!startsAt || !endsAt) {
     return { error: "Invalid dates." };
   }
   if (endsAt <= startsAt) {
     return { error: "End must be after start." };
+  }
+
+  const now = new Date();
+  if (startsAt < now) {
+    return { error: "Start time cannot be in the past." };
+  }
+
+  if (timeOffOverlapsMinimumLeadTimeBlock(startsAt, endsAt, now, scheduleTz)) {
+    const through = leadTimeBlockLastYmd(now, scheduleTz);
+    return {
+      error: `Time off cannot include dates from today through ${through} (org schedule time). Choose times starting after that.`,
+    };
+  }
+
+  const blackouts = await prisma.timeOffBlackout.findMany({
+    select: { startsOnYmd: true, endsOnYmd: true },
+  });
+  if (timeOffOverlapsBlackout(startsAt, endsAt, scheduleTz, blackouts)) {
+    return {
+      error:
+        "That period includes a blackout date when time off cannot be requested. Ask an admin if you need an exception.",
+    };
   }
 
   const emp = await prisma.employee.findUnique({
