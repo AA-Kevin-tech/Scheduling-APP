@@ -68,49 +68,59 @@ export function EditTimeOffBlackoutForm({ row }: { row: TimeOffBlackout }) {
     updateTimeOffBlackout,
     null as { ok?: boolean; error?: string } | null,
   );
+  const formId = `edit-time-off-blackout-${row.id}`;
 
   return (
-    <form action={formAction} className="flex flex-wrap items-end gap-3 pt-4">
-      <input type="hidden" name="id" value={row.id} />
-      <label className="text-xs font-medium text-slate-600">
-        <span className="block">From</span>
-        <input
-          name="startsOnYmd"
-          type="date"
-          required
-          defaultValue={row.startsOnYmd}
-          className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        />
-      </label>
-      <label className="text-xs font-medium text-slate-600">
-        <span className="block">Through</span>
-        <input
-          name="endsOnYmd"
-          type="date"
-          required
-          defaultValue={row.endsOnYmd}
-          className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        />
-      </label>
-      <label className="min-w-[10rem] flex-1 text-xs font-medium text-slate-600">
-        <span className="block">Label</span>
-        <input
-          name="label"
-          defaultValue={row.label ?? ""}
-          className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        />
-      </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+    <div className="pt-4">
+      <form
+        id={formId}
+        action={formAction}
+        className="flex flex-wrap items-end gap-3"
       >
-        {pending ? "…" : "Save"}
-      </button>
-      <DeleteResourceForm action={deleteTimeOffBlackout} id={row.id} />
+        <input type="hidden" name="id" value={row.id} />
+        <label className="text-xs font-medium text-slate-600">
+          <span className="block">From</span>
+          <input
+            name="startsOnYmd"
+            type="date"
+            required
+            defaultValue={row.startsOnYmd}
+            className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </label>
+        <label className="text-xs font-medium text-slate-600">
+          <span className="block">Through</span>
+          <input
+            name="endsOnYmd"
+            type="date"
+            required
+            defaultValue={row.endsOnYmd}
+            className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </label>
+        <label className="min-w-[10rem] flex-1 text-xs font-medium text-slate-600">
+          <span className="block">Label</span>
+          <input
+            name="label"
+            defaultValue={row.label ?? ""}
+            className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          />
+        </label>
+      </form>
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <button
+          form={formId}
+          type="submit"
+          disabled={pending}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {pending ? "…" : "Save"}
+        </button>
+        <DeleteResourceForm action={deleteTimeOffBlackout} id={row.id} />
+      </div>
       {state?.error ? (
-        <p className="w-full text-sm text-red-600">{state.error}</p>
+        <p className="mt-2 w-full text-sm text-red-600">{state.error}</p>
       ) : null}
-    </form>
+    </div>
   );
 }

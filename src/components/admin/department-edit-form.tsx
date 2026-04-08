@@ -212,10 +212,12 @@ function CoverageRuleEditRow({
     updateCoverageRule,
     null as { ok?: boolean; error?: string } | null,
   );
+  /** Keep delete in a separate form — nested <form> is invalid HTML and breaks the rest of the page (e.g. "Delete draft"). */
+  const formId = `edit-coverage-rule-${rule.id}`;
 
   return (
     <li className="rounded-lg border border-slate-200 bg-slate-50/80 p-3">
-      <form action={formAction} className="space-y-3">
+      <form id={formId} action={formAction} className="space-y-3">
         <input type="hidden" name="id" value={rule.id} />
         <input type="hidden" name="departmentId" value={departmentId} />
         <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
@@ -257,24 +259,25 @@ function CoverageRuleEditRow({
             />
           </label>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={pending}
-            className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
-          >
-            {pending ? "…" : "Save rule"}
-          </button>
-          <DeleteResourceForm
-            action={deleteCoverageRule}
-            id={rule.id}
-            label="Delete rule"
-          />
-        </div>
-        {state?.error ? (
-          <p className="text-xs text-red-600">{state.error}</p>
-        ) : null}
       </form>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          form={formId}
+          type="submit"
+          disabled={pending}
+          className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        >
+          {pending ? "…" : "Save rule"}
+        </button>
+        <DeleteResourceForm
+          action={deleteCoverageRule}
+          id={rule.id}
+          label="Delete rule"
+        />
+      </div>
+      {state?.error ? (
+        <p className="mt-2 text-xs text-red-600">{state.error}</p>
+      ) : null}
     </li>
   );
 }
