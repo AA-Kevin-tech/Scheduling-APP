@@ -74,7 +74,7 @@
    | `AUTH_URL` | Public URL of the app, e.g. `https://your-app.up.railway.app` |
    | `NEXT_PUBLIC_APP_URL` | Same as `AUTH_URL` if you use it in client code for links |
    | `MIN_REST_MINUTES` | Optional; minimum rest between shifts for swap/assignment validation (default 480) |
-   | `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` | Optional; IANA zone for the manager schedule grid and create-shift defaults (default `America/Chicago`) |
+   | `NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE` | Optional; IANA zone for the manager schedule grid, create-shift defaults, **time off request** parsing, and the rolling “no requests” lead-time window (default `America/Chicago`) |
    | `TIME_CLOCK_*` | Optional; see `.env.example` — early clock-in window, late/missing-in thresholds, weekly hour-cap alert threshold, kiosk and worker session cookies |
    | `INTUIT_CLIENT_ID`, `INTUIT_CLIENT_SECRET` | Optional; QuickBooks Online OAuth (see note below) |
    | `INTUIT_REDIRECT_URI` | Optional; defaults to `{AUTH_URL}/api/integrations/quickbooks/callback` (must match the Intuit app redirect URI exactly) |
@@ -102,12 +102,13 @@ The **manager dashboard** (`/manager`), **Clock issues** (`/manager/time-clock`)
 ## Project layout
 
 - `src/app/` — App Router pages (employee vs manager vs **admin**, **`/terminal`** kiosk, auth)
+- `src/app/admin/time-off-blackouts/` — Admin-only dates when employees cannot submit new time off requests
 - `src/app/admin/integrations/` — QuickBooks Online connect UI (admins only)
 - `src/app/api/integrations/quickbooks/` — OAuth connect + callback routes
 - `src/lib/integrations/` — Intuit OAuth helpers (server-only)
 - `src/auth.ts` — Auth.js (NextAuth v5) configuration
 - `src/lib/` — DB client, validation helpers, schedule/swaps utilities, queries
-- `prisma/schema.prisma` — Data model (includes `QuickBooksConnection` after migrations are applied)
+- `prisma/schema.prisma` — Data model (includes `QuickBooksConnection`, `TimeOffBlackout`, etc., after migrations are applied)
 - `prisma/seed.ts` — Sample departments and users
 
 ## Phases
@@ -144,9 +145,11 @@ All six phases below are **implemented in this repo**. Use the paths and API not
 
 **Phase 6** — Time off:
 
-- **Employee:** request time off (start/end, optional reason); list history; cancel while `PENDING`.
+- **Employee:** request time off (start/end `datetime-local`, optional reason). Start and end are interpreted in **`NEXT_PUBLIC_DEFAULT_SCHEDULE_TIMEZONE`** (same as the manager schedule board). List history; cancel while `PENDING`.
+- **Lead time (rolling block):** Employees cannot submit requests that include any calendar day from **today through today + 14** in that org schedule timezone (inclusive). For example, if today is April 7, April 7–April 21 are blocked; the first selectable calendar day is April 22. The employee time off page shows the computed “blocked through” date and sets form `min` accordingly; the server enforces the same rule.
+- **Admin blackouts:** Under **Admin → Time off blackouts**, admins define inclusive date ranges (`TimeOffBlackout`) when new employee requests are rejected (e.g. peak season). Existing requests are not changed; managers can still act on the queue. Blackout dates are listed on the employee time off page when configured.
 - **Manager:** queue at `/manager/time-off` with overlap context (how many assigned shifts intersect the window); approve or deny; notifications to staff on decision.
-- **Managers** are notified on new requests; **audit** entries for create / cancel / approve / deny.
+- **Managers** are notified on new requests; **audit** entries for create / cancel / approve / deny (and blackout create/update/delete).
 
 **Time clock (kiosk)** — Implemented alongside the scheduling model (`ShiftTimePunch` on assignments):
 
