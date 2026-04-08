@@ -9,6 +9,7 @@ import { RefreshBridge } from "@/components/refresh-bridge";
 const nav = [
   { href: "/employee", label: "Home" },
   { href: "/employee/schedule", label: "Schedule" },
+  { href: "/employee/attendance", label: "Hours" },
   { href: "/employee/availability", label: "Avail." },
   { href: "/employee/time-off", label: "Off" },
   { href: "/employee/swaps", label: "Swaps" },
@@ -68,7 +69,9 @@ export default async function EmployeeLayout({
                 title={
                   item.href === "/employee/time-off"
                     ? "Time off"
-                    : undefined
+                    : item.href === "/employee/attendance"
+                      ? "Attendance & punches"
+                      : undefined
                 }
                 className="block min-h-[44px] min-w-[52px] rounded-lg px-2 py-2 text-center text-[11px] font-medium leading-tight text-sky-800 hover:bg-sky-50 sm:text-xs"
               >

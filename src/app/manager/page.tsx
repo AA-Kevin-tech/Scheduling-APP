@@ -132,8 +132,8 @@ export default async function ManagerDashboardPage() {
             </Link>
           </li>
           <li>
-            <Link href="/manager/audit" className="text-sky-700 hover:underline">
-              Audit log
+            <Link href="/manager/attendance" className="text-sky-700 hover:underline">
+              Attendance
             </Link>
           </li>
           <li>

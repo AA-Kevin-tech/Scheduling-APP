@@ -85,10 +85,10 @@ export default async function ManagerSettingsPage() {
           — roster and assignments to departments.
         </li>
         <li>
-          <Link href="/manager/audit" className="text-sky-700 hover:underline">
-            Audit log
+          <Link href="/manager/attendance" className="text-sky-700 hover:underline">
+            Attendance
           </Link>{" "}
-          — record of scheduling and approval actions.
+          — time clock shortcuts and the scheduling audit log.
         </li>
       </ul>
       <p className="text-sm text-slate-600">
