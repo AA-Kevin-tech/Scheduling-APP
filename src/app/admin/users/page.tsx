@@ -10,12 +10,26 @@ export default async function AdminUsersPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-slate-900">Users</h1>
-        <Link
-          href="/admin/users/new"
-          className="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
-        >
-          Add user
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/employee-onboarding"
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+          >
+            Onboarding tracker
+          </Link>
+          <Link
+            href="/admin/users/invite"
+            className="rounded-md border border-sky-700 bg-white px-4 py-2 text-sm font-medium text-sky-800 hover:bg-sky-50"
+          >
+            Invite employee
+          </Link>
+          <Link
+            href="/admin/users/new"
+            className="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
+          >
+            Add user
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">

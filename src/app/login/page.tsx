@@ -7,7 +7,7 @@ import { LoginForm } from "./login-form";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; onboarded?: string }>;
 }) {
   const session = await auth();
   const params = await searchParams;
@@ -31,6 +31,14 @@ export default async function LoginPage({
         <p className="mt-1 text-center text-sm text-slate-500">
           Staff sign-in
         </p>
+        {params.onboarded === "1" ? (
+          <p
+            className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
+            role="status"
+          >
+            Onboarding complete. Sign in with the password you just created.
+          </p>
+        ) : null}
         <LoginForm
           callbackUrl={safeCallbackUrl(params.callbackUrl, "/")}
         />

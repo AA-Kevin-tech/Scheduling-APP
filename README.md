@@ -1,6 +1,6 @@
 # Pulse - Scheduling
 
-**Pulse** is production-oriented **staff scheduling**: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, a **kiosk time clock** with alerts for managers and admins, and optional **QuickBooks Online** linking (admin **Integrations**) for future payroll export. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
+**Pulse** is production-oriented **staff scheduling**: multi-department scheduling, shifts, swaps (with rules and audit), manager workflows, **employee invite onboarding** (self-service password, time clock PIN, and encrypted payroll profile for future QuickBooks export), a **kiosk time clock** with alerts for managers and admins, and optional **QuickBooks Online** linking (admin **Integrations**) for future payroll export. Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and **PostgreSQL**.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@
    cp .env.example .env
    ```
 
-   Set `DATABASE_URL` to your Postgres connection string. Generate `AUTH_SECRET` (e.g. `openssl rand -base64 32`). Optional **time clock**, **schedule**, and **Intuit / QuickBooks** variables are documented in `.env.example`.
+   Set `DATABASE_URL` to your Postgres connection string. Generate `AUTH_SECRET` (e.g. `openssl rand -base64 32`). For **employee invite onboarding** (email link → password, time clock PIN, payroll forms), configure `RESEND_API_KEY` and `EMAIL_FROM`, and set **`PAYROLL_VAULT_KEY`** in production (`openssl rand -base64 32`). Other optional **time clock**, **schedule**, and **Intuit / QuickBooks** variables are in `.env.example`.
 
 3. **Database**
 
@@ -103,7 +103,7 @@ The **manager dashboard** (`/manager`), **Clock issues** (`/manager/time-clock`)
 
 ## Project layout
 
-- `src/app/` — App Router pages (employee vs manager vs **admin**, **`/terminal`** kiosk, auth)
+- `src/app/` — App Router pages (employee vs manager vs **admin**, **`/terminal`** kiosk, auth, **`/onboarding/[token]`** invite completion, **`/admin/employee-onboarding`** and **`/manager/employees/onboarding`** invite progress)
 - `src/app/admin/time-off-blackouts/` — Admin-only dates when employees cannot submit new time off requests
 - `src/app/admin/integrations/` — QuickBooks Online connect UI (admins only)
 - `src/app/api/integrations/quickbooks/` — OAuth connect + callback routes

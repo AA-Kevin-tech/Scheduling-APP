@@ -33,6 +33,15 @@ export default async function ManagerEmployeesPage({
               Include archived
             </Link>
           )}
+          <Link
+            href="/manager/employees/onboarding"
+            className="text-sky-700 hover:underline"
+          >
+            Onboarding tracker
+          </Link>
+          <Link href="/manager/employees/invite" className="text-sky-700 hover:underline">
+            Invite employee
+          </Link>
           <Link href="/manager/employees/new" className="text-sky-700 hover:underline">
             Add employee
           </Link>

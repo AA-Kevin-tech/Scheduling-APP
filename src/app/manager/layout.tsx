@@ -9,6 +9,7 @@ const links = [
   { href: "/terminal/setup", label: "Time clock" },
   { href: "/manager/time-clock", label: "Clock issues" },
   { href: "/manager/employees", label: "Employees" },
+  { href: "/manager/employees/onboarding", label: "Onboarding" },
   { href: "/manager/coverage", label: "Coverage" },
   { href: "/manager/holiday-pay", label: "Holiday pay" },
   { href: "/manager/swaps", label: "Swaps" },

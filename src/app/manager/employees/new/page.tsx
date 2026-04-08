@@ -30,7 +30,12 @@ export default async function ManagerNewEmployeePage() {
       </div>
       <p className="text-sm text-slate-600">
         New accounts are created as employees. Admins can change roles under
-        Admin → Users.
+        Admin → Users. To have them set password, PIN, and payroll info
+        themselves, use{" "}
+        <Link href="/manager/employees/invite" className="text-sky-700 hover:underline">
+          Invite employee
+        </Link>
+        .
       </p>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

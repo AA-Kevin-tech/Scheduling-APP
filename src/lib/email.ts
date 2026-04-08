@@ -34,6 +34,42 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   }
 }
 
+/** Invite link for employee self-onboarding (account, PIN, payroll profile). */
+export async function sendEmployeeOnboardingInviteEmail(
+  to: string,
+  onboardingUrl: string,
+) {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+
+  if (!key || !from) {
+    console.warn(
+      "[email] Employee invite (set RESEND_API_KEY + EMAIL_FROM to send real mail):",
+      { to, onboardingUrl },
+    );
+    return;
+  }
+
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      subject: "Complete your onboarding",
+      html: `<p>You have been invited to set up your employee account.</p><p><a href="${onboardingUrl}">Complete onboarding</a></p><p>If the link does not work, copy and paste this URL:</p><p style="word-break:break-all">${onboardingUrl}</p><p>This link expires in seven days. If you did not expect this email, you can ignore it.</p>`,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Email send failed: ${res.status} ${text}`);
+  }
+}
+
 function appOrigin(): string {
   const base =
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||

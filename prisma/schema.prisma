@@ -39,6 +39,8 @@ model User {
   quickBooksConnections QuickBooksConnection[] @relation("QuickBooksConnectedBy")
 
   employee Employee?
+  /// Invites sent to prospective employees (self-onboarding).
+  sentEmployeeInvites EmployeeInvite[]
 }
 
 /// Single-tenant QuickBooks Online link (OAuth tokens for payroll/time export).
@@ -181,12 +183,20 @@ model Employee {
   employmentType EmploymentType @default(FULL_TIME)
   /// When true, company holiday paid-absence and premium rules apply (if configured).
   holidayPayEligible Boolean @default(true)
-  /// Bcrypt hash of time clock PIN (terminal login); set by manager/admin only.
+  /// Bcrypt hash of time clock PIN (terminal login); set during self-onboarding or by manager/admin.
   timeClockPinHash String?
+  /// Mailing / payroll address (employee enters during onboarding when applicable).
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  payrollVault EmployeePayrollVault?
 
   departments      EmployeeDepartment[]
   certifications   Certification[]
@@ -197,6 +207,42 @@ model Employee {
   swapRequestsIn   SwapRequest[]    @relation("SwapTarget")
   hourLimits       HourLimit[]
   locations        EmployeeLocation[]
+}
+
+/// Pending self-service onboarding link (email + token). Consumed when the employee completes signup.
+model EmployeeInvite {
+  id        String    @id @default(cuid())
+  email     String
+  /// Opaque secret from the invite URL; treat like a password reset token.
+  token     String    @unique
+  expiresAt DateTime
+  invitedById String
+  consumedAt DateTime?
+  createdAt DateTime  @default(now())
+  /// First time the employee hit a valid onboarding page (not necessarily submitted).
+  startedAt DateTime?
+  stage     EmployeeInviteStage @default(INVITED)
+
+  employeeNumber String?
+  locationIds    String[] @default([])
+  assignments    Json
+
+  invitedBy User @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([stage])
+}
+
+/// Encrypted JSON blob: SSN, tax withholding, direct deposit (for future QuickBooks Payroll export).
+model EmployeePayrollVault {
+  id         String   @id @default(cuid())
+  employeeId String   @unique
+  ciphertext String   @db.Text
+  iv         String
+  authTag    String
+  updatedAt  DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 /// Org-wide paid holiday calendar (interpret `holidayDateYmd` in the default schedule timezone).
@@ -410,6 +456,16 @@ enum SwapRequestStatus {
   APPROVED_BY_MANAGER
   DENIED_BY_MANAGER
   CANCELLED
+}
+
+/// Progress through email invite onboarding (see Admin / Manager onboarding tracker).
+enum EmployeeInviteStage {
+  /// Invite email sent; onboarding URL not yet opened.
+  INVITED
+  /// Employee opened the onboarding page at least once.
+  STARTED
+  /// Submitted the onboarding form; user account created.
+  COMPLETED
 }
 
 enum HourLimitScope {
