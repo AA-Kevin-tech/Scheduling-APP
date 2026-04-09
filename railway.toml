@@ -1,0 +1,5 @@
+# Ensures production DB schema matches prisma/schema before traffic hits the app.
+# See https://docs.railway.app/deployments/pre-deploy-command
+[deploy]
+preDeployCommand = ["npm", "run", "db:deploy"]
+startCommand = "npm run start"

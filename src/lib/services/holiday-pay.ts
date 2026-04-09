@@ -88,8 +88,12 @@ export async function buildHolidayPayReport(input: {
     }),
     prisma.shiftTimePunch.findMany({
       where: {
-        clockInAt: { lt: bounds.end },
-        OR: [{ clockOutAt: null }, { clockOutAt: { gt: bounds.start } }],
+        AND: [
+          { clockInAt: { lt: bounds.end } },
+          {
+            OR: [{ clockOutAt: null }, { clockOutAt: { gt: bounds.start } }],
+          },
+        ],
       },
       include: {
         assignment: {

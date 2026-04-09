@@ -15,9 +15,13 @@ export async function sumWorkedMinutesInRange(
 ): Promise<number> {
   const punches = await prisma.shiftTimePunch.findMany({
     where: {
-      assignment: { employeeId },
-      clockInAt: { lt: rangeEnd },
-      OR: [{ clockOutAt: null }, { clockOutAt: { gt: rangeStart } }],
+      AND: [
+        { assignment: { employeeId } },
+        { clockInAt: { lt: rangeEnd } },
+        {
+          OR: [{ clockOutAt: null }, { clockOutAt: { gt: rangeStart } }],
+        },
+      ],
     },
     select: { clockInAt: true, clockOutAt: true },
   });

@@ -42,8 +42,12 @@ export async function listPunchesOverlappingAdminDay(
   const { start, end } = zonedDayBoundsUtc(isoKey, tz);
   const rows = await prisma.shiftTimePunch.findMany({
     where: {
-      clockInAt: { lt: end },
-      OR: [{ clockOutAt: null }, { clockOutAt: { gt: start } }],
+      AND: [
+        { clockInAt: { lt: end } },
+        {
+          OR: [{ clockOutAt: null }, { clockOutAt: { gt: start } }],
+        },
+      ],
     },
     include: {
       assignment: {
