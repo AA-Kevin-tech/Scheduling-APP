@@ -61,22 +61,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return token;
       }
       if (token.sub) {
-        try {
-          const { prisma } = await import("@/lib/db");
-          const row = await prisma.user.findUnique({
-            where: { id: token.sub },
-            select: { credentialVersion: true },
-          });
-          const tv =
-            typeof token.credentialVersion === "number"
-              ? token.credentialVersion
-              : 0;
-          if (!row || row.credentialVersion !== tv) {
-            return null;
+        let row: { credentialVersion: number } | null | undefined;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const { prisma } = await import("@/lib/db");
+            row = await prisma.user.findUnique({
+              where: { id: token.sub },
+              select: { credentialVersion: true },
+            });
+            break;
+          } catch (e) {
+            if (attempt === 2) {
+              console.error(
+                "[auth] jwt credentialVersion check failed after retries; invalidating session",
+                e,
+              );
+              return null;
+            }
+            await new Promise((r) => setTimeout(r, 50 * (attempt + 1)));
           }
-        } catch {
-          // DB down or schema not migrated yet — do not throw from jwt (would 500 every request).
-          return token;
+        }
+        const tv =
+          typeof token.credentialVersion === "number"
+            ? token.credentialVersion
+            : 0;
+        if (!row || row.credentialVersion !== tv) {
+          return null;
         }
       }
       return token;

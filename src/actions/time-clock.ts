@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import type { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -212,13 +213,26 @@ export async function terminalClockIn(
     return { error: "Clock-in is not allowed for this shift right now." };
   }
 
-  const punch = await prisma.shiftTimePunch.create({
-    data: {
-      shiftAssignmentId: assignment.id,
-      clockInAt: now,
-      clockInNote: note,
-    },
-  });
+  let punch;
+  try {
+    punch = await prisma.shiftTimePunch.create({
+      data: {
+        shiftAssignmentId: assignment.id,
+        clockInAt: now,
+        clockInNote: note,
+      },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return {
+        error: "This shift already has a time punch. Clock out first if needed.",
+      };
+    }
+    throw e;
+  }
 
   await writeAuditLog({
     actorUserId: null,

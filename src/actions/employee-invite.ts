@@ -14,10 +14,12 @@ import {
   encryptPayrollVaultPayload,
   type PayrollVaultPayload,
 } from "@/lib/crypto/payroll-vault";
+import { publicAppBaseUrl } from "@/lib/app-url";
 import { prisma } from "@/lib/db";
 import { sendEmployeeOnboardingInviteEmail } from "@/lib/email";
 import { normalizeIanaTimezone } from "@/lib/schedule/tz";
 import { writeAuditLog } from "@/lib/services/audit";
+import { timeClockPinLookupDigest } from "@/lib/time-clock/pin-lookup";
 import { userDisplayName } from "@/lib/user-display-name";
 
 const assignmentSchema = z
@@ -55,15 +57,6 @@ function zodFormError(err: z.ZodError): string {
     ...Object.values(flat.fieldErrors).flat(),
   ];
   return parts.filter(Boolean).join(", ") || "Invalid form.";
-}
-
-function authBaseUrl(): string {
-  const base =
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    process.env.AUTH_URL?.trim() ||
-    process.env.NEXTAUTH_URL?.trim() ||
-    "http://localhost:3000";
-  return base.replace(/\/$/, "");
 }
 
 async function validateAssignments(
@@ -205,7 +198,7 @@ export async function createEmployeeInvite(
     },
   });
 
-  const onboardingUrl = `${authBaseUrl()}/onboarding/${encodeURIComponent(token)}`;
+  const onboardingUrl = `${publicAppBaseUrl()}/onboarding/${encodeURIComponent(token)}`;
 
   try {
     await sendEmployeeOnboardingInviteEmail(email, onboardingUrl);
@@ -323,11 +316,23 @@ const completeSchema = z
   });
 
 async function pinIsUnique(plainPin: string): Promise<boolean> {
-  const rows = await prisma.employee.findMany({
-    where: { timeClockPinHash: { not: null } },
+  let digest: string;
+  try {
+    digest = timeClockPinLookupDigest(plainPin);
+  } catch {
+    return false;
+  }
+  const clash = await prisma.employee.findFirst({
+    where: { timeClockPinLookup: digest },
+    select: { id: true },
+  });
+  if (clash) return false;
+
+  const legacy = await prisma.employee.findMany({
+    where: { timeClockPinHash: { not: null }, timeClockPinLookup: null },
     select: { timeClockPinHash: true },
   });
-  for (const r of rows) {
+  for (const r of legacy) {
     if (r.timeClockPinHash && (await compare(plainPin, r.timeClockPinHash))) {
       return false;
     }
@@ -443,6 +448,16 @@ export async function completeEmployeeOnboarding(
 
   const passwordHash = await hash(parsed.data.password, 12);
   const timeClockPinHash = await hash(pin, 12);
+  let timeClockPinLookup: string;
+  try {
+    timeClockPinLookup = timeClockPinLookupDigest(pin);
+  } catch (e) {
+    console.error(e);
+    return {
+      error:
+        "Server could not process time clock PIN. Ensure AUTH_SECRET is configured.",
+    };
+  }
   const firstName = parsed.data.firstName.trim();
   const lastName = parsed.data.lastName.trim();
   const displayName = userDisplayName({ firstName, lastName });
@@ -514,6 +529,7 @@ export async function completeEmployeeOnboarding(
           hourlyRate,
           annualSalary,
           timeClockPinHash,
+          timeClockPinLookup,
           addressLine1: parsed.data.addressLine1.trim(),
           addressLine2: parsed.data.addressLine2?.trim() || null,
           city: parsed.data.city.trim(),

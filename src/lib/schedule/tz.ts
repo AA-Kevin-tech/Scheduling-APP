@@ -107,6 +107,20 @@ export function formatDatetimeLocalInTimezone(instant: Date, tz: string): string
   return formatInTimeZone(instant, tz, "yyyy-MM-dd'T'HH:mm");
 }
 
+/**
+ * Advance a UTC instant by `weeks` calendar weeks in `tz`, preserving local wall date/time.
+ * Avoids DST drift from naive UTC +7-day arithmetic on repeating shifts.
+ */
+export function addCalendarWeeksPreservingLocalTime(
+  utcInstant: Date,
+  weeks: number,
+  tz: string,
+): Date {
+  const z = toZonedTime(utcInstant, tz);
+  const shifted = addDays(z, 7 * weeks);
+  return fromZonedTime(shifted, tz);
+}
+
 /** Start/end of a calendar day (`isoKey`) in `tz`, as UTC instants (for overlap checks). */
 export function zonedDayBoundsUtc(
   isoKey: string,

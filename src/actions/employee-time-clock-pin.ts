@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
+import { timeClockPinLookupDigest } from "@/lib/time-clock/pin-lookup";
 
 const schema = z.object({
   employeeId: z.string().min(1),
@@ -20,14 +21,30 @@ async function pinIsUniqueForOthers(
   plainPin: string,
   excludeEmployeeId: string,
 ): Promise<boolean> {
-  const rows = await prisma.employee.findMany({
+  let digest: string;
+  try {
+    digest = timeClockPinLookupDigest(plainPin);
+  } catch {
+    return false;
+  }
+  const clash = await prisma.employee.findFirst({
+    where: {
+      id: { not: excludeEmployeeId },
+      timeClockPinLookup: digest,
+    },
+    select: { id: true },
+  });
+  if (clash) return false;
+
+  const legacy = await prisma.employee.findMany({
     where: {
       id: { not: excludeEmployeeId },
       timeClockPinHash: { not: null },
+      timeClockPinLookup: null,
     },
     select: { timeClockPinHash: true },
   });
-  for (const r of rows) {
+  for (const r of legacy) {
     if (r.timeClockPinHash && (await compare(plainPin, r.timeClockPinHash))) {
       return false;
     }
@@ -81,9 +98,15 @@ export async function updateEmployeeTimeClockPin(
   }
 
   const timeClockPinHash = await hash(p, 12);
+  let timeClockPinLookup: string;
+  try {
+    timeClockPinLookup = timeClockPinLookupDigest(p);
+  } catch {
+    return { error: "Server configuration error (AUTH_SECRET)." };
+  }
   await prisma.employee.update({
     where: { id: employeeId },
-    data: { timeClockPinHash },
+    data: { timeClockPinHash, timeClockPinLookup },
   });
 
   await writeAuditLog({
@@ -129,7 +152,7 @@ export async function clearEmployeeTimeClockPin(
 
   await prisma.employee.update({
     where: { id: employeeId },
-    data: { timeClockPinHash: null },
+    data: { timeClockPinHash: null, timeClockPinLookup: null },
   });
 
   await writeAuditLog({

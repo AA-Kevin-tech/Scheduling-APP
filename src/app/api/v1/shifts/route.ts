@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
-import { addWeeksUtc, parseDateParam, startOfWeekMondayUtc } from "@/lib/datetime";
+import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
 import { getShiftsForEmployee, getShiftsForRange } from "@/lib/queries/schedule";
 
 function mapShift(s: Awaited<ReturnType<typeof getShiftsForRange>>[number]) {
@@ -53,9 +53,19 @@ export async function GET(req: Request) {
   const departmentId = searchParams.get("departmentId") ?? undefined;
   const roleId = searchParams.get("roleId") ?? undefined;
 
-  const from = fromParam
-    ? startOfWeekMondayUtc(parseDateParam(fromParam, new Date()))
-    : startOfWeekMondayUtc(new Date());
+  let from: Date;
+  if (fromParam) {
+    const anchor = new Date(fromParam);
+    if (Number.isNaN(anchor.getTime())) {
+      return NextResponse.json(
+        { error: "Invalid `from` date" },
+        { status: 400 },
+      );
+    }
+    from = startOfWeekMondayUtc(anchor);
+  } else {
+    from = startOfWeekMondayUtc(new Date());
+  }
   const to = toParam ? new Date(toParam) : addWeeksUtc(from, 1);
 
   if (Number.isNaN(to.getTime())) {

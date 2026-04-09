@@ -207,6 +207,8 @@ model Employee {
   holidayPayEligible Boolean @default(true)
   /// Bcrypt hash of time clock PIN (terminal login); set during self-onboarding or by manager/admin.
   timeClockPinHash String?
+  /// HMAC-SHA256 digest for O(1) PIN resolution (legacy rows may be null until PIN is set again).
+  timeClockPinLookup String?
   /// Mailing / payroll address (employee enters during onboarding when applicable).
   addressLine1 String?
   addressLine2 String?
@@ -229,6 +231,8 @@ model Employee {
   swapRequestsIn   SwapRequest[]    @relation("SwapTarget")
   hourLimits       HourLimit[]
   locations        EmployeeLocation[]
+
+  @@index([timeClockPinLookup])
 }
 
 /// Pending self-service onboarding link (email + token). Consumed when the employee completes signup.

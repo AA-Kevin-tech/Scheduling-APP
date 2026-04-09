@@ -50,7 +50,8 @@
 |--------|-------------|
 | `npm run dev` | Next.js dev server |
 | `npm run build` | `prisma generate` + production build (does not require Postgres to be running; see **Builds and CI** below) |
-| `npm run start` | Start production server |
+| `npm run start` | Start production server (run migrations separately, or use `start:deploy`) |
+| `npm run start:deploy` | `prisma migrate deploy` then start (optional one-step Railway/VM boot) |
 | `npm run db:migrate` | `prisma migrate dev` |
 | `npm run db:push` | `prisma db push` (prototyping only) |
 | `npm run db:seed` | Run `prisma/seed.ts` |
@@ -63,7 +64,7 @@
 2. **Connect GitHub** and deploy this repo as a **Node** service with:
 
    - **Build command:** `npm run build`
-   - **Start command:** `npm run start` (or `npx prisma migrate deploy && npm run start` if you apply migrations on boot — see below)
+   - **Start command:** `npm run start` after migrations, or `npm run start:deploy` to migrate then serve (see below)
 
 3. **Environment variables** on the Railway service:
 
@@ -87,13 +88,13 @@
 4. **Migrations**
 
    - Preferred: run migrations in CI or a **release command** / one-off job: `npx prisma migrate deploy`.
-   - Alternatively: `start` script `npx prisma migrate deploy && npm run start` so deploys apply migrations before serving (acceptable for small teams; watch for concurrent deploys).
+   - Alternatively: **`npm run start:deploy`** so the host applies migrations before serving (acceptable for small teams; watch for concurrent deploys).
 
    Deploy logs may show `npm warn config production Use '--omit=dev' instead` — that comes from npm’s config on the host; it does not indicate a failed deploy. Prisma’s old `package.json#prisma` warning is addressed in this repo via root `prisma.config.ts`.
 
 5. **Health check**
 
-   Railway can use `GET /api/health` — returns `{ ok: true, db: "up" }` when the database is reachable.
+   Railway can use `GET /api/health` — returns `{ ok: true, db: "up" }` when the database is reachable. If you set `HEALTH_CHECK_SECRET`, send `Authorization: Bearer <secret>` or header `x-health-check-secret: <secret>`.
 
 ## Builds and CI
 

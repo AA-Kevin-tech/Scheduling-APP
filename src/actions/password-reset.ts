@@ -3,6 +3,7 @@
 import { randomBytes } from "crypto";
 import { hash } from "bcryptjs";
 import { z } from "zod";
+import { publicAppBaseUrl } from "@/lib/app-url";
 import { prisma } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email";
 
@@ -47,11 +48,7 @@ export async function requestPasswordReset(
     },
   });
 
-  const base =
-    process.env.NEXTAUTH_URL ??
-    process.env.AUTH_URL ??
-    "http://localhost:3000";
-  const resetUrl = `${base.replace(/\/$/, "")}/reset-password?token=${encodeURIComponent(token)}`;
+  const resetUrl = `${publicAppBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
 
   try {
     await sendPasswordResetEmail(email, resetUrl);

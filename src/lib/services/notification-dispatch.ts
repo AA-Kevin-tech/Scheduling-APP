@@ -18,7 +18,7 @@ export function notificationAppPath(type: string, role: UserRole): string {
     return isMgr ? "/manager/time-off" : "/employee/time-off";
   }
   if (type.startsWith("TIME_CLOCK")) {
-    return "/manager/time-clock";
+    return isMgr ? "/manager/time-clock" : "/employee/attendance";
   }
   return isMgr ? "/manager/notifications" : "/employee/notifications";
 }

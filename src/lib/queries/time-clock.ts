@@ -1,6 +1,7 @@
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { clockInEarlyMinutes } from "@/lib/time-clock/constants";
+import { timeClockPinLookupDigest } from "@/lib/time-clock/pin-lookup";
 
 const shiftInclude = {
   department: true,
@@ -15,13 +16,20 @@ const assignmentTerminalInclude = {
   employee: { include: { user: { select: { name: true, email: true } } } },
 } as const;
 
-/** Resolve employee by time clock PIN (bcrypt compare against hashed PINs). */
+/** Resolve employee by time clock PIN (indexed lookup + bcrypt; legacy rows scan hashes only). */
 export async function findEmployeeByTimeClockPin(raw: string) {
   const pin = raw.trim();
   if (!/^\d{4,8}$/.test(pin)) return null;
 
-  const rows = await prisma.employee.findMany({
-    where: { archivedAt: null, timeClockPinHash: { not: null } },
+  let digest: string;
+  try {
+    digest = timeClockPinLookupDigest(pin);
+  } catch {
+    return null;
+  }
+
+  const withLookup = await prisma.employee.findMany({
+    where: { archivedAt: null, timeClockPinLookup: digest },
     select: {
       id: true,
       userId: true,
@@ -30,11 +38,32 @@ export async function findEmployeeByTimeClockPin(raw: string) {
     },
   });
 
-  for (const r of rows) {
-    if (
-      r.timeClockPinHash &&
-      (await compare(pin, r.timeClockPinHash))
-    ) {
+  for (const r of withLookup) {
+    if (r.timeClockPinHash && (await compare(pin, r.timeClockPinHash))) {
+      return {
+        id: r.id,
+        userId: r.userId,
+        timezone: r.timezone,
+      };
+    }
+  }
+
+  const legacy = await prisma.employee.findMany({
+    where: {
+      archivedAt: null,
+      timeClockPinHash: { not: null },
+      timeClockPinLookup: null,
+    },
+    select: {
+      id: true,
+      userId: true,
+      timezone: true,
+      timeClockPinHash: true,
+    },
+  });
+
+  for (const r of legacy) {
+    if (r.timeClockPinHash && (await compare(pin, r.timeClockPinHash))) {
       return {
         id: r.id,
         userId: r.userId,

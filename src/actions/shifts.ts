@@ -11,12 +11,12 @@ import {
   shiftsWhereForLocations,
 } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
-import { addWeeksUtc } from "@/lib/datetime";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import { notifyUsersSchedulePublished } from "@/lib/services/notifications";
 import { validateShiftAssignment } from "@/lib/services/shift-assignment";
 import {
+  addCalendarWeeksPreservingLocalTime,
   normalizeIanaTimezone,
   parseDatetimeLocalInTimezone,
 } from "@/lib/schedule/tz";
@@ -136,8 +136,8 @@ export async function createShift(
         roleId: roleId ?? null,
         zoneId: zoneId ?? null,
         title: title ?? null,
-        startsAt: addWeeksUtc(startsAt, w),
-        endsAt: addWeeksUtc(endsAt, w),
+        startsAt: addCalendarWeeksPreservingLocalTime(startsAt, w, tz),
+        endsAt: addCalendarWeeksPreservingLocalTime(endsAt, w, tz),
         publishedAt: null,
         parentShiftId: root.id,
       },

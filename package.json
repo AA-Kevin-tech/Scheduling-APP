@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && next start",
+    "start": "next start",
+    "start:deploy": "prisma migrate deploy && next start",
     "lint": "eslint",
     "icons:pwa": "tsx scripts/generate-pwa-icons.ts",
     "postinstall": "prisma generate",
