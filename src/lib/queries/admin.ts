@@ -6,14 +6,31 @@ export async function getLocations() {
   });
 }
 
+/** Narrow select: avoids Prisma Decimal on Employee (breaks RSC serialization) and omits unused columns. */
 export async function getUsersForAdminList() {
   return prisma.user.findMany({
     orderBy: { email: "asc" },
-    include: {
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
       employee: {
-        include: {
-          locations: { include: { location: true } },
-          departments: { include: { department: true, role: true } },
+        select: {
+          archivedAt: true,
+          locations: {
+            select: {
+              id: true,
+              location: { select: { name: true } },
+            },
+          },
+          departments: {
+            select: {
+              id: true,
+              department: { select: { name: true } },
+              role: { select: { name: true } },
+            },
+          },
         },
       },
     },

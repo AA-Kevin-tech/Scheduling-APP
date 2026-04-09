@@ -12,25 +12,33 @@ export default async function AdminUsersPage() {
         <h1 className="text-xl font-semibold text-slate-900">Users</h1>
         <div className="flex flex-wrap gap-2">
           <Link
-            href="/admin/employee-onboarding"
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            href="/admin/users/new"
+            className="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
           >
-            Onboarding tracker
+            Add employee
           </Link>
           <Link
             href="/admin/users/invite"
             className="rounded-md border border-sky-700 bg-white px-4 py-2 text-sm font-medium text-sky-800 hover:bg-sky-50"
           >
-            Invite employee
+            Invite by email
           </Link>
           <Link
-            href="/admin/users/new"
-            className="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800"
+            href="/admin/employee-onboarding"
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
           >
-            Add user
+            Onboarding tracker
           </Link>
         </div>
       </div>
+
+      <p className="text-sm text-slate-600">
+        <span className="font-medium text-slate-800">Add employee</span> creates
+        the account now for someone who already works with you—you set their
+        password (or share it once) and their locations and departments.{" "}
+        <span className="font-medium text-slate-800">Invite by email</span> sends
+        a link so they finish signup and payroll details themselves.
+      </p>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
         <table className="min-w-full text-left text-sm">

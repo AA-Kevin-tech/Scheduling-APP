@@ -20,7 +20,7 @@ export default async function AdminNewUserPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Add user</h1>
+        <h1 className="text-xl font-semibold text-slate-900">Add employee</h1>
         <Link
           href="/admin/users"
           className="text-sm text-sky-700 hover:underline"
@@ -30,9 +30,10 @@ export default async function AdminNewUserPage() {
       </div>
 
       <p className="text-sm text-slate-600">
-        Prefer self-service onboarding?{" "}
+        Use this for staff who already work with you and need an account right
+        away. For a self-service link instead,{" "}
         <Link href="/admin/users/invite" className="text-sky-700 hover:underline">
-          Invite employee by email
+          invite by email
         </Link>
         .
       </p>

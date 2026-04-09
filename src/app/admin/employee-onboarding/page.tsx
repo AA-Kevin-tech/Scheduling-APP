@@ -55,7 +55,7 @@ export default async function AdminEmployeeOnboardingPage({
             href="/admin/users/invite"
             className="text-sky-700 hover:underline"
           >
-            Send invite
+            Invite by email
           </Link>
           <Link href="/admin/users" className="text-sky-700 hover:underline">
             ← Users
