@@ -2,9 +2,13 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { TerminalDashboard } from "@/lib/queries/time-clock-dashboard";
-import { terminalClockIn, terminalClockOut, terminalSignOut } from "@/actions/time-clock";
+import {
+  terminalClockIn,
+  terminalClockOut,
+  terminalSignOut,
+} from "@/actions/time-clock";
 
 function PendingButton({
   label,
@@ -30,19 +34,49 @@ function PendingButton({
   );
 }
 
+const KIOSK_RESET_SECONDS = 20;
+
 export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
   const router = useRouter();
   const [clockInState, clockInAction] = useFormState(terminalClockIn, {});
   const [clockOutState, clockOutAction] = useFormState(terminalClockOut, {});
+  const [resetCountdown, setResetCountdown] = useState<number | null>(null);
 
   useEffect(() => {
-    if (clockInState.ok || clockOutState.ok) {
-      router.refresh();
-    }
+    if (!clockInState.ok && !clockOutState.ok) return;
+
+    router.refresh();
+    setResetCountdown(KIOSK_RESET_SECONDS);
+
+    const intervalId = window.setInterval(() => {
+      setResetCountdown((s) =>
+        s === null ? null : s <= 1 ? 0 : s - 1,
+      );
+    }, 1000);
+
+    const signOutId = window.setTimeout(() => {
+      void terminalSignOut();
+    }, KIOSK_RESET_SECONDS * 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.clearTimeout(signOutId);
+    };
   }, [clockInState.ok, clockOutState.ok, router]);
 
   return (
     <div className="mx-auto max-w-lg space-y-8">
+      {resetCountdown !== null && resetCountdown > 0 ? (
+        <div
+          className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-center text-sm text-sky-950"
+          role="status"
+        >
+          Returning to PIN entry in{" "}
+          <span className="font-semibold tabular-nums">{resetCountdown}</span>s
+          for the next person.
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
           <p className="text-sm text-slate-500">Signed in</p>

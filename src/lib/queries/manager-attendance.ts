@@ -36,7 +36,7 @@ export async function getTimesheetAssignmentsForEmployee(params: {
       ),
     },
     include: {
-      timePunch: true,
+      timePunches: { orderBy: { clockInAt: "asc" } },
       shift: {
         include: {
           department: { select: { name: true } },
@@ -69,7 +69,7 @@ export async function getPublishedShiftsOverlappingDayForLocations(params: {
           employee: {
             include: { user: { select: { name: true, email: true } } },
           },
-          timePunch: true,
+          timePunches: { orderBy: { clockInAt: "asc" } },
         },
       },
     },

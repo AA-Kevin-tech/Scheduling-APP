@@ -1,6 +1,5 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import type { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -140,8 +139,14 @@ export async function terminalSignIn(
     return { error: "PIN must be 4–8 digits." };
   }
 
-  const employee = await findEmployeeByTimeClockPin(pin);
-  if (!employee) {
+  const resolved = await findEmployeeByTimeClockPin(pin);
+  if (resolved.kind === "ambiguous") {
+    return {
+      error:
+        "This PIN is linked to more than one active employee. Ask a manager to assign unique PINs.",
+    };
+  }
+  if (resolved.kind === "not_found") {
     return { error: "Invalid PIN." };
   }
 
@@ -150,7 +155,7 @@ export async function terminalSignIn(
   const token = signPayload({
     v: 1,
     exp,
-    employeeId: employee.id,
+    employeeId: resolved.employee.id,
   } satisfies WorkerPayload);
 
   const jar = await cookies();
@@ -203,8 +208,13 @@ export async function terminalClockIn(
   if (!assignment) {
     return { error: "Shift not found." };
   }
-  if (assignment.timePunch) {
-    return { error: "This shift already has a time punch." };
+  const openOnAssignment = assignment.timePunches.some(
+    (p) => p.clockOutAt == null,
+  );
+  if (openOnAssignment) {
+    return {
+      error: "This shift already has an open punch. Clock out before clocking in again.",
+    };
   }
 
   const earlyMs = clockInEarlyMinutes() * 60 * 1000;
@@ -213,26 +223,13 @@ export async function terminalClockIn(
     return { error: "Clock-in is not allowed for this shift right now." };
   }
 
-  let punch;
-  try {
-    punch = await prisma.shiftTimePunch.create({
-      data: {
-        shiftAssignmentId: assignment.id,
-        clockInAt: now,
-        clockInNote: note,
-      },
-    });
-  } catch (e) {
-    if (
-      e instanceof Prisma.PrismaClientKnownRequestError &&
-      e.code === "P2002"
-    ) {
-      return {
-        error: "This shift already has a time punch. Clock out first if needed.",
-      };
-    }
-    throw e;
-  }
+  const punch = await prisma.shiftTimePunch.create({
+    data: {
+      shiftAssignmentId: assignment.id,
+      clockInAt: now,
+      clockInNote: note,
+    },
+  });
 
   await writeAuditLog({
     actorUserId: null,

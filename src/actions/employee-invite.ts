@@ -1,7 +1,7 @@
 "use server";
 
 import { randomBytes } from "crypto";
-import { compare, hash } from "bcryptjs";
+import { hash } from "bcryptjs";
 import { z } from "zod";
 import {
   type CompensationType,
@@ -19,6 +19,7 @@ import { prisma } from "@/lib/db";
 import { sendEmployeeOnboardingInviteEmail } from "@/lib/email";
 import { normalizeIanaTimezone } from "@/lib/schedule/tz";
 import { writeAuditLog } from "@/lib/services/audit";
+import { isTimeClockPinAvailable } from "@/lib/time-clock/pin-uniqueness";
 import { timeClockPinLookupDigest } from "@/lib/time-clock/pin-lookup";
 import { userDisplayName } from "@/lib/user-display-name";
 
@@ -315,31 +316,6 @@ const completeSchema = z
     }
   });
 
-async function pinIsUnique(plainPin: string): Promise<boolean> {
-  let digest: string;
-  try {
-    digest = timeClockPinLookupDigest(plainPin);
-  } catch {
-    return false;
-  }
-  const clash = await prisma.employee.findFirst({
-    where: { timeClockPinLookup: digest },
-    select: { id: true },
-  });
-  if (clash) return false;
-
-  const legacy = await prisma.employee.findMany({
-    where: { timeClockPinHash: { not: null }, timeClockPinLookup: null },
-    select: { timeClockPinHash: true },
-  });
-  for (const r of legacy) {
-    if (r.timeClockPinHash && (await compare(plainPin, r.timeClockPinHash))) {
-      return false;
-    }
-  }
-  return true;
-}
-
 export async function completeEmployeeOnboarding(
   _prev: unknown,
   formData: FormData,
@@ -411,8 +387,11 @@ export async function completeEmployeeOnboarding(
   }
 
   const pin = parsed.data.pin.trim();
-  if (!(await pinIsUnique(pin))) {
-    return { error: "That time clock PIN is already in use. Choose another." };
+  if (!(await isTimeClockPinAvailable(pin, null))) {
+    return {
+      error:
+        "That PIN is already in use. Choose a different one for your time clock.",
+    };
   }
 
   const routingDigits = parsed.data.routingNumber;
@@ -569,6 +548,23 @@ export async function completeEmployeeOnboarding(
       });
     });
   } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      const t = e.meta?.target;
+      const targetStr = Array.isArray(t)
+        ? t.join(",")
+        : typeof t === "string"
+          ? t
+          : "";
+      if (targetStr.includes("timeClockPinLookup")) {
+        return {
+          error:
+            "That PIN is already in use. Choose a different one for your time clock.",
+        };
+      }
+    }
     console.error(e);
     return { error: "Could not complete onboarding. Try again or contact support." };
   }

@@ -86,9 +86,9 @@ export default async function ManagerTimesheetsPage({
     const s = a.shift.startsAt;
     const e = a.shift.endsAt;
     totalSchedMin += overlapMinutes(s, e, rangeStart, rangeEnd);
-    if (a.timePunch) {
-      const end = a.timePunch.clockOutAt ?? now;
-      totalWorkMin += overlapMinutes(a.timePunch.clockInAt, end, rangeStart, rangeEnd);
+    for (const punch of a.timePunches) {
+      const end = punch.clockOutAt ?? now;
+      totalWorkMin += overlapMinutes(punch.clockInAt, end, rangeStart, rangeEnd);
     }
   }
 
@@ -221,44 +221,33 @@ export default async function ManagerTimesheetsPage({
                     rangeStart,
                     rangeEnd,
                   );
-                  const punch = a.timePunch;
-                  const workInWeek = punch
-                    ? overlapMinutes(
+                  const punches = a.timePunches;
+                  const workInWeek = punches.reduce((sum, punch) => {
+                    const segEnd = punch.clockOutAt ?? now;
+                    return (
+                      sum +
+                      overlapMinutes(
                         punch.clockInAt,
-                        punch.clockOutAt ?? now,
+                        segEnd,
                         rangeStart,
                         rangeEnd,
                       )
-                    : 0;
-                  const diffMin = punch ? workInWeek - schedInWeek : null;
+                    );
+                  }, 0);
+                  const hasOpenPunch = punches.some((p) => p.clockOutAt == null);
+                  const diffMin =
+                    punches.length > 0 ? workInWeek - schedInWeek : null;
                   const dept = sh.department.name;
                   const roleName = sh.role?.name;
                   const locName = sh.location?.name;
 
-                  const punchRow: AdminPunchRow | null = punch
-                    ? {
-                        punchId: punch.id,
-                        assignmentId: a.id,
-                        employeeLabel: label ?? "—",
-                        departmentName: dept,
-                        shiftStartsAt: sh.startsAt,
-                        shiftEndsAt: sh.endsAt,
-                        clockInAt: punch.clockInAt,
-                        clockOutAt: punch.clockOutAt,
-                        clockInNote: punch.clockInNote,
-                        clockOutNote: punch.clockOutNote,
-                      }
-                    : null;
-
-                  const missingRow: AdminAssignmentNoPunchRow | null = !punch
-                    ? {
-                        assignmentId: a.id,
-                        employeeLabel: label ?? "—",
-                        departmentName: dept,
-                        shiftStartsAt: sh.startsAt,
-                        shiftEndsAt: sh.endsAt,
-                      }
-                    : null;
+                  const createRow: AdminAssignmentNoPunchRow = {
+                    assignmentId: a.id,
+                    employeeLabel: label ?? "—",
+                    departmentName: dept,
+                    shiftStartsAt: sh.startsAt,
+                    shiftEndsAt: sh.endsAt,
+                  };
 
                   return (
                     <li
@@ -290,7 +279,7 @@ export default async function ManagerTimesheetsPage({
                           <p className="mt-0.5">
                             <span className="text-slate-500">Worked </span>
                             <span className="font-medium tabular-nums text-slate-800">
-                              {punch ? formatHm(workInWeek) : "—"}
+                              {punches.length > 0 ? formatHm(workInWeek) : "—"}
                             </span>
                           </p>
                           {diffMin != null ? (
@@ -316,55 +305,89 @@ export default async function ManagerTimesheetsPage({
                         </div>
                         <div>
                           <span className="text-slate-500">Punched </span>
-                          {punch ? (
-                            <span className="tabular-nums">
-                              {punch.clockInAt.toLocaleString()}
-                              {" → "}
-                              {punch.clockOutAt
-                                ? punch.clockOutAt.toLocaleString()
-                                : (
+                          {punches.length === 0 ? (
+                            <span className="text-amber-800">No punch</span>
+                          ) : (
+                            <ul className="mt-1 list-inside list-disc space-y-1">
+                              {punches.map((punch) => (
+                                <li key={punch.id} className="tabular-nums">
+                                  {punch.clockInAt.toLocaleString()}
+                                  {" → "}
+                                  {punch.clockOutAt ? (
+                                    punch.clockOutAt.toLocaleString()
+                                  ) : (
                                     <span className="font-medium text-amber-800">
                                       open
                                     </span>
                                   )}
-                            </span>
-                          ) : (
-                            <span className="text-amber-800">No punch</span>
+                                </li>
+                              ))}
+                            </ul>
                           )}
                         </div>
                       </div>
 
-                      {canEditPunches && punchRow ? (
-                        <AdminCorrectPunchForm
-                          row={punchRow}
-                          clockInLocal={formatDatetimeLocalInTimezone(
-                            punchRow.clockInAt,
-                            tz,
-                          )}
-                          clockOutLocal={
-                            punchRow.clockOutAt
-                              ? formatDatetimeLocalInTimezone(
-                                  punchRow.clockOutAt,
+                      {canEditPunches
+                        ? punches.map((punch) => {
+                            const punchRow: AdminPunchRow = {
+                              punchId: punch.id,
+                              assignmentId: a.id,
+                              employeeLabel: label ?? "—",
+                              departmentName: dept,
+                              shiftStartsAt: sh.startsAt,
+                              shiftEndsAt: sh.endsAt,
+                              clockInAt: punch.clockInAt,
+                              clockOutAt: punch.clockOutAt,
+                              clockInNote: punch.clockInNote,
+                              clockOutNote: punch.clockOutNote,
+                            };
+                            return (
+                              <AdminCorrectPunchForm
+                                key={punch.id}
+                                row={punchRow}
+                                clockInLocal={formatDatetimeLocalInTimezone(
+                                  punchRow.clockInAt,
                                   tz,
-                                )
-                              : ""
+                                )}
+                                clockOutLocal={
+                                  punchRow.clockOutAt
+                                    ? formatDatetimeLocalInTimezone(
+                                        punchRow.clockOutAt,
+                                        tz,
+                                      )
+                                    : ""
+                                }
+                              />
+                            );
+                          })
+                        : null}
+                      {canEditPunches && !hasOpenPunch ? (
+                        <div
+                          className={
+                            punches.length > 0
+                              ? "mt-4 border-t border-slate-100 pt-4"
+                              : "mt-3"
                           }
-                        />
+                        >
+                          {punches.length > 0 ? (
+                            <p className="mb-2 text-xs text-slate-500">
+                              Add another segment (e.g. after a break).
+                            </p>
+                          ) : null}
+                          <AdminCreatePunchForm
+                            row={createRow}
+                            defaultClockInLocal={formatDatetimeLocalInTimezone(
+                              sh.startsAt,
+                              tz,
+                            )}
+                            defaultClockOutLocal={formatDatetimeLocalInTimezone(
+                              sh.endsAt,
+                              tz,
+                            )}
+                          />
+                        </div>
                       ) : null}
-                      {canEditPunches && missingRow ? (
-                        <AdminCreatePunchForm
-                          row={missingRow}
-                          defaultClockInLocal={formatDatetimeLocalInTimezone(
-                            sh.startsAt,
-                            tz,
-                          )}
-                          defaultClockOutLocal={formatDatetimeLocalInTimezone(
-                            sh.endsAt,
-                            tz,
-                          )}
-                        />
-                      ) : null}
-                      {!canEditPunches && !punch ? (
+                      {!canEditPunches && punches.length === 0 ? (
                         <p className="mt-2 text-xs text-slate-500">
                           Ask an administrator to add a punch if this shift was worked.
                         </p>

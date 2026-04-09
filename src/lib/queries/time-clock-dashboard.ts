@@ -58,7 +58,7 @@ export async function getTerminalDashboard(
   }
 
   const clockInOptions = clockable
-    .filter((a) => !a.timePunch)
+    .filter((a) => !a.timePunches.some((p) => p.clockOutAt == null))
     .map((a) => {
       const s = a.shift;
       const title = s.title || s.role?.name || s.department.name;

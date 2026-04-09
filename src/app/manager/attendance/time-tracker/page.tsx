@@ -69,8 +69,7 @@ export default async function ManagerTimeTrackerPage({
         end: shift.endsAt,
         title,
       });
-      if (asg.timePunch) {
-        const p = asg.timePunch;
+      for (const p of asg.timePunches) {
         row.segments.push({
           kind: "punched",
           start: p.clockInAt,

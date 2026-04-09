@@ -120,7 +120,7 @@ export async function getMissingClockInsDuringShift(
 
   const rows = await prisma.shiftAssignment.findMany({
     where: {
-      timePunch: null,
+      timePunches: { none: {} },
       shift: shiftWhere,
     },
     include: {
@@ -165,7 +165,7 @@ export async function getMissedShiftsWithoutPunch(
 
   const rows = await prisma.shiftAssignment.findMany({
     where: {
-      timePunch: null,
+      timePunches: { none: {} },
       shift: shiftWhere,
     },
     include: {

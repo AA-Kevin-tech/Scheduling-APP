@@ -85,7 +85,7 @@ export async function listAssignmentsWithoutPunchOverlappingDay(
   const { start, end } = zonedDayBoundsUtc(isoKey, tz);
   const rows = await prisma.shiftAssignment.findMany({
     where: {
-      timePunch: null,
+      timePunches: { none: {} },
       shift: {
         publishedAt: { not: null },
         startsAt: { lt: end },

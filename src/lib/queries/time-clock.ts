@@ -12,20 +12,30 @@ const shiftInclude = {
 
 const assignmentTerminalInclude = {
   shift: { include: shiftInclude },
-  timePunch: true,
+  timePunches: { orderBy: { clockInAt: "asc" as const } },
   employee: { include: { user: { select: { name: true, email: true } } } },
 } as const;
 
+export type TimeClockPinResolve =
+  | {
+      kind: "ok";
+      employee: { id: string; userId: string; timezone: string };
+    }
+  | { kind: "not_found" }
+  | { kind: "ambiguous" };
+
 /** Resolve employee by time clock PIN (indexed lookup + bcrypt; legacy rows scan hashes only). */
-export async function findEmployeeByTimeClockPin(raw: string) {
+export async function findEmployeeByTimeClockPin(
+  raw: string,
+): Promise<TimeClockPinResolve> {
   const pin = raw.trim();
-  if (!/^\d{4,8}$/.test(pin)) return null;
+  if (!/^\d{4,8}$/.test(pin)) return { kind: "not_found" };
 
   let digest: string;
   try {
     digest = timeClockPinLookupDigest(pin);
   } catch {
-    return null;
+    return { kind: "not_found" };
   }
 
   const withLookup = await prisma.employee.findMany({
@@ -38,14 +48,19 @@ export async function findEmployeeByTimeClockPin(raw: string) {
     },
   });
 
+  const lookupMatches: { id: string; userId: string; timezone: string }[] = [];
   for (const r of withLookup) {
     if (r.timeClockPinHash && (await compare(pin, r.timeClockPinHash))) {
-      return {
+      lookupMatches.push({
         id: r.id,
         userId: r.userId,
         timezone: r.timezone,
-      };
+      });
     }
+  }
+  if (lookupMatches.length > 1) return { kind: "ambiguous" };
+  if (lookupMatches.length === 1) {
+    return { kind: "ok", employee: lookupMatches[0] };
   }
 
   const legacy = await prisma.employee.findMany({
@@ -62,16 +77,21 @@ export async function findEmployeeByTimeClockPin(raw: string) {
     },
   });
 
+  const legacyMatches: { id: string; userId: string; timezone: string }[] = [];
   for (const r of legacy) {
     if (r.timeClockPinHash && (await compare(pin, r.timeClockPinHash))) {
-      return {
+      legacyMatches.push({
         id: r.id,
         userId: r.userId,
         timezone: r.timezone,
-      };
+      });
     }
   }
-  return null;
+  if (legacyMatches.length > 1) return { kind: "ambiguous" };
+  if (legacyMatches.length === 1) {
+    return { kind: "ok", employee: legacyMatches[0] };
+  }
+  return { kind: "not_found" };
 }
 
 /** Open punch (clocked in, not out) for this employee on any assignment. */
@@ -107,7 +127,7 @@ export async function getClockableAssignmentsForEmployee(
     },
     include: {
       shift: { include: shiftInclude },
-      timePunch: true,
+      timePunches: { orderBy: { clockInAt: "asc" } },
     },
     orderBy: { shift: { startsAt: "asc" } },
   });

@@ -152,13 +152,19 @@ export async function adminCreateTimePunch(
 
   const assignment = await prisma.shiftAssignment.findUnique({
     where: { id: assignmentId },
-    include: { timePunch: { select: { id: true } }, shift: true },
+    include: { timePunches: { select: { clockOutAt: true } }, shift: true },
   });
   if (!assignment) {
     return { error: "Assignment not found." };
   }
-  if (assignment.timePunch) {
-    return { error: "This assignment already has a time punch." };
+  const openOnAssignment = assignment.timePunches.some(
+    (p) => p.clockOutAt == null,
+  );
+  if (openOnAssignment) {
+    return {
+      error:
+        "This assignment has an open punch. Clock it out before adding another.",
+    };
   }
   if (assignment.shift.publishedAt == null) {
     return { error: "Only published shifts can receive a retroactive punch." };

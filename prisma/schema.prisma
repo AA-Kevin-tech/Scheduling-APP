@@ -232,7 +232,8 @@ model Employee {
   hourLimits       HourLimit[]
   locations        EmployeeLocation[]
 
-  @@index([timeClockPinLookup])
+  /// Enforces unique kiosk PINs among rows that have a lookup digest (nulls allowed for employees without a PIN).
+  @@unique([timeClockPinLookup])
 }
 
 /// Pending self-service onboarding link (email + token). Consumed when the employee completes signup.
@@ -370,15 +371,16 @@ model ShiftAssignment {
 
   swapRequestsFrom SwapRequest[] @relation("SwapFromAssignment")
   swapRequestsTo   SwapRequest[] @relation("SwapToAssignment")
-  timePunch        ShiftTimePunch?
+  /// One row per clock-in segment (e.g. return from lunch = new row).
+  timePunches      ShiftTimePunch[]
 }
 
-/// One punch record per shift assignment (clock in / clock out pair).
+/// Clock in / clock out segment; multiple rows per assignment are allowed (breaks).
 model ShiftTimePunch {
   id                String    @id @default(cuid())
-  shiftAssignmentId String    @unique
+  shiftAssignmentId String
   clockInAt         DateTime
-  clockOutAt      DateTime?
+  clockOutAt        DateTime?
   clockInNote       String?   @db.Text
   clockOutNote      String?   @db.Text
   createdAt         DateTime  @default(now())
@@ -386,6 +388,7 @@ model ShiftTimePunch {
 
   assignment ShiftAssignment @relation(fields: [shiftAssignmentId], references: [id], onDelete: Cascade)
 
+  @@index([shiftAssignmentId])
   @@index([clockOutAt])
 }
 

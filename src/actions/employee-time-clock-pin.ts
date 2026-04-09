@@ -1,11 +1,13 @@
 "use server";
 
-import { compare, hash } from "bcryptjs";
+import { hash } from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
+import { isTimeClockPinAvailable } from "@/lib/time-clock/pin-uniqueness";
 import { timeClockPinLookupDigest } from "@/lib/time-clock/pin-lookup";
 
 const schema = z.object({
@@ -17,40 +19,8 @@ const schema = z.object({
 
 const PIN_REGEX = /^\d{4,8}$/;
 
-async function pinIsUniqueForOthers(
-  plainPin: string,
-  excludeEmployeeId: string,
-): Promise<boolean> {
-  let digest: string;
-  try {
-    digest = timeClockPinLookupDigest(plainPin);
-  } catch {
-    return false;
-  }
-  const clash = await prisma.employee.findFirst({
-    where: {
-      id: { not: excludeEmployeeId },
-      timeClockPinLookup: digest,
-    },
-    select: { id: true },
-  });
-  if (clash) return false;
-
-  const legacy = await prisma.employee.findMany({
-    where: {
-      id: { not: excludeEmployeeId },
-      timeClockPinHash: { not: null },
-      timeClockPinLookup: null,
-    },
-    select: { timeClockPinHash: true },
-  });
-  for (const r of legacy) {
-    if (r.timeClockPinHash && (await compare(plainPin, r.timeClockPinHash))) {
-      return false;
-    }
-  }
-  return true;
-}
+const PIN_IN_USE_MSG =
+  "That PIN is already in use. Choose a different one for your time clock.";
 
 export async function updateEmployeeTimeClockPin(
   _prev: { ok?: boolean; error?: string } | undefined,
@@ -93,8 +63,8 @@ export async function updateEmployeeTimeClockPin(
     return { error: "Employee not found." };
   }
 
-  if (!(await pinIsUniqueForOthers(p, employeeId))) {
-    return { error: "That PIN is already assigned to another employee." };
+  if (!(await isTimeClockPinAvailable(p, employeeId))) {
+    return { error: PIN_IN_USE_MSG };
   }
 
   const timeClockPinHash = await hash(p, 12);
@@ -104,10 +74,20 @@ export async function updateEmployeeTimeClockPin(
   } catch {
     return { error: "Server configuration error (AUTH_SECRET)." };
   }
-  await prisma.employee.update({
-    where: { id: employeeId },
-    data: { timeClockPinHash, timeClockPinLookup },
-  });
+  try {
+    await prisma.employee.update({
+      where: { id: employeeId },
+      data: { timeClockPinHash, timeClockPinLookup },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return { error: PIN_IN_USE_MSG };
+    }
+    throw e;
+  }
 
   await writeAuditLog({
     actorUserId: session.user.id,
