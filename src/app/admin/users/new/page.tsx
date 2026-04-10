@@ -13,6 +13,7 @@ export default async function AdminNewUserPage() {
 
   const deptOptions = departments.map((d) => ({
     id: d.id,
+    locationId: d.locationId,
     name: d.location ? `${d.name} (${d.location.name})` : d.name,
     roles: d.roles.map((r) => ({ id: r.id, name: r.name })),
   }));

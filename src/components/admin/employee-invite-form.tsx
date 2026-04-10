@@ -21,7 +21,10 @@ export function EmployeeInviteForm(props: Props) {
     props;
 
   const [assignments, setAssignments] = useState<Assignment[]>(() => {
-    const first = departments[0];
+    const initialLocSet = locations[0] ? new Set([locations[0].id]) : new Set<string>();
+    const atVenue = departments.filter((d) => initialLocSet.has(d.locationId));
+    const pool = atVenue.length > 0 ? atVenue : departments;
+    const first = pool[0];
     return [
       {
         departmentId: first?.id ?? "",
@@ -38,9 +41,14 @@ export function EmployeeInviteForm(props: Props) {
 
   const [state, formAction, pending] = useActionState(createEmployeeInvite, null);
 
+  const filteredDepartments = useMemo(
+    () => departments.filter((d) => locIds.has(d.locationId)),
+    [departments, locIds],
+  );
+
   const deptById = useMemo(
-    () => Object.fromEntries(departments.map((d) => [d.id, d])),
-    [departments],
+    () => Object.fromEntries(filteredDepartments.map((d) => [d.id, d])),
+    [filteredDepartments],
   );
 
   const orderedLocationIds = useMemo(
@@ -55,7 +63,7 @@ export function EmployeeInviteForm(props: Props) {
   }
 
   function addRow() {
-    const first = departments[0];
+    const first = filteredDepartments[0];
     setAssignments((rows) => [
       ...rows,
       {
@@ -107,6 +115,50 @@ export function EmployeeInviteForm(props: Props) {
       window.location.href = successRedirect;
     }
   }, [state, successRedirect]);
+
+  useEffect(() => {
+    if (filteredDepartments.length === 0) {
+      setAssignments((rows) => {
+        const already =
+          rows.length === 1 &&
+          rows[0].departmentId === "" &&
+          rows[0].roleId === null;
+        if (already) return rows;
+        return [{ departmentId: "", roleId: null, isPrimary: true }];
+      });
+      return;
+    }
+
+    const allowed = new Set(filteredDepartments.map((d) => d.id));
+    setAssignments((rows) => {
+      let changed = false;
+      const next = rows.map((row) => {
+        if (allowed.has(row.departmentId)) return row;
+        changed = true;
+        const pick = filteredDepartments[0]!;
+        return {
+          departmentId: pick.id,
+          roleId: pick.roles[0]?.id ?? null,
+          isPrimary: row.isPrimary,
+        };
+      });
+      if (!changed) {
+        if (!rows.some((r) => r.isPrimary) && rows.length > 0) {
+          return rows.map((r, i) => ({ ...r, isPrimary: i === 0 }));
+        }
+        return rows;
+      }
+      let fixed = next;
+      if (!fixed.some((r) => r.isPrimary) && fixed.length > 0) {
+        fixed = fixed.map((r, i) => ({ ...r, isPrimary: i === 0 }));
+      }
+      return fixed;
+    });
+  }, [filteredDepartments]);
+
+  const assignmentsInvalid =
+    filteredDepartments.length === 0 ||
+    assignments.some((a) => !a.departmentId);
 
   if (departments.length === 0) {
     return (
@@ -191,11 +243,18 @@ export function EmployeeInviteForm(props: Props) {
           <button
             type="button"
             onClick={addRow}
-            className="text-sm text-sky-700 hover:underline"
+            disabled={filteredDepartments.length === 0}
+            className="text-sm text-sky-700 hover:underline disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
           >
             Add department
           </button>
         </div>
+        {departments.length > 0 && filteredDepartments.length === 0 ? (
+          <p className="mt-2 text-sm text-amber-800">
+            None of the selected venues have departments yet. Select another
+            venue or add departments for that venue first.
+          </p>
+        ) : null}
         <ul className="mt-3 space-y-3">
           {assignments.map((row, index) => {
             const d = deptById[row.departmentId];
@@ -217,11 +276,22 @@ export function EmployeeInviteForm(props: Props) {
                       }
                       className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
                     >
-                      {departments.map((dep) => (
-                        <option key={dep.id} value={dep.id}>
-                          {dep.name}
+                      {filteredDepartments.length === 0 ? (
+                        <option value="">
+                          No departments for selected venues
                         </option>
-                      ))}
+                      ) : (
+                        <>
+                          {!row.departmentId ? (
+                            <option value="">— Select department —</option>
+                          ) : null}
+                          {filteredDepartments.map((dep) => (
+                            <option key={dep.id} value={dep.id}>
+                              {dep.name}
+                            </option>
+                          ))}
+                        </>
+                      )}
                     </select>
                   </div>
                   <div>
@@ -283,7 +353,7 @@ export function EmployeeInviteForm(props: Props) {
 
       <button
         type="submit"
-        disabled={pending}
+        disabled={pending || assignmentsInvalid}
         className="rounded-md bg-sky-700 px-4 py-2 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
       >
         {pending ? "Sending…" : "Send invite email"}

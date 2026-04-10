@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
@@ -68,26 +69,42 @@ export async function createDepartment(
   });
   if (!loc) return { error: "Venue not found." };
 
-  const slug = await uniqueDepartmentSlug(
-    parsed.data.name,
-    parsed.data.locationId,
-  );
+  const name = parsed.data.name.trim();
+  if (!name) {
+    return { error: "Name is required." };
+  }
 
-  const dept = await prisma.department.create({
-    data: {
-      locationId: parsed.data.locationId,
-      name: parsed.data.name.trim(),
-      slug,
-      colorToken: parsed.data.colorToken,
-      sortOrder: parsed.data.sortOrder,
-      roles: {
-        create: [
-          { name: "Attendant", slug: "attendant" },
-          { name: "Lead", slug: "lead" },
-        ],
+  const slug = await uniqueDepartmentSlug(name, parsed.data.locationId);
+
+  let dept;
+  try {
+    dept = await prisma.department.create({
+      data: {
+        locationId: parsed.data.locationId,
+        name,
+        slug,
+        colorToken: parsed.data.colorToken,
+        sortOrder: parsed.data.sortOrder,
+        roles: {
+          create: [
+            { name: "Attendant", slug: "attendant" },
+            { name: "Lead", slug: "lead" },
+          ],
+        },
       },
-    },
-  });
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === "P2002"
+    ) {
+      return {
+        error:
+          "A department with this name already exists at this venue, or the name could not be saved uniquely. Try a slightly different name.",
+      };
+    }
+    throw e;
+  }
 
   await writeAuditLog({
     actorUserId: session.user.id,
