@@ -105,6 +105,34 @@ export async function getSchedulingLocationIdsForSession(
   return applyActiveVenueCookieToBase(base);
 }
 
+/**
+ * Whether an employee shares at least one venue with the session’s effective scheduling scope.
+ * Matches manager roster visibility (`scope === null` = full org → allowed).
+ */
+export async function employeeOverlapsSchedulingScope(
+  session: Session,
+  employeeId: string,
+): Promise<boolean> {
+  const scope = await getSchedulingLocationIdsForSession(session);
+  const employee = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: {
+      locations: { select: { locationId: true } },
+      departments: {
+        select: { department: { select: { locationId: true } } },
+      },
+    },
+  });
+  if (!employee) return false;
+  if (scope === null) return true;
+  if (scope.length === 0) return false;
+  const empVenues = new Set([
+    ...employee.locations.map((l) => l.locationId),
+    ...employee.departments.map((d) => d.department.locationId),
+  ]);
+  return [...empVenues].some((id) => scope.includes(id));
+}
+
 export type VenueSwitcherPayload = {
   locations: { id: string; name: string }[];
   selected: "__all__" | string;

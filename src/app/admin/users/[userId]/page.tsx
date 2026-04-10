@@ -69,6 +69,7 @@ export default async function AdminEditUserPage({
     lastName,
     role: user.role,
     employeeNumber: user.employee.employeeNumber,
+    phone: user.employee.phone,
     timezone: user.employee.timezone,
     locationIds: user.employee.locations.map((l) => l.locationId),
     assignments: user.employee.departments.map((ed) => ({
@@ -118,13 +119,6 @@ export default async function AdminEditUserPage({
           Manager notes, hourly rate or annual salary, and employment type are not visible
           to the employee.
         </p>
-        <div className="mt-3 space-y-3">
-          <FieldRow label="Phone (employee)">
-            <p className="text-sm text-slate-700">
-              {user.employee.phone ?? "—"}
-            </p>
-          </FieldRow>
-        </div>
         <div className="mt-4">
           <EmployeeHrDetailsForm
             employeeId={employeeId}

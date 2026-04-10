@@ -17,6 +17,7 @@ import {
 import { requireAdmin, requireAdminOrManager } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
+import { validateEmployeePhoneFormValue } from "@/lib/employee-phone-input";
 import { normalizeIanaTimezone } from "@/lib/schedule/tz";
 import { userDisplayName } from "@/lib/user-display-name";
 
@@ -86,6 +87,13 @@ export async function createEmployeeUser(
 
   if (!parsed.success) {
     return { error: zodFormError(parsed.error) };
+  }
+
+  const phoneChecked = validateEmployeePhoneFormValue(
+    String(formData.get("phone") ?? ""),
+  );
+  if (!phoneChecked.ok) {
+    return { error: phoneChecked.error };
   }
 
   const email = parsed.data.email.toLowerCase().trim();
@@ -177,6 +185,7 @@ export async function createEmployeeUser(
       data: {
         userId: u.id,
         employeeNumber: parsed.data.employeeNumber?.trim() || null,
+        phone: phoneChecked.phone,
         timezone: normalizeIanaTimezone(
           typeof parsed.data.timezone === "string"
             ? parsed.data.timezone
@@ -212,6 +221,7 @@ export async function createEmployeeUser(
   revalidatePath("/admin/users");
   revalidatePath("/manager/employees");
   revalidatePath("/manager/schedule");
+  revalidatePath("/employee/profile");
   return { ok: true };
 }
 
@@ -255,6 +265,13 @@ export async function updateEmployeeUser(
 
   if (!parsed.success) {
     return { error: zodFormError(parsed.error) };
+  }
+
+  const phoneChecked = validateEmployeePhoneFormValue(
+    String(formData.get("phone") ?? ""),
+  );
+  if (!phoneChecked.ok) {
+    return { error: phoneChecked.error };
   }
 
   const user = await prisma.user.findUnique({
@@ -330,6 +347,7 @@ export async function updateEmployeeUser(
       where: { id: empId },
       data: {
         employeeNumber: parsed.data.employeeNumber?.trim() || null,
+        phone: phoneChecked.phone,
         timezone: normalizeIanaTimezone(
           typeof parsed.data.timezone === "string"
             ? parsed.data.timezone
@@ -377,6 +395,7 @@ export async function updateEmployeeUser(
   revalidatePath("/manager/employees");
   revalidatePath("/manager/schedule");
   revalidatePath("/employee/schedule");
+  revalidatePath("/employee/profile");
   return { ok: true };
 }
 

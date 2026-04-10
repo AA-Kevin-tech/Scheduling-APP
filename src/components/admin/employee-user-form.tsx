@@ -34,6 +34,7 @@ type Props = {
     lastName: string;
     role: UserRole;
     employeeNumber: string | null;
+    phone?: string | null;
     timezone?: string;
     locationIds: string[];
     assignments: Assignment[];
@@ -269,6 +270,24 @@ export function EmployeeUserForm(props: Props) {
             placeholder="Optional"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-700">
+          Phone
+        </label>
+        <input
+          name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="off"
+          defaultValue={initial?.phone ?? ""}
+          placeholder="Optional — SMS when they opt in"
+          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          Digits, spaces, dashes, +, and parentheses. Same field they can edit on their profile.
+        </p>
       </div>
 
       <div>

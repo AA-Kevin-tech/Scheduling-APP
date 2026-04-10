@@ -4,6 +4,7 @@ import { HourLimitScope } from "@prisma/client";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
+import { EmployeePhoneStaffForm } from "@/components/employee/employee-phone-staff-form";
 import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
 import { FieldRow } from "@/components/ui/field-row";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
@@ -81,9 +82,10 @@ export default async function ManagerEmployeeHourLimitsPage({
           <FieldRow label="Email">
             <p className="text-sm text-slate-600">{employee.user?.email}</p>
           </FieldRow>
-          <FieldRow label="Phone">
-            <p className="text-sm text-slate-700">{employee.phone ?? "—"}</p>
-          </FieldRow>
+          <EmployeePhoneStaffForm
+            employeeId={employeeId}
+            currentPhone={employee.phone}
+          />
           <FieldRow label="Employee #">
             <p className="text-xs text-slate-500">
               {employee.employeeNumber ? `#${employee.employeeNumber}` : "—"}

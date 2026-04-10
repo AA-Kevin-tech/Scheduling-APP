@@ -4,14 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireEmployeeProfile } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
+import { validateEmployeePhoneFormValue } from "@/lib/employee-phone-input";
 import { normalizeIanaTimezone } from "@/lib/schedule/tz";
 
 const timezoneSchema = z.object({
   timezone: z.string().min(1),
-});
-
-const phoneSchema = z.object({
-  phone: z.string().max(40),
 });
 
 export async function updateEmployeeTimezone(
@@ -35,31 +32,17 @@ export async function updateEmployeeTimezone(
   return { ok: true };
 }
 
-function normalizePhone(raw: string): string | null {
-  const t = raw.trim();
-  if (t === "") return null;
-  if (t.length > 40) return null;
-  if (!/^[\d\s\-+().]+$/.test(t)) return null;
-  return t;
-}
-
 export async function updateEmployeePhone(
   _prev: unknown,
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const { employeeId } = await requireEmployeeProfile();
-  const parsed = phoneSchema.safeParse({
-    phone: formData.get("phone") ?? "",
-  });
-  if (!parsed.success) {
-    return { error: "Phone number is too long." };
+  const raw = String(formData.get("phone") ?? "");
+  const checked = validateEmployeePhoneFormValue(raw);
+  if (!checked.ok) {
+    return { error: checked.error };
   }
-  const phone = normalizePhone(parsed.data.phone);
-  if (phone === null && parsed.data.phone.trim() !== "") {
-    return {
-      error: "Use digits and common phone symbols only (spaces, dashes, +, parentheses).",
-    };
-  }
+  const { phone } = checked;
   const row = await prisma.employee.update({
     where: { id: employeeId },
     data: { phone },
