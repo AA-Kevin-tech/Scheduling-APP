@@ -104,6 +104,8 @@ async function validateAssignments(
 
 const createInviteSchema = z.object({
   email: z.string().email(),
+  firstName: z.string().trim().min(1),
+  lastName: z.string().trim(),
   employeeNumber: z.string().nullable().optional(),
   locationIds: z.array(z.string()).min(1),
   assignments: assignmentSchema,
@@ -127,6 +129,8 @@ export async function createEmployeeInvite(
 
   const parsed = createInviteSchema.safeParse({
     email: formData.get("email"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
     employeeNumber: emptyToNull(formData.get("employeeNumber")),
     locationIds,
     assignments,
@@ -193,6 +197,8 @@ export async function createEmployeeInvite(
       token,
       expiresAt,
       invitedById: session.user.id,
+      firstName: parsed.data.firstName.trim(),
+      lastName: parsed.data.lastName.trim() || null,
       employeeNumber: parsed.data.employeeNumber?.trim() || null,
       locationIds,
       assignments: assignmentsJson,

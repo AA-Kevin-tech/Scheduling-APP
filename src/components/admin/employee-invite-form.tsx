@@ -197,6 +197,28 @@ export function EmployeeInviteForm(props: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-medium text-slate-700">
+            First name
+          </label>
+          <input
+            name="firstName"
+            required
+            autoComplete="given-name"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700">
+            Last name
+          </label>
+          <input
+            name="lastName"
+            autoComplete="family-name"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            placeholder="Optional"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700">
             Email
           </label>
           <input

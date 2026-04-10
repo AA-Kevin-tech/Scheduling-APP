@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { HourLimitScope } from "@prisma/client";
 import { auth } from "@/auth";
 import { AdminDeleteUserSection } from "@/components/admin/admin-delete-user-section";
+import { AdminEmployeeFilesSection } from "@/components/admin/admin-employee-files-section";
 import { AdminSetPasswordSection } from "@/components/admin/admin-set-password-section";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
@@ -48,7 +49,7 @@ export default async function AdminEditUserPage({
 
   const employeeId = user.employee.id;
 
-  const [employeeCapRow, effectiveCaps] = await Promise.all([
+  const [employeeCapRow, effectiveCaps, employeeFiles] = await Promise.all([
     prisma.hourLimit.findFirst({
       where: {
         employeeId,
@@ -57,6 +58,19 @@ export default async function AdminEditUserPage({
       orderBy: { updatedAt: "desc" },
     }),
     getEffectiveHourCaps(employeeId),
+    prisma.employeeFile.findMany({
+      where: { employeeId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        fileName: true,
+        contentType: true,
+        sizeBytes: true,
+        description: true,
+        createdAt: true,
+        uploadedBy: { select: { name: true, email: true } },
+      },
+    }),
   ]);
 
   const deptOptions = departments.map((d) => ({
@@ -159,6 +173,21 @@ export default async function AdminEditUserPage({
           />
         </div>
       </div>
+
+      <AdminEmployeeFilesSection
+        employeeId={employeeId}
+        adminUserIdForRevalidate={user.id}
+        files={employeeFiles.map((f) => ({
+          id: f.id,
+          fileName: f.fileName,
+          contentType: f.contentType,
+          sizeBytes: f.sizeBytes,
+          description: f.description,
+          createdAt: f.createdAt,
+          uploadedByLabel:
+            f.uploadedBy?.name?.trim() || f.uploadedBy?.email || null,
+        }))}
+      />
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>

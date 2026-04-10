@@ -11,9 +11,17 @@ const FILING = [
   { value: "HEAD_OF_HOUSEHOLD", label: "Head of household" },
 ] as const;
 
-type Props = { token: string };
+type Props = {
+  token: string;
+  defaultFirstName?: string;
+  defaultLastName?: string;
+};
 
-export function EmployeeOnboardingForm({ token }: Props) {
+export function EmployeeOnboardingForm({
+  token,
+  defaultFirstName,
+  defaultLastName,
+}: Props) {
   const [state, formAction, pending] = useActionState(
     completeEmployeeOnboarding,
     null,
@@ -112,6 +120,7 @@ export function EmployeeOnboardingForm({ token }: Props) {
               name="firstName"
               required
               autoComplete="given-name"
+              defaultValue={defaultFirstName ?? ""}
               className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
             />
           </div>
@@ -121,6 +130,7 @@ export function EmployeeOnboardingForm({ token }: Props) {
             </label>
             <input
               name="lastName"
+              defaultValue={defaultLastName ?? ""}
               autoComplete="family-name"
               className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
             />

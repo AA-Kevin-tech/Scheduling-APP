@@ -49,6 +49,14 @@ export default async function OnboardingTokenPage({
         </h1>
         <p className="mt-1 text-sm text-slate-600">
           Setting up account for{" "}
+          {meta.inviteDisplayName ? (
+            <>
+              <span className="font-medium text-slate-800">
+                {meta.inviteDisplayName}
+              </span>
+              <span className="text-slate-500"> · </span>
+            </>
+          ) : null}
           <span className="font-medium text-slate-800">{meta.email}</span>
         </p>
         <p className="mt-3 text-xs text-slate-500">
@@ -56,7 +64,11 @@ export default async function OnboardingTokenPage({
           export will be available when your payroll team enables it.
         </p>
         <div className="mt-8">
-          <EmployeeOnboardingForm token={token} />
+          <EmployeeOnboardingForm
+            token={token}
+            defaultFirstName={meta.defaultFirstName ?? undefined}
+            defaultLastName={meta.defaultLastName ?? undefined}
+          />
         </div>
         <p className="mt-8 text-center text-sm text-slate-500">
           Already finished?{" "}

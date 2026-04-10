@@ -43,6 +43,8 @@ model User {
   sentEmployeeInvites EmployeeInvite[]
   /// Venues this manager may schedule and view (managers without rows fall back to EmployeeLocation).
   managerLocations ManagerLocation[]
+  /// HR / compliance documents uploaded from admin user edit (binary stored in Postgres).
+  uploadedEmployeeFiles EmployeeFile[] @relation("EmployeeFileUploadedBy")
 }
 
 /// Single-tenant QuickBooks Online link (OAuth tokens for payroll/time export).
@@ -231,9 +233,28 @@ model Employee {
   swapRequestsIn   SwapRequest[]    @relation("SwapTarget")
   hourLimits       HourLimit[]
   locations        EmployeeLocation[]
+  files            EmployeeFile[]
 
   /// Enforces unique kiosk PINs among rows that have a lookup digest (nulls allowed for employees without a PIN).
   @@unique([timeClockPinLookup])
+}
+
+/// Admin-uploaded documents tied to an employee (not visible in the employee app).
+model EmployeeFile {
+  id                 String   @id @default(cuid())
+  employeeId         String
+  fileName           String
+  contentType        String?
+  sizeBytes          Int
+  data               Bytes
+  description        String?  @db.Text
+  uploadedByUserId   String?
+  createdAt          DateTime @default(now())
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  uploadedBy User?    @relation("EmployeeFileUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([employeeId])
 }
 
 /// Pending self-service onboarding link (email + token). Consumed when the employee completes signup.
@@ -251,6 +272,8 @@ model EmployeeInvite {
   stage     EmployeeInviteStage @default(INVITED)
 
   employeeNumber String?
+  firstName      String?
+  lastName       String?
   locationIds    String[] @default([])
   assignments    Json
 
