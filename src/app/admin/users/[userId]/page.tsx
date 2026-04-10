@@ -10,6 +10,7 @@ import { EmployeeUserForm } from "@/components/admin/employee-user-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
 import { FieldRow } from "@/components/ui/field-row";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
@@ -33,6 +34,17 @@ export default async function AdminEditUserPage({
   ]);
 
   if (!user?.employee) notFound();
+
+  const venueScope =
+    session != null ? await getSchedulingLocationIdsForSession(session) : null;
+  if (venueScope != null && venueScope.length > 0) {
+    const overlaps = user.employee.locations.some((el) =>
+      venueScope.includes(el.locationId),
+    );
+    if (!overlaps) {
+      notFound();
+    }
+  }
 
   const employeeId = user.employee.id;
 
@@ -92,6 +104,14 @@ export default async function AdminEditUserPage({
           ← Users
         </Link>
       </div>
+
+      {venueScope != null && venueScope.length > 0 ? (
+        <p className="text-sm text-slate-600">
+          Venue filter is on. You can still assign any location or department
+          here; switch to <span className="font-medium">All venues</span> above
+          when you need the full lists while editing.
+        </p>
+      ) : null}
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <EmployeeUserForm

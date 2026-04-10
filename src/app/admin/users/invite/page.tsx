@@ -1,14 +1,24 @@
 import Link from "next/link";
+import { auth } from "@/auth";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireAdmin } from "@/lib/auth/guards";
 import { EmployeeInviteForm } from "@/components/admin/employee-invite-form";
-import { getLocations } from "@/lib/queries/admin";
+import { getLocationsForScope } from "@/lib/queries/admin";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
 
 export default async function AdminInviteUserPage() {
   await requireAdmin();
+  const session = await auth();
+  const venueScope =
+    session != null ? await getSchedulingLocationIdsForSession(session) : null;
+
   const [locations, departments] = await Promise.all([
-    getLocations(),
-    getDepartmentsWithRoles(),
+    getLocationsForScope(venueScope),
+    getDepartmentsWithRoles(
+      venueScope != null && venueScope.length > 0
+        ? { onlyAtLocations: venueScope }
+        : undefined,
+    ),
   ]);
 
   const deptOptions = departments.map((d) => ({
@@ -40,6 +50,14 @@ export default async function AdminInviteUserPage() {
         </Link>
         .
       </p>
+
+      {venueScope != null && venueScope.length > 0 ? (
+        <p className="text-sm text-slate-600">
+          Locations and departments match the venue switcher. Use{" "}
+          <span className="font-medium">All venues</span> to include multiple
+          sites on the invite.
+        </p>
+      ) : null}
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <EmployeeInviteForm

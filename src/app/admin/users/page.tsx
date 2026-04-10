@@ -1,10 +1,20 @@
 import Link from "next/link";
+import { auth } from "@/auth";
+import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireAdmin } from "@/lib/auth/guards";
 import { getUsersForAdminList } from "@/lib/queries/admin";
 
 export default async function AdminUsersPage() {
   await requireAdmin();
-  const users = await getUsersForAdminList();
+  const session = await auth();
+  const venueScope =
+    session != null ? await getSchedulingLocationIdsForSession(session) : null;
+  const scoped =
+    venueScope != null && venueScope.length > 0 ? venueScope : null;
+
+  const users = await getUsersForAdminList({
+    onlyAtLocations: scoped ?? undefined,
+  });
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -31,6 +41,14 @@ export default async function AdminUsersPage() {
           </Link>
         </div>
       </div>
+
+      {scoped ? (
+        <p className="text-sm text-slate-600">
+          Listing users who work at the venue(s) selected above (and accounts
+          without an employee profile). Choose <span className="font-medium">All venues</span>{" "}
+          for the full directory.
+        </p>
+      ) : null}
 
       <p className="text-sm text-slate-600">
         <span className="font-medium text-slate-800">Add employee</span> creates

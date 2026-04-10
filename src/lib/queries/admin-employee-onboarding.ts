@@ -21,6 +21,8 @@ export async function getEmployeeOnboardingInvites(opts: {
   view: OnboardingInviteView;
   /** If set (e.g. manager), only invites this user sent. */
   invitedByUserId?: string;
+  /** When non-null and non-empty, only invites that include at least one of these venue ids. */
+  onlyAtLocations?: string[] | null;
   take?: number;
 }): Promise<EmployeeOnboardingInviteRow[]> {
   const now = new Date();
@@ -59,6 +61,11 @@ export async function getEmployeeOnboardingInvites(opts: {
       break;
     default:
       break;
+  }
+
+  const scope = opts.onlyAtLocations;
+  if (scope != null && scope.length > 0) {
+    where = { AND: [where, { locationIds: { hasSome: scope } }] };
   }
 
   const orderBy: Prisma.EmployeeInviteOrderByWithRelationInput =
