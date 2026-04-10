@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { HourLimitScope } from "@prisma/client";
 import { auth } from "@/auth";
 import { AdminDeleteUserSection } from "@/components/admin/admin-delete-user-section";
+import { AdminSetPasswordSection } from "@/components/admin/admin-set-password-section";
 import { EmployeeHourLimitsForm } from "@/components/employee-hour-limits-form";
 import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeUserForm } from "@/components/admin/employee-user-form";
@@ -102,6 +103,11 @@ export default async function AdminEditUserPage({
           locations={locations}
         />
       </div>
+
+      <AdminSetPasswordSection
+        userId={user.id}
+        isSelf={session?.user?.id === user.id}
+      />
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>

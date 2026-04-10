@@ -11,11 +11,6 @@ const requestSchema = z.object({
   email: z.string().email(),
 });
 
-const resetSchema = z.object({
-  token: z.string().min(1),
-  password: z.string().min(8),
-});
-
 export async function requestPasswordReset(
   _prev: unknown,
   formData: FormData,
@@ -64,15 +59,15 @@ export async function resetPassword(
   _prev: unknown,
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
-  const parsed = resetSchema.safeParse({
-    token: formData.get("token"),
-    password: formData.get("password"),
-  });
-  if (!parsed.success) {
+  const token = String(formData.get("token") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+
+  if (!token) {
+    return { error: "This reset link is invalid or has expired." };
+  }
+  if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
-
-  const { token, password } = parsed.data;
 
   const row = await prisma.verificationToken.findFirst({
     where: { token },
@@ -83,6 +78,20 @@ export async function resetPassword(
   }
 
   const email = row.identifier.toLowerCase().trim();
+  const existing = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+  if (!existing) {
+    await prisma.verificationToken.deleteMany({
+      where: { identifier: row.identifier, token: row.token },
+    });
+    return {
+      error:
+        "This account is no longer available. Contact an administrator for help.",
+    };
+  }
+
   const passwordHash = await hash(password, 12);
 
   await prisma.$transaction(async (tx) => {

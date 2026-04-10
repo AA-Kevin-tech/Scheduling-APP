@@ -469,6 +469,70 @@ export async function deleteUserFromAdmin(
   redirect("/admin/users");
 }
 
+const adminSetPasswordSchema = z.object({
+  userId: z.string().min(1),
+  password: z.string().min(8),
+  confirmPassword: z.string().min(1),
+});
+
+/**
+ * Sets a new credentials password for any user. Invalidates all sessions for that user.
+ * Admin only.
+ */
+export async function adminSetUserPassword(
+  _prev: unknown,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const session = await requireAdmin();
+
+  const parsed = adminSetPasswordSchema.safeParse({
+    userId: formData.get("userId"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { error: zodFormError(parsed.error) };
+  }
+
+  if (parsed.data.password !== parsed.data.confirmPassword) {
+    return { error: "Passwords do not match." };
+  }
+
+  const userId = parsed.data.userId;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true },
+  });
+  if (!user) {
+    return { error: "User not found." };
+  }
+
+  const passwordHash = await hash(parsed.data.password, 12);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+        credentialVersion: { increment: 1 },
+      },
+    });
+    await tx.session.deleteMany({ where: { userId } });
+  });
+
+  await writeAuditLog({
+    actorUserId: session.user.id,
+    entityType: "User",
+    entityId: userId,
+    action: "PASSWORD_SET_BY_ADMIN",
+    payload: { email: user.email },
+  });
+
+  revalidatePath("/admin/users");
+  revalidatePath(`/admin/users/${userId}`);
+  return { ok: true };
+}
+
 function emptyToNull(v: FormDataEntryValue | null): string | null {
   if (v === null || v === "") return null;
   return String(v);
