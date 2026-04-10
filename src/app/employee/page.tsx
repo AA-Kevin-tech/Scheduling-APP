@@ -1,11 +1,54 @@
 import Link from "next/link";
+import { formatInTimeZone } from "date-fns-tz";
+import { WeekAnnouncementStrip } from "@/components/schedule/week-announcement-strip";
 import { requireEmployeeProfile } from "@/lib/auth/guards";
 import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
+import { prisma } from "@/lib/db";
+import {
+  listScheduleAnnotationsOverlappingYmdRange,
+  toScheduleAnnotationDto,
+} from "@/lib/queries/schedule-annotations";
 import { getEffectiveHourCaps, sumAssignedMinutesInRange } from "@/lib/services/hours";
+import { addCalendarDaysInZone, normalizeIanaTimezone } from "@/lib/schedule/tz";
 
 export default async function EmployeeHomePage() {
   const { session, employeeId } = await requireEmployeeProfile();
   const name = session.user.name ?? session.user.email ?? "there";
+
+  const empVenues = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: {
+      timezone: true,
+      locations: { select: { locationId: true } },
+      departments: { select: { department: { select: { locationId: true } } } },
+    },
+  });
+  const empTz = normalizeIanaTimezone(empVenues?.timezone);
+  const venueIds = [
+    ...new Set([
+      ...(empVenues?.locations.map((l) => l.locationId) ?? []),
+      ...(empVenues?.departments.map((d) => d.department.locationId) ?? []),
+    ]),
+  ];
+  const todayYmd = formatInTimeZone(new Date(), empTz, "yyyy-MM-dd");
+  const throughYmd = addCalendarDaysInZone(todayYmd, 8, empTz);
+  const homeAnnouncements =
+    venueIds.length > 0
+      ? (
+          await listScheduleAnnotationsOverlappingYmdRange(
+            venueIds,
+            todayYmd,
+            throughYmd,
+          )
+        )
+          .map(toScheduleAnnotationDto)
+          .filter((a) => a.showAnnouncement)
+          .sort((a, b) => {
+            const byDate = a.startsOnYmd.localeCompare(b.startsOnYmd);
+            if (byDate !== 0) return byDate;
+            return a.title.localeCompare(b.title);
+          })
+      : [];
 
   const weekStart = startOfWeekMondayUtc(new Date());
   const weekEnd = addWeeksUtc(weekStart, 1);
@@ -28,6 +71,11 @@ export default async function EmployeeHomePage() {
         </p>
       </div>
 
+      <WeekAnnouncementStrip
+        items={homeAnnouncements}
+        title="Schedule notes (next several days)"
+      />
+
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-medium text-slate-500">Hours this week (UTC)</h2>
         <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-900">
@@ -48,9 +96,10 @@ export default async function EmployeeHomePage() {
             href="/employee/schedule"
             className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
           >
-            <span className="font-medium text-slate-900">My schedule</span>
+            <span className="font-medium text-slate-900">Schedule</span>
             <span className="mt-1 block text-sm text-slate-600">
-              Week view and shift details
+              Your week and shift details; use <strong>Full location</strong> there
+              to see everyone published at your site (all departments).
             </span>
           </Link>
         </li>
@@ -70,9 +119,9 @@ export default async function EmployeeHomePage() {
             href="/employee/availability"
             className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
           >
-            <span className="font-medium text-slate-900">Availability</span>
+            <span className="font-medium text-slate-900">Can&apos;t work</span>
             <span className="mt-1 block text-sm text-slate-600">
-              When you can usually work
+              Recurring times you are not available
             </span>
           </Link>
         </li>

@@ -18,6 +18,14 @@ import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
 import { initialFirstLastFromUser } from "@/lib/user-display-name";
+import {
+  adminCreateUnavailabilitySlot,
+  adminDeleteUnavailabilitySlot,
+  adminUpdateUnavailabilitySlot,
+} from "@/actions/admin/employee-unavailability";
+import { UnavailabilityAddForm } from "@/components/unavailability/unavailability-add-form";
+import { UnavailabilityDeleteForm } from "@/components/unavailability/unavailability-delete-form";
+import { UnavailabilitySlotForm } from "@/components/unavailability/unavailability-slot-form";
 
 export default async function AdminEditUserPage({
   params,
@@ -49,29 +57,34 @@ export default async function AdminEditUserPage({
 
   const employeeId = user.employee.id;
 
-  const [employeeCapRow, effectiveCaps, employeeFiles] = await Promise.all([
-    prisma.hourLimit.findFirst({
-      where: {
-        employeeId,
-        scope: HourLimitScope.EMPLOYEE,
-      },
-      orderBy: { updatedAt: "desc" },
-    }),
-    getEffectiveHourCaps(employeeId),
-    prisma.employeeFile.findMany({
-      where: { employeeId },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        fileName: true,
-        contentType: true,
-        sizeBytes: true,
-        description: true,
-        createdAt: true,
-        uploadedBy: { select: { name: true, email: true } },
-      },
-    }),
-  ]);
+  const [employeeCapRow, effectiveCaps, employeeFiles, unavailabilitySlots] =
+    await Promise.all([
+      prisma.hourLimit.findFirst({
+        where: {
+          employeeId,
+          scope: HourLimitScope.EMPLOYEE,
+        },
+        orderBy: { updatedAt: "desc" },
+      }),
+      getEffectiveHourCaps(employeeId),
+      prisma.employeeFile.findMany({
+        where: { employeeId },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          fileName: true,
+          contentType: true,
+          sizeBytes: true,
+          description: true,
+          createdAt: true,
+          uploadedBy: { select: { name: true, email: true } },
+        },
+      }),
+      prisma.availability.findMany({
+        where: { employeeId },
+        orderBy: [{ dayOfWeek: "asc" }, { startsAt: "asc" }],
+      }),
+    ]);
 
   const deptOptions = departments.map((d) => ({
     id: d.id,
@@ -188,6 +201,69 @@ export default async function AdminEditUserPage({
             f.uploadedBy?.name?.trim() || f.uploadedBy?.email || null,
         }))}
       />
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-medium text-slate-800">
+          Times they can&apos;t work
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Recurring weekly blocks when this person is not available (same as
+          their employee &ldquo;Can&apos;t work&rdquo; page). Shift assignment
+          rules are unchanged; this is for visibility and future scheduling use.
+        </p>
+        <div className="mt-4 rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+          <h3 className="text-xs font-medium text-slate-700">Add block</h3>
+          <UnavailabilityAddForm createSlot={adminCreateUnavailabilitySlot}>
+            <input type="hidden" name="employeeId" value={employeeId} />
+            <input
+              type="hidden"
+              name="adminUserIdForRevalidate"
+              value={user.id}
+            />
+          </UnavailabilityAddForm>
+        </div>
+        <div className="mt-4">
+          <h3 className="text-xs font-medium text-slate-700">Existing blocks</h3>
+          {unavailabilitySlots.length === 0 ? (
+            <p className="mt-2 text-sm text-slate-500">None on file.</p>
+          ) : (
+            <ul className="mt-2 space-y-2">
+              {unavailabilitySlots.map((s) => (
+                <li
+                  key={s.id}
+                  className="space-y-3 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm"
+                >
+                  <UnavailabilitySlotForm
+                    id={s.id}
+                    dayOfWeek={s.dayOfWeek}
+                    startsAt={s.startsAt}
+                    endsAt={s.endsAt}
+                    updateSlot={adminUpdateUnavailabilitySlot}
+                  >
+                    <input type="hidden" name="employeeId" value={employeeId} />
+                    <input
+                      type="hidden"
+                      name="adminUserIdForRevalidate"
+                      value={user.id}
+                    />
+                  </UnavailabilitySlotForm>
+                  <UnavailabilityDeleteForm
+                    slotId={s.id}
+                    action={adminDeleteUnavailabilitySlot}
+                  >
+                    <input type="hidden" name="employeeId" value={employeeId} />
+                    <input
+                      type="hidden"
+                      name="adminUserIdForRevalidate"
+                      value={user.id}
+                    />
+                  </UnavailabilityDeleteForm>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>

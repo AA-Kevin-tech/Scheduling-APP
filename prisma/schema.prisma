@@ -45,6 +45,8 @@ model User {
   managerLocations ManagerLocation[]
   /// HR / compliance documents uploaded from admin user edit (binary stored in Postgres).
   uploadedEmployeeFiles EmployeeFile[] @relation("EmployeeFileUploadedBy")
+  /// Weekly schedule templates this user saved (manager scheduling).
+  scheduleTemplates     ScheduleTemplate[]
 }
 
 /// Single-tenant QuickBooks Online link (OAuth tokens for payroll/time export).
@@ -77,6 +79,8 @@ model Location {
   managerLocations  ManagerLocation[]
   departments       Department[]
   shifts            Shift[]
+  scheduleAnnotations ScheduleAnnotation[]
+  scheduleTemplateShifts ScheduleTemplateShift[]
 }
 
 /// Manager access to a venue (scheduling, roster, shifts). Synced from user provisioning when role is MANAGER.
@@ -148,6 +152,7 @@ model Department {
   zones               DepartmentZone[]
   roles               Role[]
   shifts              Shift[]
+  scheduleTemplateShifts ScheduleTemplateShift[]
   employeeDepartments EmployeeDepartment[]
   certifications      Certification[]
   coverageRules       CoverageRule[]
@@ -166,6 +171,7 @@ model DepartmentZone {
 
   department    Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   shifts        Shift[]
+  scheduleTemplateShifts ScheduleTemplateShift[]
   coverageRules CoverageRule[]
 
   @@unique([departmentId, slug])
@@ -183,6 +189,7 @@ model Role {
   department          Department           @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   employeeDepartments EmployeeDepartment[]
   shifts              Shift[]
+  scheduleTemplateShifts ScheduleTemplateShift[]
   hourLimits          HourLimit[]
 
   @@unique([departmentId, slug])
@@ -234,6 +241,7 @@ model Employee {
   hourLimits       HourLimit[]
   locations        EmployeeLocation[]
   files            EmployeeFile[]
+  scheduleTemplateShiftAssignments ScheduleTemplateShiftAssignment[]
 
   /// Enforces unique kiosk PINs among rows that have a lookup digest (nulls allowed for employees without a PIN).
   @@unique([timeClockPinLookup])
@@ -415,6 +423,7 @@ model ShiftTimePunch {
   @@index([clockOutAt])
 }
 
+/// Recurring weekly time ranges when the employee is **not** available (same local wall times each week).
 model Availability {
   id            String    @id @default(cuid())
   employeeId    String
@@ -456,6 +465,81 @@ model TimeOffBlackout {
   updatedAt   DateTime @updatedAt
 
   @@index([startsOnYmd, endsOnYmd])
+}
+
+/// Manager-defined notes per venue and date range (announcement, closed, no time off), in org schedule timezone YMD.
+model ScheduleAnnotation {
+  id                   String   @id @default(cuid())
+  locationId           String
+  startsOnYmd          String
+  endsOnYmd            String
+  title                String
+  message              String?  @db.Text
+  highlightHex         String?
+  showAnnouncement     Boolean  @default(true)
+  businessClosed       Boolean  @default(false)
+  blockTimeOffRequests Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([locationId])
+  @@index([startsOnYmd, endsOnYmd])
+}
+
+/// Reusable weekly schedule pattern (manager-defined).
+model ScheduleTemplate {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?  @db.Text
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  createdBy User? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  shifts    ScheduleTemplateShift[]
+
+  @@index([name])
+}
+
+/// One shift slot in a weekly template (wall times in org schedule timezone).
+model ScheduleTemplateShift {
+  id           String @id @default(cuid())
+  templateId   String
+  /// 0 = Monday … 6 = Sunday (org schedule week).
+  dayIndex     Int
+  /// Local start time HH:mm (24h).
+  startHm      String
+  /// Local end time HH:mm.
+  endHm        String
+  /// Calendar days after the start day for `endHm` (0 = same calendar day as start).
+  endDayOffset Int    @default(0)
+  departmentId String
+  locationId   String?
+  roleId       String?
+  zoneId       String?
+  title        String?
+
+  template    ScheduleTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  department  Department       @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  location    Location?        @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  role        Role?            @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  zone        DepartmentZone?  @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  assignments ScheduleTemplateShiftAssignment[]
+
+  @@index([templateId])
+}
+
+model ScheduleTemplateShiftAssignment {
+  id              String @id @default(cuid())
+  templateShiftId String
+  employeeId      String
+
+  templateShift ScheduleTemplateShift @relation(fields: [templateShiftId], references: [id], onDelete: Cascade)
+  employee      Employee              @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([templateShiftId])
 }
 
 model SwapRequest {

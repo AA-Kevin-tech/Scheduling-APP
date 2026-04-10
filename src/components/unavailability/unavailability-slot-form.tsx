@@ -1,33 +1,31 @@
 "use client";
 
 import { useActionState } from "react";
-import { updateAvailabilitySlot } from "@/actions/availability";
+import { DAYS_OF_WEEK_OPTIONS } from "./days-of-week";
 
-const DAYS = [
-  { v: 0, label: "Sunday" },
-  { v: 1, label: "Monday" },
-  { v: 2, label: "Tuesday" },
-  { v: 3, label: "Wednesday" },
-  { v: 4, label: "Thursday" },
-  { v: 5, label: "Friday" },
-  { v: 6, label: "Saturday" },
-];
-
-export function AvailabilitySlotForm({
+export function UnavailabilitySlotForm({
   id,
   dayOfWeek,
   startsAt,
   endsAt,
+  updateSlot,
+  children,
 }: {
   id: string;
   dayOfWeek: number;
   startsAt: string;
   endsAt: string;
+  updateSlot: (
+    _prev: { error?: string } | undefined,
+    formData: FormData,
+  ) => Promise<{ error?: string }>;
+  children?: React.ReactNode;
 }) {
-  const [state, formAction, pending] = useActionState(updateAvailabilitySlot, {});
+  const [state, formAction, pending] = useActionState(updateSlot, {});
 
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-2">
+      {children}
       <input type="hidden" name="id" value={id} />
       <label className="text-xs text-slate-600">
         Day
@@ -36,7 +34,7 @@ export function AvailabilitySlotForm({
           defaultValue={dayOfWeek}
           className="mt-0.5 block rounded-md border border-slate-300 px-2 py-1.5 text-sm"
         >
-          {DAYS.map((d) => (
+          {DAYS_OF_WEEK_OPTIONS.map((d) => (
             <option key={d.v} value={d.v}>
               {d.label}
             </option>

@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { assignEmployeeToShift } from "@/actions/shifts";
+import type { ScheduleAnnotationDTO } from "@/lib/schedule/annotations";
 import type { WeekDayColumn } from "@/lib/schedule/week-grid";
+import { ScheduleAnnotationDialog } from "@/components/schedule/schedule-annotation-dialog";
 
 const DRAG_MIME = "application/x-schedule-shift";
 
@@ -70,6 +73,12 @@ type Props = {
   newShiftQuery?: NewShiftQueryContext;
   /** Manager: drag open shifts onto employee rows to assign. */
   enableDragAssign?: boolean;
+  /** Day notes (announcements / closed / no time off) for column hints. */
+  scheduleAnnotations?: ScheduleAnnotationDTO[];
+  /** When set, column headers include a link to add or edit notes for that day. */
+  annotationLocations?: { id: string; name: string }[];
+  /** Default venue for new notes (e.g. active venue or filtered department’s site). */
+  defaultAnnotationLocationId?: string | null;
 };
 
 type DragPayload = { shiftId: string; dayIso: string };
@@ -159,10 +168,67 @@ export function ScheduleWeekGrid({
   timezoneLabel,
   newShiftQuery,
   enableDragAssign = false,
+  scheduleAnnotations = [],
+  annotationLocations,
+  defaultAnnotationLocationId = null,
 }: Props) {
   const router = useRouter();
   const [assignError, setAssignError] = useState<string | null>(null);
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const [annotationDay, setAnnotationDay] = useState<string | null>(null);
+  const [editingAnnotation, setEditingAnnotation] =
+    useState<ScheduleAnnotationDTO | null>(null);
+
+  const canManageAnnotations =
+    Array.isArray(annotationLocations) && annotationLocations.length > 0;
+
+  useEffect(() => {
+    setEditingAnnotation(null);
+  }, [annotationDay]);
+
+  const annotationsForDay = useCallback(
+    (iso: string) =>
+      scheduleAnnotations.filter(
+        (a) => iso >= a.startsOnYmd && iso <= a.endsOnYmd,
+      ),
+    [scheduleAnnotations],
+  );
+
+  const columnTintHex = useCallback(
+    (iso: string) => {
+      const list = annotationsForDay(iso).filter(
+        (a) => a.showAnnouncement || a.businessClosed,
+      );
+      return list.find((a) => a.highlightHex)?.highlightHex;
+    },
+    [annotationsForDay],
+  );
+
+  const columnPtoBlocked = useCallback(
+    (iso: string) =>
+      annotationsForDay(iso).some((a) => a.blockTimeOffRequests),
+    [annotationsForDay],
+  );
+
+  const headerTooltip = useCallback(
+    (iso: string) => {
+      const list = annotationsForDay(iso);
+      if (list.length === 0) return undefined;
+      return list
+        .map((a) => {
+          const bits = [
+            a.showAnnouncement ? "Announcement" : null,
+            a.businessClosed ? "Closed" : null,
+            a.blockTimeOffRequests ? "No time off" : null,
+          ]
+            .filter(Boolean)
+            .join(", ");
+          return `${a.title}${bits ? ` (${bits})` : ""}${a.message ? ` — ${a.message}` : ""}`;
+        })
+        .join("\n");
+    },
+    [annotationsForDay],
+  );
 
   const handleDragOver = useCallback(
     (e: React.DragEvent, rowId: string, dayIso: string) => {
@@ -247,14 +313,47 @@ export function ScheduleWeekGrid({
               </th>
               {weekDays.map((d) => {
                 const isToday = d.isoKey === todayIso;
+                const tint = columnTintHex(d.isoKey);
+                const pto = columnPtoBlocked(d.isoKey);
+                const tip = headerTooltip(d.isoKey);
+                const noteCount = annotationsForDay(d.isoKey).length;
+                const thStyle: CSSProperties | undefined =
+                  !isToday && tint
+                    ? { backgroundColor: `${tint}55` }
+                    : undefined;
                 return (
                   <th
                     key={d.isoKey}
                     scope="col"
+                    title={tip}
+                    style={thStyle}
                     className={`border-b border-slate-200 px-2 py-2 text-center ${
                       isToday ? "bg-sky-600 text-white" : "text-slate-700"
-                    }`}
+                    } ${!isToday && pto ? "ring-1 ring-inset ring-amber-400/60" : ""}`}
                   >
+                    {canManageAnnotations ? (
+                      <button
+                        type="button"
+                        onClick={() => setAnnotationDay(d.isoKey)}
+                        className={`mb-1 w-full rounded px-1 py-0.5 text-[10px] font-medium ${
+                          isToday
+                            ? "text-white/90 hover:bg-white/10"
+                            : "text-sky-700 hover:bg-sky-50"
+                        }`}
+                      >
+                        {noteCount > 0
+                          ? `${noteCount} note${noteCount === 1 ? "" : "s"}`
+                          : "+ Note"}
+                      </button>
+                    ) : noteCount > 0 ? (
+                      <div
+                        className={`mb-1 text-[10px] font-medium ${
+                          isToday ? "text-white/80" : "text-slate-500"
+                        }`}
+                      >
+                        ● Note
+                      </div>
+                    ) : null}
                     <div className="text-[11px] font-bold uppercase tracking-wider">
                       {d.weekdayShort}
                     </div>
@@ -302,15 +401,24 @@ export function ScheduleWeekGrid({
                       enableDragAssign &&
                       row.rowId !== "open" &&
                       dragOverKey === dropKey;
+                    const tint = columnTintHex(d.isoKey);
+                    const pto = columnPtoBlocked(d.isoKey);
+                    const tdBg: CSSProperties | undefined =
+                      !isToday && tint
+                        ? { backgroundColor: `${tint}22` }
+                        : undefined;
                     return (
                       <td
                         key={d.isoKey}
                         onDragOver={(e) => handleDragOver(e, row.rowId, d.isoKey)}
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, row.rowId, d.isoKey)}
+                        style={tdBg}
                         className={`border-b border-slate-200 px-1.5 py-2 align-top ${
                           isToday ? "bg-sky-50/60" : ""
-                        } ${isDragTarget ? "ring-2 ring-inset ring-sky-400" : ""}`}
+                        } ${isDragTarget ? "ring-2 ring-inset ring-sky-400" : ""} ${
+                          !isToday && pto ? "shadow-[inset_2px_0_0_0_rgba(251,191,36,0.5)]" : ""
+                        }`}
                       >
                         <div className="flex min-h-[52px] flex-col gap-1">
                           {blocks.length === 0 && emptyHref ? (
@@ -353,12 +461,19 @@ export function ScheduleWeekGrid({
                 {weekDays.map((d) => {
                   const isToday = d.isoKey === todayIso;
                   const h = footerHoursByDay[d.isoKey];
+                  const tint = columnTintHex(d.isoKey);
+                  const pto = columnPtoBlocked(d.isoKey);
+                  const tdBg: CSSProperties | undefined =
+                    !isToday && tint
+                      ? { backgroundColor: `${tint}22` }
+                      : undefined;
                   return (
                     <td
                       key={d.isoKey}
+                      style={tdBg}
                       className={`border-t border-slate-200 px-2 py-2 text-center text-sm ${
                         isToday ? "bg-sky-100/80" : ""
-                      }`}
+                      } ${!isToday && pto ? "shadow-[inset_2px_0_0_0_rgba(251,191,36,0.5)]" : ""}`}
                     >
                       {h != null && h > 0 ? h : "—"}
                     </td>
@@ -369,6 +484,22 @@ export function ScheduleWeekGrid({
           )}
         </table>
       </div>
+
+      {annotationDay && canManageAnnotations ? (
+        <ScheduleAnnotationDialog
+          dayIso={annotationDay}
+          onClose={() => {
+            setAnnotationDay(null);
+            setEditingAnnotation(null);
+          }}
+          annotations={scheduleAnnotations}
+          locations={annotationLocations!}
+          defaultLocationId={defaultAnnotationLocationId}
+          editing={editingAnnotation}
+          onStartEdit={setEditingAnnotation}
+          onClearEditing={() => setEditingAnnotation(null)}
+        />
+      ) : null}
     </div>
   );
 }

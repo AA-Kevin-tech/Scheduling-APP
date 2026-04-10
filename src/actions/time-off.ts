@@ -1,5 +1,6 @@
 "use server";
 
+import { formatInTimeZone } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { sessionMayAccessTimeOffRequest } from "@/lib/auth/location-scope";
@@ -10,6 +11,7 @@ import {
   leadTimeBlockLastYmd,
   timeOffOverlapsBlackout,
   timeOffOverlapsMinimumLeadTimeBlock,
+  timeOffOverlapsScheduleAnnotationBlock,
 } from "@/lib/services/time-off-rules";
 import {
   getDefaultScheduleTimezone,
@@ -69,6 +71,56 @@ export async function createTimeOffRequest(
       error:
         "That period includes a blackout date when time off cannot be requested. Ask an admin if you need an exception.",
     };
+  }
+
+  const reqStartYmd = formatInTimeZone(startsAt, scheduleTz, "yyyy-MM-dd");
+  const reqEndYmd = formatInTimeZone(endsAt, scheduleTz, "yyyy-MM-dd");
+
+  const empForVenues = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: {
+      locations: { select: { locationId: true } },
+      departments: {
+        select: { department: { select: { locationId: true } } },
+      },
+    },
+  });
+  const employeeLocationIds = [
+    ...new Set([
+      ...(empForVenues?.locations.map((l) => l.locationId) ?? []),
+      ...(empForVenues?.departments.map((d) => d.department.locationId) ?? []),
+    ]),
+  ];
+
+  if (employeeLocationIds.length > 0) {
+    const annotationBlocks = await prisma.scheduleAnnotation.findMany({
+      where: {
+        blockTimeOffRequests: true,
+        locationId: { in: employeeLocationIds },
+        startsOnYmd: { lte: reqEndYmd },
+        endsOnYmd: { gte: reqStartYmd },
+      },
+      select: {
+        startsOnYmd: true,
+        endsOnYmd: true,
+        locationId: true,
+        blockTimeOffRequests: true,
+      },
+    });
+    if (
+      timeOffOverlapsScheduleAnnotationBlock(
+        startsAt,
+        endsAt,
+        scheduleTz,
+        annotationBlocks,
+        employeeLocationIds,
+      )
+    ) {
+      return {
+        error:
+          "That period includes dates when your site has blocked new time off requests. Ask a manager if you need an exception.",
+      };
+    }
   }
 
   const emp = await prisma.employee.findUnique({

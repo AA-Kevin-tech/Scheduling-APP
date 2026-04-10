@@ -1,6 +1,6 @@
 import { addDays } from "date-fns";
 import { formatInTimeZone, fromZonedTime, toZonedTime } from "date-fns-tz";
-import type { TimeOffBlackout } from "@prisma/client";
+import type { ScheduleAnnotation, TimeOffBlackout } from "@prisma/client";
 import {
   formatDatetimeLocalInTimezone,
   parseYmdTime,
@@ -81,6 +81,33 @@ export function timeOffOverlapsBlackout(
   const reqEndYmd = formatInTimeZone(endsAt, scheduleTz, "yyyy-MM-dd");
   return blackouts.some(
     (b) => reqStartYmd <= b.endsOnYmd && reqEndYmd >= b.startsOnYmd,
+  );
+}
+
+/**
+ * Request overlaps a manager "no time off" annotation if any calendar day in the request
+ * falls in an inclusive YMD range for a location the employee works at.
+ */
+export function timeOffOverlapsScheduleAnnotationBlock(
+  startsAt: Date,
+  endsAt: Date,
+  scheduleTz: string,
+  rows: Pick<
+    ScheduleAnnotation,
+    "startsOnYmd" | "endsOnYmd" | "locationId" | "blockTimeOffRequests"
+  >[],
+  employeeLocationIds: string[],
+): boolean {
+  if (rows.length === 0 || employeeLocationIds.length === 0) return false;
+  const reqStartYmd = formatInTimeZone(startsAt, scheduleTz, "yyyy-MM-dd");
+  const reqEndYmd = formatInTimeZone(endsAt, scheduleTz, "yyyy-MM-dd");
+  const locSet = new Set(employeeLocationIds);
+  return rows.some(
+    (r) =>
+      r.blockTimeOffRequests &&
+      locSet.has(r.locationId) &&
+      reqStartYmd <= r.endsOnYmd &&
+      reqEndYmd >= r.startsOnYmd,
   );
 }
 

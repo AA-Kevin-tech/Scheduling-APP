@@ -10,7 +10,7 @@ const nav = [
   { href: "/employee", label: "Home" },
   { href: "/employee/schedule", label: "Schedule" },
   { href: "/employee/attendance", label: "Hours" },
-  { href: "/employee/availability", label: "Avail." },
+  { href: "/employee/availability", label: "Unavail." },
   { href: "/employee/time-off", label: "Off" },
   { href: "/employee/swaps", label: "Swaps" },
   { href: "/employee/notifications", label: "Alerts" },

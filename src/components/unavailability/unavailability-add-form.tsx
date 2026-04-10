@@ -1,23 +1,24 @@
 "use client";
 
 import { useActionState } from "react";
-import { createAvailabilitySlot } from "@/actions/availability";
+import { DAYS_OF_WEEK_OPTIONS } from "./days-of-week";
 
-const DAYS = [
-  { v: 0, label: "Sunday" },
-  { v: 1, label: "Monday" },
-  { v: 2, label: "Tuesday" },
-  { v: 3, label: "Wednesday" },
-  { v: 4, label: "Thursday" },
-  { v: 5, label: "Friday" },
-  { v: 6, label: "Saturday" },
-];
-
-export function AvailabilityAddForm() {
-  const [state, formAction, pending] = useActionState(createAvailabilitySlot, {});
+export function UnavailabilityAddForm({
+  createSlot,
+  children,
+}: {
+  createSlot: (
+    _prev: { error?: string } | undefined,
+    formData: FormData,
+  ) => Promise<{ error?: string }>;
+  children?: React.ReactNode;
+}) {
+  const [state, formAction, pending] = useActionState(createSlot, {});
 
   return (
-    <form action={formAction} className="mt-3 grid gap-3 sm:grid-cols-4">
+    <form action={formAction} className="mt-3">
+      {children}
+      <div className="grid gap-3 sm:grid-cols-4">
       <label className="text-sm">
         <span className="text-slate-600">Day</span>
         <select
@@ -25,7 +26,7 @@ export function AvailabilityAddForm() {
           required
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
         >
-          {DAYS.map((d) => (
+          {DAYS_OF_WEEK_OPTIONS.map((d) => (
             <option key={d.v} value={d.v}>
               {d.label}
             </option>
@@ -61,10 +62,11 @@ export function AvailabilityAddForm() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-md bg-sky-700 py-2 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
+          className="rounded-md bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800 disabled:opacity-50"
         >
-          {pending ? "…" : "Add"}
+          {pending ? "Adding…" : "Add"}
         </button>
+      </div>
       </div>
     </form>
   );

@@ -25,7 +25,7 @@ export async function createAvailabilitySlot(
   });
 
   if (!parsed.success) {
-    return { error: "Invalid availability fields." };
+    return { error: "Invalid fields." };
   }
 
   const { dayOfWeek, startsAt, endsAt } = parsed.data;
@@ -72,7 +72,7 @@ export async function updateAvailabilitySlot(
   });
 
   if (!parsed.success) {
-    return { error: "Invalid availability fields." };
+    return { error: "Invalid fields." };
   }
 
   const { id, dayOfWeek, startsAt, endsAt } = parsed.data;

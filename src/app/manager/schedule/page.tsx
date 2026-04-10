@@ -18,13 +18,19 @@ import {
   formatShiftTimeRange,
   shiftHours,
 } from "@/lib/schedule/week-grid";
+import { prisma } from "@/lib/db";
 import {
   getDepartmentsWithRoles,
   getEmployeesWithDepartments,
   getShiftsForRange,
 } from "@/lib/queries/schedule";
+import {
+  listScheduleAnnotationsOverlappingYmdRange,
+  toScheduleAnnotationDto,
+} from "@/lib/queries/schedule-annotations";
 import { firstSearchParam } from "@/lib/search-params";
 import { PublishScheduleBar } from "@/components/manager/publish-schedule-bar";
+import { ScheduleBulkToolbar } from "@/components/manager/schedule-bulk-toolbar";
 
 export default async function ManagerSchedulePage({
   searchParams,
@@ -93,6 +99,42 @@ export default async function ManagerSchedulePage({
 
   const weekDays = buildWeekColumns(weekStart, scheduleTz);
   const todayIso = todayIsoInZone(now, scheduleTz);
+
+  const weekStartYmd = weekDays[0]!.isoKey;
+  const weekEndYmd = weekDays[6]!.isoKey;
+  const annotationLocationIdsForQuery: string[] | null = departmentId
+    ? (() => {
+        const dept = departments.find((d) => d.id === departmentId);
+        return dept ? [dept.locationId] : locationIds;
+      })()
+    : locationIds;
+
+  const [annotationRows, annotationLocationRows, scheduleTemplates] =
+    await Promise.all([
+    listScheduleAnnotationsOverlappingYmdRange(
+      annotationLocationIdsForQuery,
+      weekStartYmd,
+      weekEndYmd,
+    ),
+    prisma.location.findMany({
+      where:
+        locationIds === null
+          ? undefined
+          : locationIds.length === 0
+            ? { id: { in: [] } }
+            : { id: { in: locationIds } },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.scheduleTemplate.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+  const scheduleAnnotationDtos = annotationRows.map(toScheduleAnnotationDto);
+  const defaultAnnotationLocationId = departmentId
+    ? (departments.find((d) => d.id === departmentId)?.locationId ?? null)
+    : (annotationLocationRows[0]?.id ?? null);
 
   const lastCol = weekDays[6];
   const rangeLabel = `${formatInTimeZone(weekStart, scheduleTz, "MMM d, yyyy")} – ${formatInTimeZone(
@@ -220,6 +262,13 @@ export default async function ManagerSchedulePage({
         </button>
       </form>
 
+      <ScheduleBulkToolbar
+        mondayIso={mondayIso}
+        {...(departmentId ? { departmentId } : {})}
+        {...(roleId ? { roleId } : {})}
+        templates={scheduleTemplates}
+      />
+
       <PublishScheduleBar
         draftCount={draftCount}
         weekStartIso={weekStart.toISOString()}
@@ -240,6 +289,9 @@ export default async function ManagerSchedulePage({
           ...(roleId ? { roleId } : {}),
         }}
         enableDragAssign
+        scheduleAnnotations={scheduleAnnotationDtos}
+        annotationLocations={annotationLocationRows}
+        defaultAnnotationLocationId={defaultAnnotationLocationId}
         emptyMessage={
           shifts.length === 0
             ? "No shifts this week. Create one to get started."
