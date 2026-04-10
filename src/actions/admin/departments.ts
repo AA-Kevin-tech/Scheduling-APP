@@ -29,11 +29,13 @@ async function uniqueDepartmentSlug(
   base: string,
   locationId: string,
   excludeDepartmentId?: string,
+  tx?: Prisma.TransactionClient,
 ): Promise<string> {
+  const db = tx ?? prisma;
   let slug = slugify(base);
   let n = 0;
   while (true) {
-    const hit = await prisma.department.findFirst({
+    const hit = await db.department.findFirst({
       where: {
         locationId,
         slug,
@@ -74,33 +76,64 @@ export async function createDepartment(
     return { error: "Name is required." };
   }
 
-  const slug = await uniqueDepartmentSlug(name, parsed.data.locationId);
-
   let dept;
   try {
-    dept = await prisma.department.create({
-      data: {
-        locationId: parsed.data.locationId,
+    dept = await prisma.$transaction(async (tx) => {
+      const slug = await uniqueDepartmentSlug(
         name,
-        slug,
-        colorToken: parsed.data.colorToken,
-        sortOrder: parsed.data.sortOrder,
-        roles: {
-          create: [
-            { name: "Attendant", slug: "attendant" },
-            { name: "Lead", slug: "lead" },
-          ],
+        parsed.data.locationId,
+        undefined,
+        tx,
+      );
+      return tx.department.create({
+        data: {
+          locationId: parsed.data.locationId,
+          name,
+          slug,
+          colorToken: parsed.data.colorToken,
+          sortOrder: parsed.data.sortOrder,
+          roles: {
+            create: [
+              { name: "Attendant", slug: "attendant" },
+              { name: "Lead", slug: "lead" },
+            ],
+          },
         },
-      },
+      });
     });
   } catch (e) {
     if (
       e instanceof Prisma.PrismaClientKnownRequestError &&
       e.code === "P2002"
     ) {
+      revalidatePath("/admin/departments");
+      revalidatePath("/manager/departments");
+      revalidatePath("/manager/schedule");
+
+      const baseSlug = slugify(name);
+      const dup = await prisma.department.findFirst({
+        where: {
+          locationId: parsed.data.locationId,
+          OR: [
+            { slug: baseSlug },
+            { slug: { startsWith: `${baseSlug}-` } },
+            { name: { equals: name, mode: "insensitive" } },
+          ],
+        },
+        select: { name: true, slug: true },
+      });
+      if (dup) {
+        return {
+          error: `A department already exists at this venue named “${dup.name}” (slug \`${dup.slug}\`). Use that row or pick a different name.`,
+        };
+      }
+      const target = (
+        e.meta as { target?: string[] } | undefined
+      )?.target?.join(", ");
       return {
-        error:
-          "A department with this name already exists at this venue, or the name could not be saved uniquely. Try a slightly different name.",
+        error: target
+          ? `Could not save: unique constraint on ${target}. Refresh the page to see the current list, or try a different name.`
+          : "Could not save uniquely. Refresh the page to see the current list, or try a different name.",
       };
     }
     throw e;
