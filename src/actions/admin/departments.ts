@@ -77,6 +77,8 @@ export async function createDepartment(
   }
 
   let dept;
+  /** Slug we attempted (for error messages if create fails). */
+  let attemptedSlug = slugify(name);
   try {
     dept = await prisma.$transaction(async (tx) => {
       const slug = await uniqueDepartmentSlug(
@@ -85,6 +87,7 @@ export async function createDepartment(
         undefined,
         tx,
       );
+      attemptedSlug = slug;
       return tx.department.create({
         data: {
           locationId: parsed.data.locationId,
@@ -127,6 +130,24 @@ export async function createDepartment(
           error: `A department already exists at this venue named “${dup.name}” (slug \`${dup.slug}\`). Use that row or pick a different name.`,
         };
       }
+
+      const dupOtherVenue = await prisma.department.findFirst({
+        where: {
+          slug: attemptedSlug,
+          locationId: { not: parsed.data.locationId },
+        },
+        select: {
+          name: true,
+          slug: true,
+          location: { select: { name: true } },
+        },
+      });
+      if (dupOtherVenue) {
+        return {
+          error: `Slug “${dupOtherVenue.slug}” is already used by “${dupOtherVenue.name}” at ${dupOtherVenue.location.name}. The same department name is allowed at each venue, but an old database index may still require slugs to be unique org-wide. Run \`npx prisma migrate deploy\` (migration drop_legacy_department_global_slug_index) or pick a different name.`,
+        };
+      }
+
       const target = (
         e.meta as { target?: string[] } | undefined
       )?.target?.join(", ");
