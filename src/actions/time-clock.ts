@@ -6,26 +6,18 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { canAccessManagerRoutes } from "@/lib/auth/roles";
-import { prisma } from "@/lib/db";
+import { findEmployeeByTimeClockPin } from "@/lib/queries/time-clock";
+import { getEmployeeAccountClockEnabled } from "@/lib/queries/organization-settings";
 import {
-  findEmployeeByTimeClockPin,
-  findOpenPunchForEmployee,
-  getShiftAssignmentForEmployee,
-} from "@/lib/queries/time-clock";
-import { getEffectiveHourCaps } from "@/lib/services/hours";
-import {
-  notifyLateClockIn,
-  notifyWeeklyHourCapAfterClockOut,
-} from "@/lib/services/time-clock-notify";
-import { writeAuditLog } from "@/lib/services/audit";
+  performClockIn,
+  performClockOut,
+} from "@/lib/services/time-clock-punch";
 import { signPayload, verifyPayload } from "@/lib/terminal/signed-cookie";
 import {
-  clockInEarlyMinutes,
-  clockInLateAfterMinutes,
   kioskCookieHours,
   terminalWorkerSessionMinutes,
 } from "@/lib/time-clock/constants";
-import { sumWorkedMinutesInIsoWeek } from "@/lib/time-clock/worked-minutes";
+import { requireEmployeeProfile } from "@/lib/auth/guards";
 
 const COOKIE_KIOSK = "timeclock_kiosk";
 const COOKIE_WORKER = "timeclock_worker";
@@ -196,75 +188,15 @@ export async function terminalClockIn(
   }
 
   const now = new Date();
-  const open = await findOpenPunchForEmployee(worker.employeeId);
-  if (open) {
-    return { error: "Clock out of your current shift first." };
-  }
-
-  const assignment = await getShiftAssignmentForEmployee(
+  const result = await performClockIn({
+    employeeId: worker.employeeId,
     assignmentId,
-    worker.employeeId,
-  );
-  if (!assignment) {
-    return { error: "Shift not found." };
-  }
-  const openOnAssignment = assignment.timePunches.some(
-    (p) => p.clockOutAt == null,
-  );
-  if (openOnAssignment) {
-    return {
-      error: "This shift already has an open punch. Clock out before clocking in again.",
-    };
-  }
-
-  const earlyMs = clockInEarlyMinutes() * 60 * 1000;
-  const early = new Date(assignment.shift.startsAt.getTime() - earlyMs);
-  if (now < early || now > assignment.shift.endsAt) {
-    return { error: "Clock-in is not allowed for this shift right now." };
-  }
-
-  const punch = await prisma.shiftTimePunch.create({
-    data: {
-      shiftAssignmentId: assignment.id,
-      clockInAt: now,
-      clockInNote: note,
-    },
+    note,
+    now,
+    origin: { source: "terminal" },
   });
-
-  await writeAuditLog({
-    actorUserId: null,
-    entityType: "ShiftTimePunch",
-    entityId: punch.id,
-    action: "TIME_CLOCK_IN",
-    payload: {
-      employeeId: worker.employeeId,
-      shiftAssignmentId: assignment.id,
-      terminal: true,
-    },
-  });
-
-  const lateMs = clockInLateAfterMinutes() * 60 * 1000;
-  if (now.getTime() > assignment.shift.startsAt.getTime() + lateMs) {
-    const u = assignment.employee.user;
-    const employeeLabel = u.name?.trim() || u.email;
-    const sh = assignment.shift;
-    const venueId = sh.locationId ?? sh.department.locationId;
-    await notifyLateClockIn({
-      employeeLabel,
-      departmentName: sh.department.name,
-      venueId,
-      scheduledStart: sh.startsAt,
-      minutesAfterStart: Math.round(
-        (now.getTime() - sh.startsAt.getTime()) / 60000,
-      ),
-    });
-  }
-
+  if ("error" in result) return result;
   revalidatePath("/terminal");
-  revalidatePath("/manager/attendance/time-tracker");
-  revalidatePath("/manager/attendance/timesheets");
-  revalidatePath("/employee");
-  revalidatePath("/employee/attendance");
   return { ok: true };
 }
 
@@ -282,52 +214,64 @@ export async function terminalClockOut(
   const note = String(formData.get("note") ?? "").trim() || null;
   const now = new Date();
 
-  const open = await findOpenPunchForEmployee(worker.employeeId);
-  if (!open || open.assignment.employeeId !== worker.employeeId) {
-    return { error: "You are not clocked in." };
-  }
-
-  await prisma.shiftTimePunch.update({
-    where: { id: open.id },
-    data: { clockOutAt: now, clockOutNote: note },
+  const result = await performClockOut({
+    employeeId: worker.employeeId,
+    note,
+    now,
+    origin: { source: "terminal" },
   });
-
-  await writeAuditLog({
-    actorUserId: null,
-    entityType: "ShiftTimePunch",
-    entityId: open.id,
-    action: "TIME_CLOCK_OUT",
-    payload: {
-      employeeId: worker.employeeId,
-      shiftAssignmentId: open.shiftAssignmentId,
-      terminal: true,
-    },
-  });
-
-  const [empRow, caps, workedWeek] = await Promise.all([
-    prisma.employee.findUnique({
-      where: { id: worker.employeeId },
-      include: { user: { select: { name: true, email: true } } },
-    }),
-    getEffectiveHourCaps(worker.employeeId),
-    sumWorkedMinutesInIsoWeek(worker.employeeId, now),
-  ]);
-  if (empRow && caps.weeklyMaxMinutes != null) {
-    const employeeLabel =
-      empRow.user.name?.trim() || empRow.user.email || "Employee";
-    await notifyWeeklyHourCapAfterClockOut({
-      employeeId: worker.employeeId,
-      employeeLabel,
-      workedMinutes: workedWeek,
-      weeklyMaxMinutes: caps.weeklyMaxMinutes,
-      now,
-    });
-  }
-
+  if ("error" in result) return result;
   revalidatePath("/terminal");
-  revalidatePath("/manager/attendance/time-tracker");
-  revalidatePath("/manager/attendance/timesheets");
-  revalidatePath("/employee");
-  revalidatePath("/employee/attendance");
   return { ok: true };
+}
+
+export async function employeeAccountClockIn(
+  _prev: unknown,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const { session, employeeId } = await requireEmployeeProfile();
+  const allowed = await getEmployeeAccountClockEnabled();
+  if (!allowed) {
+    return {
+      error: "Clock in and out are only available at the work kiosk.",
+    };
+  }
+
+  const assignmentId = String(formData.get("assignmentId") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim() || null;
+  if (!assignmentId) {
+    return { error: "Missing shift." };
+  }
+
+  const now = new Date();
+  return performClockIn({
+    employeeId,
+    assignmentId,
+    note,
+    now,
+    origin: { source: "employee_account", actorUserId: session.user.id },
+  });
+}
+
+export async function employeeAccountClockOut(
+  _prev: unknown,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  const { session, employeeId } = await requireEmployeeProfile();
+  const allowed = await getEmployeeAccountClockEnabled();
+  if (!allowed) {
+    return {
+      error: "Clock in and out are only available at the work kiosk.",
+    };
+  }
+
+  const note = String(formData.get("note") ?? "").trim() || null;
+  const now = new Date();
+
+  return performClockOut({
+    employeeId,
+    note,
+    now,
+    origin: { source: "employee_account", actorUserId: session.user.id },
+  });
 }

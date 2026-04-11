@@ -14,6 +14,9 @@ import {
 } from "@/lib/services/hours";
 import { addCalendarDaysInZone, normalizeIanaTimezone } from "@/lib/schedule/tz";
 import { sumWorkedMinutesInRange } from "@/lib/time-clock/worked-minutes";
+import { EmployeeHomeClockSection } from "@/components/employee/employee-home-clock";
+import { getTerminalDashboard } from "@/lib/queries/time-clock-dashboard";
+import { getEmployeeAccountClockEnabled } from "@/lib/queries/organization-settings";
 
 /** Payroll-style decimal hours from whole minutes (e.g. 7.50). */
 function formatDecimalHoursFromMinutes(minutes: number): string {
@@ -62,11 +65,15 @@ export default async function EmployeeHomePage() {
   const now = new Date();
   const weekStart = startOfWeekMondayUtc(now);
   const weekEnd = addWeeksUtc(weekStart, 1);
-  const [workedMinutes, scheduledMinutes, caps] = await Promise.all([
+  const [workedMinutes, scheduledMinutes, caps, allowWebClock] = await Promise.all([
     sumWorkedMinutesInRange(employeeId, weekStart, weekEnd, now),
     sumPublishedAssignedMinutesInRange(employeeId, weekStart, weekEnd),
     getEffectiveHourCaps(employeeId),
+    getEmployeeAccountClockEnabled(),
   ]);
+  const clockDash = allowWebClock
+    ? await getTerminalDashboard(employeeId)
+    : null;
   const weeklyCap = caps.weeklyMaxMinutes;
   const hoursWorked = formatDecimalHoursFromMinutes(workedMinutes);
   const hoursScheduled = formatDecimalHoursFromMinutes(scheduledMinutes);
@@ -85,6 +92,11 @@ export default async function EmployeeHomePage() {
       <WeekAnnouncementStrip
         items={homeAnnouncements}
         title="Schedule notes (next several days)"
+      />
+
+      <EmployeeHomeClockSection
+        allowWebClock={allowWebClock}
+        dash={clockDash}
       />
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

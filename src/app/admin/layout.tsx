@@ -14,6 +14,7 @@ const links = [
   { href: "/admin/holidays", label: "Holidays" },
   { href: "/admin/time-off-blackouts", label: "Time off blackouts" },
   { href: "/admin/payroll-corrections", label: "Payroll corrections" },
+  { href: "/admin/time-clock", label: "Time clock access" },
   { href: "/admin/integrations", label: "Integrations" },
   { href: "/manager/time-clock", label: "Time clock issues" },
 ];

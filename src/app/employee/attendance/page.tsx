@@ -6,6 +6,7 @@ import {
   sumWorkedMinutesLastDaysUtc,
 } from "@/lib/time-clock/worked-minutes";
 import { addWeeksUtc, startOfWeekMondayUtc } from "@/lib/datetime";
+import { getEmployeeAccountClockEnabled } from "@/lib/queries/organization-settings";
 
 function formatHoursMinutes(totalMinutes: number): string {
   const h = Math.floor(totalMinutes / 60);
@@ -18,7 +19,7 @@ export default async function EmployeeAttendancePage() {
   const { employeeId } = await requireEmployeeProfile();
   const now = new Date();
 
-  const [weekMinutes, last30Minutes, punches] = await Promise.all([
+  const [weekMinutes, last30Minutes, punches, allowWebClock] = await Promise.all([
     sumWorkedMinutesInIsoWeek(employeeId, now),
     sumWorkedMinutesLastDaysUtc(employeeId, 30, now),
     prisma.shiftTimePunch.findMany({
@@ -38,6 +39,7 @@ export default async function EmployeeAttendancePage() {
       orderBy: { clockInAt: "desc" },
       take: 150,
     }),
+    getEmployeeAccountClockEnabled(),
   ]);
 
   const weekStart = startOfWeekMondayUtc(now);
@@ -54,8 +56,9 @@ export default async function EmployeeAttendancePage() {
         </Link>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900">Attendance</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Time clock punches from the work terminal (read-only). For corrections,
-          contact a manager or administrator.
+          {allowWebClock
+            ? "Your punches from the kiosk or from your employee home screen. This page is read-only; for corrections, contact a manager or administrator."
+            : "Time clock punches from the work terminal (read-only). For corrections, contact a manager or administrator."}
         </p>
       </div>
 

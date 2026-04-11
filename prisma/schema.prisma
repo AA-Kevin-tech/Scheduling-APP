@@ -65,6 +65,14 @@ model QuickBooksConnection {
   connectedBy User? @relation("QuickBooksConnectedBy", fields: [connectedByUserId], references: [id], onDelete: SetNull)
 }
 
+/// Org-wide app settings (single row, id `singleton`).
+model OrganizationSettings {
+  id String @id @default("singleton")
+  /// When true, employees may clock in/out from their logged-in account as well as the kiosk.
+  employeeAccountClockEnabled Boolean  @default(false)
+  updatedAt                   DateTime @updatedAt
+}
+
 /// Physical venue / job site (e.g. main building, annex).
 model Location {
   id        String   @id @default(cuid())
