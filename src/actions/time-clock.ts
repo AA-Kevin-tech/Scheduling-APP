@@ -263,6 +263,7 @@ export async function terminalClockIn(
   revalidatePath("/terminal");
   revalidatePath("/manager/attendance/time-tracker");
   revalidatePath("/manager/attendance/timesheets");
+  revalidatePath("/employee");
   revalidatePath("/employee/attendance");
   return { ok: true };
 }
@@ -326,6 +327,7 @@ export async function terminalClockOut(
   revalidatePath("/terminal");
   revalidatePath("/manager/attendance/time-tracker");
   revalidatePath("/manager/attendance/timesheets");
+  revalidatePath("/employee");
   revalidatePath("/employee/attendance");
   return { ok: true };
 }

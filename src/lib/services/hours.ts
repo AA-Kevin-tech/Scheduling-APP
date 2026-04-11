@@ -60,6 +60,44 @@ export async function sumAssignedMinutesInRange(
   return total;
 }
 
+/**
+ * Scheduled minutes on the published schedule only (matches what employees see under Schedule),
+ * overlapping [rangeStart, rangeEnd).
+ */
+export async function sumPublishedAssignedMinutesInRange(
+  employeeId: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+): Promise<number> {
+  const assignments = await prisma.shiftAssignment.findMany({
+    where: {
+      employeeId,
+      shift: {
+        publishedAt: { not: null },
+        startsAt: { lt: rangeEnd },
+        endsAt: { gt: rangeStart },
+      },
+    },
+    include: {
+      shift: { select: { startsAt: true, endsAt: true } },
+    },
+  });
+
+  let total = 0;
+  for (const a of assignments) {
+    const s = a.shift.startsAt;
+    const e = a.shift.endsAt;
+    if (s < rangeEnd && e > rangeStart) {
+      const overlapStart = s > rangeStart ? s : rangeStart;
+      const overlapEnd = e < rangeEnd ? e : rangeEnd;
+      if (overlapEnd > overlapStart) {
+        total += Math.round((overlapEnd.getTime() - overlapStart.getTime()) / 60000);
+      }
+    }
+  }
+  return total;
+}
+
 export function shiftDurationMinutes(startsAt: Date, endsAt: Date): number {
   return Math.max(0, Math.round((endsAt.getTime() - startsAt.getTime()) / 60000));
 }

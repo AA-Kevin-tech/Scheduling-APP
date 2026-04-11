@@ -8,8 +8,17 @@ import {
   listScheduleAnnotationsOverlappingYmdRange,
   toScheduleAnnotationDto,
 } from "@/lib/queries/schedule-annotations";
-import { getEffectiveHourCaps, sumAssignedMinutesInRange } from "@/lib/services/hours";
+import {
+  getEffectiveHourCaps,
+  sumPublishedAssignedMinutesInRange,
+} from "@/lib/services/hours";
 import { addCalendarDaysInZone, normalizeIanaTimezone } from "@/lib/schedule/tz";
+import { sumWorkedMinutesInRange } from "@/lib/time-clock/worked-minutes";
+
+/** Payroll-style decimal hours from whole minutes (e.g. 7.50). */
+function formatDecimalHoursFromMinutes(minutes: number): string {
+  return (minutes / 60).toFixed(2);
+}
 
 export default async function EmployeeHomePage() {
   const { session, employeeId } = await requireEmployeeProfile();
@@ -50,17 +59,19 @@ export default async function EmployeeHomePage() {
           })
       : [];
 
-  const weekStart = startOfWeekMondayUtc(new Date());
+  const now = new Date();
+  const weekStart = startOfWeekMondayUtc(now);
   const weekEnd = addWeeksUtc(weekStart, 1);
-  const worked = await sumAssignedMinutesInRange(
-    employeeId,
-    weekStart,
-    weekEnd,
-  );
-  const caps = await getEffectiveHourCaps(employeeId);
+  const [workedMinutes, scheduledMinutes, caps] = await Promise.all([
+    sumWorkedMinutesInRange(employeeId, weekStart, weekEnd, now),
+    sumPublishedAssignedMinutesInRange(employeeId, weekStart, weekEnd),
+    getEffectiveHourCaps(employeeId),
+  ]);
   const weeklyCap = caps.weeklyMaxMinutes;
-  const hours = Math.floor(worked / 60);
-  const capH = weeklyCap != null ? Math.floor(weeklyCap / 60) : null;
+  const hoursWorked = formatDecimalHoursFromMinutes(workedMinutes);
+  const hoursScheduled = formatDecimalHoursFromMinutes(scheduledMinutes);
+  const capH =
+    weeklyCap != null ? formatDecimalHoursFromMinutes(weeklyCap) : null;
 
   return (
     <div className="space-y-6">
@@ -79,11 +90,14 @@ export default async function EmployeeHomePage() {
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-medium text-slate-500">Hours this week (UTC)</h2>
         <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-900">
-          {hours}h worked
+          {hoursWorked}h worked
           {capH != null ? ` / ${capH}h cap` : ""}
         </p>
+        <p className="mt-1 text-base font-medium tabular-nums text-slate-700">
+          {hoursScheduled}h scheduled this week
+        </p>
         <p className="mt-1 text-xs text-slate-500">
-          {weeklyCap != null && worked > weeklyCap * 0.9 && (
+          {weeklyCap != null && workedMinutes > weeklyCap * 0.9 && (
             <span className="font-medium text-amber-800">Near weekly limit · </span>
           )}
           Week of {weekStart.toLocaleDateString()}
