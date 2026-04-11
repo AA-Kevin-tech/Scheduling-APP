@@ -33,13 +33,13 @@
 *.pem
 
 # Local-only Intuit / QuickBooks setup walkthrough (not committed)
-Intuit-Connection.md
+docs/Intuit-Connection.md
 # Local-only Resend / Twilio alerts setup walkthrough (not committed)
-Notification-Alerts-Integration.md
+docs/Notification-Alerts-Integration.md
 # Local-only employee invite / payroll vault setup checklist (not committed)
-Employee-Invite-Onboarding-Setup.md
+docs/Employee-Invite-Onboarding-Setup.md
 # Local-only admin / manager how-to (not committed)
-Admin-Manager-How-To.md
+docs/Admin-Manager-How-To.md
 
 # IDE
 .cursor/

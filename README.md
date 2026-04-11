@@ -161,7 +161,7 @@ All six phases below are **implemented in this repo**. Use the paths and API not
 - **Alerts** — **Managers** and **admins** receive in-app notifications (under **Alerts**) for late clock-in, weekly hour-limit approach or exceed (uses configured **`HourLimit`** caps), still clocked in after shift end, missing clock-in while a shift is in progress, and ended shifts with no punch. The manager **Clock issues** page (`/manager/time-clock`) lists current issues; the dashboard shows a total count. Admins can open the same page from the admin nav.
 - **Configuration** — See `.env.example` for `TIME_CLOCK_EARLY_MINUTES`, `TIME_CLOCK_LATE_AFTER_MINUTES`, `TIME_CLOCK_MISSING_IN_AFTER_MINUTES`, `TIME_CLOCK_WEEKLY_CAP_WARN_PERCENT`, and kiosk/session cookie lifetime.
 
-**QuickBooks Online (payroll prep)** — Admins use **Admin → Integrations** to connect a company via Intuit OAuth (`INTUIT_CLIENT_*`, redirect URI, `AUTH_URL`). Tokens are stored in **`QuickBooksConnection`**; exporting approved pay-period hours to QuickBooks Payroll is not implemented yet. For a step-by-step setup you can keep locally, create **`Intuit-Connection.md`** in the repo root — this project lists that filename in **`.gitignore`** so it is not committed if you add it.
+**QuickBooks Online (payroll prep)** — Admins use **Admin → Integrations** to connect a company via Intuit OAuth (`INTUIT_CLIENT_*`, redirect URI, `AUTH_URL`). Tokens are stored in **`QuickBooksConnection`**; exporting approved pay-period hours to QuickBooks Payroll is not implemented yet. For a step-by-step setup you can keep locally, create **`docs/Intuit-Connection.md`** — this project lists that path in **`.gitignore`** so it is not committed if you add it.
 
 ## License
 
