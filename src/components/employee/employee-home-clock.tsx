@@ -1,36 +1,28 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useState } from "react";
 import type { TerminalDashboard } from "@/lib/queries/time-clock-dashboard";
 import {
   employeeAccountClockIn,
   employeeAccountClockOut,
 } from "@/actions/time-clock";
 
-function PendingButton({
-  label,
-  pendingLabel,
-  className,
-}: {
-  label: string;
-  pendingLabel: string;
-  className?: string;
-}) {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className={
-        className ??
-        "min-h-[52px] w-full rounded-xl bg-sky-700 px-4 text-base font-medium text-white hover:bg-sky-800 disabled:opacity-60"
-      }
-    >
-      {pending ? pendingLabel : label}
-    </button>
-  );
+function getGeoPosition(): Promise<{ lat: number; lng: number } | null> {
+  if (typeof window === "undefined" || !navigator.geolocation) {
+    return Promise.resolve(null);
+  }
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        resolve({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 20_000, maximumAge: 0 },
+    );
+  });
 }
 
 export function EmployeeHomeClockSection({
@@ -61,22 +53,58 @@ export function EmployeeHomeClockSection({
 
 function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
   const router = useRouter();
-  const [clockInState, clockInAction] = useFormState(employeeAccountClockIn, {});
-  const [clockOutState, clockOutAction] = useFormState(
-    employeeAccountClockOut,
-    {},
-  );
+  const [pending, setPending] = useState(false);
+  const [clockInError, setClockInError] = useState<string | null>(null);
+  const [clockOutError, setClockOutError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!clockInState.ok && !clockOutState.ok) return;
-    router.refresh();
-  }, [clockInState.ok, clockOutState.ok, router]);
+  async function runClockIn(form: HTMLFormElement) {
+    setClockInError(null);
+    setPending(true);
+    try {
+      const fd = new FormData(form);
+      const pos = await getGeoPosition();
+      if (pos) {
+        fd.set("latitude", String(pos.lat));
+        fd.set("longitude", String(pos.lng));
+      }
+      const r = await employeeAccountClockIn(undefined, fd);
+      if (r?.error) {
+        setClockInError(r.error);
+        return;
+      }
+      router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function runClockOut(form: HTMLFormElement) {
+    setClockOutError(null);
+    setPending(true);
+    try {
+      const fd = new FormData(form);
+      const pos = await getGeoPosition();
+      if (pos) {
+        fd.set("latitude", String(pos.lat));
+        fd.set("longitude", String(pos.lng));
+      }
+      const r = await employeeAccountClockOut(undefined, fd);
+      if (r?.error) {
+        setClockOutError(r.error);
+        return;
+      }
+      router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
     <section className="rounded-xl border-2 border-sky-200 bg-sky-50/80 p-4 shadow-sm">
       <h2 className="text-sm font-medium text-sky-950">Time clock</h2>
       <p className="mt-1 text-xs text-sky-900/80">
         Same rules as the kiosk: published shifts in the clock-in window only.
+        If your site uses a geofence, allow location when prompted.
       </p>
 
       {dash.openPunch ? (
@@ -101,7 +129,13 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
             </time>
           </p>
 
-          <form action={clockOutAction} className="mt-4 space-y-3">
+          <form
+            className="mt-4 space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void runClockOut(e.currentTarget);
+            }}
+          >
             <label htmlFor="employee-home-clockOutNote" className="sr-only">
               Note (optional)
             </label>
@@ -112,14 +146,16 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
               placeholder="Optional note for your manager"
               className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
             />
-            {clockOutState.error ? (
-              <p className="text-sm text-red-700">{clockOutState.error}</p>
+            {clockOutError ? (
+              <p className="text-sm text-red-700">{clockOutError}</p>
             ) : null}
-            <PendingButton
-              label="Clock out"
-              pendingLabel="Clocking out…"
+            <button
+              type="submit"
+              disabled={pending}
               className="min-h-[56px] w-full rounded-xl bg-slate-900 px-4 text-lg font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-            />
+            >
+              {pending ? "Clocking out…" : "Clock out"}
+            </button>
           </form>
         </div>
       ) : null}
@@ -138,7 +174,13 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
               key={opt.assignmentId}
               className="rounded-xl border border-white/80 bg-white p-3 shadow-sm"
             >
-              <form action={clockInAction} className="space-y-3">
+              <form
+                className="space-y-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void runClockIn(e.currentTarget);
+                }}
+              >
                 <input type="hidden" name="assignmentId" value={opt.assignmentId} />
                 <div>
                   <p className="font-medium text-slate-900">{opt.title}</p>
@@ -160,12 +202,18 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
                   placeholder="Optional note"
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
                 />
-                <PendingButton label="Clock in" pendingLabel="Clocking in…" />
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="min-h-[52px] w-full rounded-xl bg-sky-700 px-4 text-base font-medium text-white hover:bg-sky-800 disabled:opacity-60"
+                >
+                  {pending ? "Clocking in…" : "Clock in"}
+                </button>
               </form>
             </div>
           ))}
-          {clockInState.error ? (
-            <p className="text-sm text-red-700">{clockInState.error}</p>
+          {clockInError ? (
+            <p className="text-sm text-red-700">{clockInError}</p>
           ) : null}
         </div>
       ) : null}

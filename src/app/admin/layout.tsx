@@ -1,6 +1,8 @@
 import Link from "next/link";
+import type { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { getVenueSwitcherPayload } from "@/lib/auth/location-scope";
+import { canAccessItPayrollTimeClockSettings } from "@/lib/auth/roles";
 import { VenueScopeSwitcher } from "@/components/venue-scope-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
@@ -14,7 +16,6 @@ const links = [
   { href: "/admin/holidays", label: "Holidays" },
   { href: "/admin/time-off-blackouts", label: "Time off blackouts" },
   { href: "/admin/payroll-corrections", label: "Payroll corrections" },
-  { href: "/admin/time-clock", label: "Time clock access" },
   { href: "/admin/integrations", label: "Integrations" },
   { href: "/manager/time-clock", label: "Time clock issues" },
 ];
@@ -28,6 +29,19 @@ export default async function AdminLayout({
   const venuePayload =
     session != null ? await getVenueSwitcherPayload(session) : null;
 
+  const itPayrollClockLink =
+    session?.user &&
+    canAccessItPayrollTimeClockSettings(session.user.role as UserRole)
+      ? ([
+          {
+            href: "/it-payroll/time-clock",
+            label: "IT/Payroll: time clock & geofence",
+          },
+        ] as const)
+      : [];
+
+  const navLinks = [...links, ...itPayrollClockLink];
+
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
       <aside className="border-b border-slate-200 bg-white lg:w-56 lg:border-b-0 lg:border-r">
@@ -37,7 +51,7 @@ export default async function AdminLayout({
         </div>
         <nav className="hidden px-2 pb-4 lg:block" aria-label="Admin">
           <ul className="space-y-1">
-            {links.map((l) => (
+            {navLinks.map((l) => (
               <li key={l.href}>
                 <Link
                   href={l.href}
@@ -61,7 +75,7 @@ export default async function AdminLayout({
           className="flex gap-2 overflow-x-auto px-2 pb-3 lg:hidden"
           aria-label="Admin mobile"
         >
-          {links.map((l) => (
+          {navLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}

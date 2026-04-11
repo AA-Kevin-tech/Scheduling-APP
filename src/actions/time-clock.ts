@@ -225,6 +225,30 @@ export async function terminalClockOut(
   return { ok: true };
 }
 
+function parseOptionalClientCoords(formData: FormData): {
+  latitude: number | null;
+  longitude: number | null;
+} {
+  const latRaw = String(formData.get("latitude") ?? "").trim();
+  const lngRaw = String(formData.get("longitude") ?? "").trim();
+  if (!latRaw || !lngRaw) {
+    return { latitude: null, longitude: null };
+  }
+  const latitude = Number(latRaw);
+  const longitude = Number(lngRaw);
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return { latitude: null, longitude: null };
+  }
+  return { latitude, longitude };
+}
+
 export async function employeeAccountClockIn(
   _prev: unknown,
   formData: FormData,
@@ -243,6 +267,7 @@ export async function employeeAccountClockIn(
     return { error: "Missing shift." };
   }
 
+  const coords = parseOptionalClientCoords(formData);
   const now = new Date();
   return performClockIn({
     employeeId,
@@ -250,6 +275,8 @@ export async function employeeAccountClockIn(
     note,
     now,
     origin: { source: "employee_account", actorUserId: session.user.id },
+    clientLatitude: coords.latitude,
+    clientLongitude: coords.longitude,
   });
 }
 
@@ -267,11 +294,14 @@ export async function employeeAccountClockOut(
 
   const note = String(formData.get("note") ?? "").trim() || null;
   const now = new Date();
+  const coords = parseOptionalClientCoords(formData);
 
   return performClockOut({
     employeeId,
     note,
     now,
     origin: { source: "employee_account", actorUserId: session.user.id },
+    clientLatitude: coords.latitude,
+    clientLongitude: coords.longitude,
   });
 }

@@ -16,6 +16,11 @@ export function canAccessManagerRoutes(role: UserRole): boolean {
   return role === "MANAGER" || isOrgWideSchedulingRole(role);
 }
 
+/** IT and Payroll: org time clock policy and per-location geofences (not ADMIN or managers). */
+export function canAccessItPayrollTimeClockSettings(role: UserRole): boolean {
+  return role === "IT" || role === "PAYROLL";
+}
+
 /** Roles that receive manager-style notifications (in addition to venue managers). */
 export const MANAGER_NOTIFICATION_ROLES: UserRole[] = [
   "MANAGER",

@@ -15,6 +15,7 @@ import {
   clockInLateAfterMinutes,
 } from "@/lib/time-clock/constants";
 import { sumWorkedMinutesInIsoWeek } from "@/lib/time-clock/worked-minutes";
+import { validateEmployeeWebClockGeofence } from "@/lib/services/time-clock-geofence";
 
 export type TimeClockPunchOrigin =
   | { source: "terminal" }
@@ -37,6 +38,9 @@ export async function performClockIn(input: {
   note: string | null;
   now: Date;
   origin: TimeClockPunchOrigin;
+  /** Browser WGS84 coordinates for employee-account punches when a geofence applies. */
+  clientLatitude?: number | null;
+  clientLongitude?: number | null;
 }): Promise<{ ok: true } | { error: string }> {
   const { employeeId, assignmentId, note, now, origin } = input;
 
@@ -66,6 +70,16 @@ export async function performClockIn(input: {
   const early = new Date(assignment.shift.startsAt.getTime() - earlyMs);
   if (now < early || now > assignment.shift.endsAt) {
     return { error: "Clock-in is not allowed for this shift right now." };
+  }
+
+  if (origin.source === "employee_account") {
+    const geo = await validateEmployeeWebClockGeofence({
+      employeeId,
+      shift: assignment.shift,
+      latitude: input.clientLatitude ?? null,
+      longitude: input.clientLongitude ?? null,
+    });
+    if ("error" in geo) return geo;
   }
 
   const punch = await prisma.shiftTimePunch.create({
@@ -119,12 +133,24 @@ export async function performClockOut(input: {
   note: string | null;
   now: Date;
   origin: TimeClockPunchOrigin;
+  clientLatitude?: number | null;
+  clientLongitude?: number | null;
 }): Promise<{ ok: true } | { error: string }> {
   const { employeeId, note, now, origin } = input;
 
   const open = await findOpenPunchForEmployee(employeeId);
   if (!open || open.assignment.employeeId !== employeeId) {
     return { error: "You are not clocked in." };
+  }
+
+  if (origin.source === "employee_account") {
+    const geo = await validateEmployeeWebClockGeofence({
+      employeeId,
+      shift: open.assignment.shift,
+      latitude: input.clientLatitude ?? null,
+      longitude: input.clientLongitude ?? null,
+    });
+    if ("error" in geo) return geo;
   }
 
   await prisma.shiftTimePunch.update({

@@ -80,17 +80,6 @@ export default async function AdminHomePage() {
         </li>
         <li>
           <Link
-            href="/admin/time-clock"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
-          >
-            <span className="font-medium text-slate-900">Time clock access</span>
-            <p className="mt-1 text-sm text-slate-600">
-              Kiosk-only vs kiosk and employee account clock-in
-            </p>
-          </Link>
-        </li>
-        <li>
-          <Link
             href="/manager"
             className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
           >

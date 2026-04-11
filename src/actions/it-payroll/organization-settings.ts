@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireItOrPayroll } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 
@@ -16,7 +16,7 @@ export async function updateOrganizationTimeClockSettings(
   _prev: unknown,
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
-  const session = await requireAdmin();
+  const session = await requireItOrPayroll();
   const parsed = schema.safeParse({
     employeeAccountClockEnabled: formData.get("employeeAccountClockEnabled"),
   });
@@ -43,7 +43,7 @@ export async function updateOrganizationTimeClockSettings(
     payload: { employeeAccountClockEnabled: enabled },
   });
 
-  revalidatePath("/admin/time-clock");
+  revalidatePath("/it-payroll/time-clock");
   revalidatePath("/employee");
   revalidatePath("/employee/attendance");
   return { ok: true };

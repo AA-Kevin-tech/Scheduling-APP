@@ -2,6 +2,7 @@ import type { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import {
   canAccessAdminRoutes,
+  canAccessItPayrollTimeClockSettings,
   canAccessManagerRoutes,
   loginHomePath,
 } from "@/lib/auth/roles";
@@ -26,6 +27,17 @@ export async function requireAdmin() {
   const session = await requireSession();
   if (!canAccessAdminRoutes(session.user.role as UserRole)) {
     redirect("/manager");
+  }
+  return session;
+}
+
+/** IT and Payroll only (time clock policy + geofence configuration). */
+export async function requireItOrPayroll() {
+  const session = await requireSession();
+  if (
+    !canAccessItPayrollTimeClockSettings(session.user.role as UserRole)
+  ) {
+    redirect(loginHomePath(session.user.role as UserRole));
   }
   return session;
 }
