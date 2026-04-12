@@ -41,7 +41,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
   const [state, formAction, pending] = useActionState(updateDepartment, null);
 
   return (
-    <li className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <li className="surface-card p-4">
       <p className="mb-2 text-xs text-slate-500">
         Venue:{" "}
         <span className="font-medium text-slate-700">{d.location.name}</span>

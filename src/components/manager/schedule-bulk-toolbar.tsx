@@ -37,7 +37,7 @@ function Modal({
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl border border-slate-200 bg-white p-5 shadow-lg"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto surface-card p-5 shadow-lg"
         role="dialog"
         aria-labelledby="schedule-bulk-modal-title"
         onClick={(e) => e.stopPropagation()}

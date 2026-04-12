@@ -140,7 +140,7 @@ export default async function AdminEditUserPage({
         </p>
       ) : null}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <EmployeeUserForm
           mode="edit"
           userId={user.id}
@@ -156,7 +156,7 @@ export default async function AdminEditUserPage({
         isSelf={session?.user?.id === user.id}
       />
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
         <div className="mt-4">
           <EmployeeTimeClockPinForm
@@ -167,7 +167,7 @@ export default async function AdminEditUserPage({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">HR details</h2>
         <p className="mt-1 text-xs text-slate-500">
           Manager notes, hourly rate or annual salary, and employment type are not visible
@@ -202,7 +202,7 @@ export default async function AdminEditUserPage({
         }))}
       />
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">
           Times they can&apos;t work
         </h2>
@@ -265,7 +265,7 @@ export default async function AdminEditUserPage({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
         <p className="mt-1 text-xs text-slate-500">
           Department limits may tighten the effective cap below.

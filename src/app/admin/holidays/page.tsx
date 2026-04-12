@@ -32,7 +32,7 @@ export default async function AdminCompanyHolidaysPage() {
         clock in (see manager Holiday pay report).
       </p>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Configured holidays</h2>
         {holidays.length === 0 ? (
           <p className="mt-3 text-sm text-slate-500">None yet — add one below.</p>

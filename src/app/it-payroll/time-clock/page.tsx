@@ -47,7 +47,7 @@ export default async function ItPayrollTimeClockPage() {
         </p>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-900">
           Employee account clocking
         </h2>
@@ -58,7 +58,7 @@ export default async function ItPayrollTimeClockPage() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-900">
           Per-location geofences
         </h2>

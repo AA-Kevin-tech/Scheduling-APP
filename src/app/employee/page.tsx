@@ -99,7 +99,7 @@ export default async function EmployeeHomePage() {
         dash={clockDash}
       />
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-500">Hours this week (UTC)</h2>
         <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-900">
           {hoursWorked}h worked
@@ -120,7 +120,7 @@ export default async function EmployeeHomePage() {
         <li>
           <Link
             href="/employee/schedule"
-            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Schedule</span>
             <span className="mt-1 block text-sm text-slate-600">
@@ -132,7 +132,7 @@ export default async function EmployeeHomePage() {
         <li>
           <Link
             href="/terminal"
-            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Time clock</span>
             <span className="mt-1 block text-sm text-slate-600">
@@ -143,7 +143,7 @@ export default async function EmployeeHomePage() {
         <li>
           <Link
             href="/employee/availability"
-            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Can&apos;t work</span>
             <span className="mt-1 block text-sm text-slate-600">
@@ -154,7 +154,7 @@ export default async function EmployeeHomePage() {
         <li>
           <Link
             href="/employee/time-off"
-            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Time off</span>
             <span className="mt-1 block text-sm text-slate-600">
@@ -165,7 +165,7 @@ export default async function EmployeeHomePage() {
         <li>
           <Link
             href="/employee/swaps"
-            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Shift swaps</span>
             <span className="mt-1 block text-sm text-slate-600">
@@ -176,7 +176,7 @@ export default async function EmployeeHomePage() {
         <li>
           <Link
             href="/employee/notifications"
-            className="block min-h-[52px] rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50 hover:border-sky-300"
+            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Notifications</span>
             <span className="mt-1 block text-sm text-slate-600">

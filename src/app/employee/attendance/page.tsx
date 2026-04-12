@@ -63,7 +63,7 @@ export default async function EmployeeAttendancePage() {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="surface-card p-4">
           <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
             This week (UTC)
           </h2>
@@ -74,7 +74,7 @@ export default async function EmployeeAttendancePage() {
             {weekStart.toLocaleDateString()} – {weekEnd.toLocaleDateString()}
           </p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="surface-card p-4">
           <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Last 30 days (UTC)
           </h2>
@@ -96,7 +96,7 @@ export default async function EmployeeAttendancePage() {
             when you are at work.
           </p>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="mt-3 overflow-x-auto surface-card">
             <table className="min-w-full text-left text-xs sm:text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
                 <tr>

@@ -38,7 +38,7 @@ export default async function EmployeeAvailabilityPage() {
         hour caps, and rest rules.
       </p>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Add unavailable time</h2>
         <UnavailabilityAddForm createSlot={createAvailabilitySlot} />
       </section>

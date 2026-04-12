@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { ThemePreference, UserRole } from "@prisma/client";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import authConfig from "./auth.config";
@@ -31,6 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: true,
             passwordHash: true,
             credentialVersion: true,
+            themePreference: true,
             employee: { select: { id: true } },
           },
         });
@@ -47,27 +48,40 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role as UserRole,
           employeeId: user.employee?.id,
           credentialVersion: user.credentialVersion,
+          themePreference: user.themePreference,
         };
       },
     }),
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.employeeId = user.employeeId;
         token.credentialVersion = user.credentialVersion ?? 0;
+        token.themePreference = user.themePreference ?? "SYSTEM";
+        return token;
+      }
+      if (
+        trigger === "update" &&
+        session &&
+        typeof session === "object" &&
+        "themePreference" in session &&
+        session.themePreference
+      ) {
+        token.themePreference =
+          session.themePreference as ThemePreference;
         return token;
       }
       if (token.sub) {
-        let row: { credentialVersion: number } | null | undefined;
+        let row: { credentialVersion: number; themePreference: ThemePreference } | null | undefined;
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
             const { prisma } = await import("@/lib/db");
             row = await prisma.user.findUnique({
               where: { id: token.sub },
-              select: { credentialVersion: true },
+              select: { credentialVersion: true, themePreference: true },
             });
             break;
           } catch (e) {
@@ -88,6 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!row || row.credentialVersion !== tv) {
           return null;
         }
+        token.themePreference = row.themePreference;
       }
       return token;
     },

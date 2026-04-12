@@ -15,7 +15,7 @@ export default async function ItPayrollHomePage() {
         <li>
           <Link
             href="/it-payroll/time-clock"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">
               Time clock & geofence

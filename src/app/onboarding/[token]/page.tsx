@@ -24,7 +24,7 @@ export default async function OnboardingTokenPage({
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="w-full max-w-md surface-card p-8">
           <h1 className="text-lg font-semibold text-slate-900">
             Onboarding unavailable
           </h1>
@@ -43,7 +43,7 @@ export default async function OnboardingTokenPage({
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="mx-auto max-w-xl surface-card p-6 sm:p-8">
         <h1 className="text-xl font-semibold text-slate-900">
           Complete your onboarding
         </h1>

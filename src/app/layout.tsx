@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { auth } from "@/auth";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -46,17 +47,20 @@ export const viewport: Viewport = {
   themeColor: "#0c4a6e",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  const themePreference = session?.user?.themePreference ?? null;
+
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers themePreference={themePreference}>{children}</Providers>
       </body>
     </html>
   );

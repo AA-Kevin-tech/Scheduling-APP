@@ -33,7 +33,7 @@ export default async function AdminTimeOffBlackoutsPage() {
         changed automatically.
       </p>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">
           Configured blackouts
         </h2>

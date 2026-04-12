@@ -143,7 +143,7 @@ export default async function ManagerTimesheetsPage({
         </p>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,220px)_1fr]">
-          <aside className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+          <aside className="surface-card p-3">
             <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Employee
             </h2>
@@ -208,7 +208,7 @@ export default async function ManagerTimesheetsPage({
             </div>
 
             {assignments.length === 0 ? (
-              <p className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
+              <p className="surface-card p-6 text-sm text-slate-600">
                 No published assignments overlap this week for this employee.
               </p>
             ) : (
@@ -252,7 +252,7 @@ export default async function ManagerTimesheetsPage({
                   return (
                     <li
                       key={a.id}
-                      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                      className="surface-card p-4"
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>

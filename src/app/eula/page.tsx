@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function EulaPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
-      <article className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white px-6 py-10 shadow-sm md:px-10 md:py-12">
+      <article className="mx-auto max-w-3xl surface-card px-6 py-10 md:px-10 md:py-12">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
           End User License Agreement
         </h1>

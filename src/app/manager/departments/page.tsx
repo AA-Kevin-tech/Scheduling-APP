@@ -29,7 +29,7 @@ export default async function ManagerDepartmentsPage() {
           return (
             <li
               key={d.id}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="surface-card p-4"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span

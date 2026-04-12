@@ -45,7 +45,7 @@ export default async function ManagerNewEmployeePage() {
         .
       </p>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <EmployeeUserForm
           mode="create"
           isAdminContext={false}

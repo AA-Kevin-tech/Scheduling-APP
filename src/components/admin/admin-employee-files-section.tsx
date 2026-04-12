@@ -28,7 +28,7 @@ export function AdminEmployeeFilesSection({
   files: AdminEmployeeFileRow[];
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="surface-card p-6">
       <h2 className="text-sm font-medium text-slate-800">Employee files</h2>
       <p className="mt-1 text-xs text-slate-500">
         Upload contracts, certifications, or other records. Files are only

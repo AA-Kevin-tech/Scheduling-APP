@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { ThemePreference, UserRole } from "@prisma/client";
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
@@ -37,6 +37,8 @@ export default {
         session.user.id = token.sub ?? "";
         session.user.role = token.role as UserRole;
         session.user.employeeId = token.employeeId as string | undefined;
+        session.user.themePreference =
+          (token.themePreference as ThemePreference | undefined) ?? "SYSTEM";
       }
       return session;
     },

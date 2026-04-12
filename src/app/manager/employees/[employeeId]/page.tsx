@@ -72,7 +72,7 @@ export default async function ManagerEmployeeHourLimitsPage({
         </Link>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <div className="space-y-3">
           <FieldRow label="Name">
             <p className="text-sm font-medium text-slate-900">
@@ -94,7 +94,7 @@ export default async function ManagerEmployeeHourLimitsPage({
         </div>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">
           Effective weekly cap (scheduling &amp; swaps)
         </h2>
@@ -111,7 +111,7 @@ export default async function ManagerEmployeeHourLimitsPage({
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
         <div className="mt-4">
           <EmployeeTimeClockPinForm
@@ -121,7 +121,7 @@ export default async function ManagerEmployeeHourLimitsPage({
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">HR details</h2>
         <p className="mt-1 text-xs text-slate-500">
           Manager notes, hourly rate or annual salary, and employment type are not visible
@@ -140,7 +140,7 @@ export default async function ManagerEmployeeHourLimitsPage({
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">
           Employee-specific weekly limit
         </h2>

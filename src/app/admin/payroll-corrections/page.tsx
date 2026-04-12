@@ -89,7 +89,7 @@ export default async function AdminPayrollCorrectionsPage({
             {punches.map((row) => (
               <li
                 key={row.punchId}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="surface-card p-4"
               >
                 <div className="text-sm">
                   <span className="font-medium text-slate-900">{row.employeeLabel}</span>
@@ -128,7 +128,7 @@ export default async function AdminPayrollCorrectionsPage({
             {missing.map((row) => (
               <li
                 key={row.assignmentId}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="surface-card p-4"
               >
                 <div className="text-sm">
                   <span className="font-medium text-slate-900">{row.employeeLabel}</span>

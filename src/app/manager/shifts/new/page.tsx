@@ -67,7 +67,7 @@ export default async function NewShiftPage({
         Shifts can repeat weekly; each occurrence is stored as its own row (series
         link via parent shift).
       </p>
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <NewShiftForm
           departments={departments}
           scheduleTimeZone={tz}

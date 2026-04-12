@@ -9,6 +9,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ThemePreference {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
 // ——— Auth.js (Prisma adapter) ———
 
 model User {
@@ -30,6 +36,7 @@ model User {
   smsOptInAt        DateTime?
   /// Best mobile for SMS when this user has no Employee row (e.g. manager-only). E.164 when saved.
   phoneE164         String?
+  themePreference   ThemePreference @default(SYSTEM)
 
   accounts      Account[]
   sessions      Session[]

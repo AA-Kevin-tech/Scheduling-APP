@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireManager } from "@/lib/auth/guards";
 import { ManagerAccountPhoneForm } from "@/components/settings/manager-account-phone-form";
 import { NotificationPreferencesForm } from "@/components/settings/notification-preferences-form";
+import { ThemePreferenceForm } from "@/components/settings/theme-preference-form";
 import { prisma } from "@/lib/db";
 
 export default async function ManagerSettingsPage() {
@@ -14,6 +15,7 @@ export default async function ManagerSettingsPage() {
       notifySms: true,
       smsOptInAt: true,
       phoneE164: true,
+      themePreference: true,
     },
   });
 
@@ -31,7 +33,15 @@ export default async function ManagerSettingsPage() {
         is no separate organization-wide settings form yet.
       </p>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
+        <h2 className="text-sm font-medium text-slate-800">Appearance</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Light, dark, or match your device settings.
+        </p>
+        <ThemePreferenceForm initialPreference={user.themePreference} />
+      </section>
+
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Alert preferences</h2>
         <p className="mt-1 text-xs text-slate-500">
           Email and SMS for swap requests, time off, schedule publishes, and

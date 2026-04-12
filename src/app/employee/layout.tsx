@@ -33,10 +33,10 @@ export default async function EmployeeLayout({
   const headerTitle = venueLabel?.trim() || "Pulse";
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur">
+    <div className="surface-page flex min-h-screen flex-col">
+      <header className="surface-header sticky top-0 z-10 border-b px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <span className="shrink-0 text-sm font-semibold text-slate-900">
+          <span className="shrink-0 text-sm font-semibold text-app-heading">
             {headerTitle}
           </span>
           <div className="flex min-w-0 flex-1 flex-col items-stretch gap-2 sm:max-w-xs sm:items-end">
@@ -58,7 +58,7 @@ export default async function EmployeeLayout({
         {children}
       </main>
       <nav
-        className="sticky bottom-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]"
+        className="sticky bottom-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-slate-700 dark:bg-slate-900"
         aria-label="Employee"
       >
         <ul className="mx-auto flex max-w-lg justify-around gap-1 px-2 py-2">
@@ -73,7 +73,7 @@ export default async function EmployeeLayout({
                       ? "Attendance & punches"
                       : undefined
                 }
-                className="block min-h-[44px] min-w-[52px] rounded-lg px-2 py-2 text-center text-[11px] font-medium leading-tight text-sky-800 hover:bg-sky-50 sm:text-xs"
+                className="block min-h-[44px] min-w-[52px] rounded-lg px-2 py-2 text-center text-[11px] font-medium leading-tight text-sky-800 hover:bg-sky-50 dark:text-sky-300 dark:hover:bg-sky-950/50 sm:text-xs"
               >
                 {item.label}
               </Link>

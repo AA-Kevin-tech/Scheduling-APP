@@ -34,7 +34,7 @@ export function EmployeeHomeClockSection({
 }) {
   if (!allowWebClock) {
     return (
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Time clock</h2>
         <p className="mt-2 text-sm text-slate-600">
           Your organization requires clock in and out at the work kiosk using your

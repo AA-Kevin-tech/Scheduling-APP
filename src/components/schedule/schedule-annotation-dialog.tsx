@@ -69,7 +69,7 @@ export function ScheduleAnnotationDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto surface-card p-4 shadow-xl">
         <div className="flex items-start justify-between gap-2">
           <h2
             id="annotation-dialog-title"

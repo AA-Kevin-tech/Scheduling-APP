@@ -64,7 +64,7 @@ export default async function ManagerDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link
           href="/manager/schedule"
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+          className="surface-card p-4 hover:border-sky-300"
         >
           <p className="text-sm text-slate-500">Unassigned future shifts</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
@@ -74,7 +74,7 @@ export default async function ManagerDashboardPage() {
         </Link>
         <Link
           href="/manager/swaps"
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+          className="surface-card p-4 hover:border-sky-300"
         >
           <p className="text-sm text-slate-500">Swap queue</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
@@ -86,7 +86,7 @@ export default async function ManagerDashboardPage() {
         </Link>
         <Link
           href="/manager/time-off"
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+          className="surface-card p-4 hover:border-sky-300"
         >
           <p className="text-sm text-slate-500">Time off pending</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
@@ -96,7 +96,7 @@ export default async function ManagerDashboardPage() {
         </Link>
         <Link
           href="/manager/coverage"
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+          className="surface-card p-4 hover:border-sky-300"
         >
           <p className="text-sm text-slate-500">Coverage gaps (week)</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
@@ -106,7 +106,7 @@ export default async function ManagerDashboardPage() {
         </Link>
         <Link
           href="/manager/time-clock"
-          className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+          className="surface-card p-4 hover:border-sky-300"
         >
           <p className="text-sm text-slate-500">Time clock issues</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">

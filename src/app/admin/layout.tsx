@@ -43,10 +43,10 @@ export default async function AdminLayout({
   const navLinks = [...links, ...itPayrollClockLink];
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:flex">
-      <aside className="border-b border-slate-200 bg-white lg:w-56 lg:border-b-0 lg:border-r">
+    <div className="surface-page min-h-screen lg:flex">
+      <aside className="surface-aside border-b lg:w-56 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-4 py-4 lg:block">
-          <span className="font-semibold text-slate-900">Admin</span>
+          <span className="font-semibold text-app-heading">Admin</span>
           <SignOutButton className="lg:mt-4 lg:block" />
         </div>
         <nav className="hidden px-2 pb-4 lg:block" aria-label="Admin">
@@ -55,7 +55,7 @@ export default async function AdminLayout({
               <li key={l.href}>
                 <Link
                   href={l.href}
-                  className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  className="surface-nav-link block rounded-md px-3 py-2 text-sm"
                 >
                   {l.label}
                 </Link>
@@ -64,7 +64,7 @@ export default async function AdminLayout({
             <li className="pt-2">
               <Link
                 href="/manager"
-                className="block rounded-md px-3 py-2 text-sm text-sky-700 hover:bg-sky-50"
+                className="surface-nav-link-accent block rounded-md px-3 py-2 text-sm"
               >
                 Manager tools →
               </Link>
@@ -79,7 +79,7 @@ export default async function AdminLayout({
             <Link
               key={l.href}
               href={l.href}
-              className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800"
+              className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
             >
               {l.label}
             </Link>
@@ -88,7 +88,7 @@ export default async function AdminLayout({
       </aside>
       <div className="flex-1 p-6">
         {venuePayload ? (
-          <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3">
+          <div className="mb-4 rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
             <VenueScopeSwitcher payload={venuePayload} />
           </div>
         ) : null}

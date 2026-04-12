@@ -53,14 +53,14 @@ export default async function TerminalSetupPage() {
         </p>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">This browser</h2>
         <div className="mt-4">
           <TerminalSetupForm kioskActive={kioskActive} />
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Employee URL</h2>
         <p className="mt-2 text-sm text-slate-600">
           After locking, bookmark or set the home page to:

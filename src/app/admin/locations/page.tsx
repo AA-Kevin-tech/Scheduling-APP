@@ -11,7 +11,7 @@ export default async function AdminLocationsPage() {
     <div className="mx-auto max-w-4xl space-y-8">
       <h1 className="text-xl font-semibold text-slate-900">Locations</h1>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Add location</h2>
         <LocationCreateForm />
       </section>

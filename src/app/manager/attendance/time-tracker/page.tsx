@@ -135,7 +135,7 @@ export default async function ManagerTimeTrackerPage({
         </Link>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="surface-card p-4">
         <TimeTrackerDayGrid
           rows={rows}
           dayStart={dayStart}

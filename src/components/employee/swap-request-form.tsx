@@ -69,7 +69,7 @@ export function SwapRequestForm({
   );
 
   return (
-    <form action={action} className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <form action={action} className="space-y-4 surface-card p-4">
       <h2 className="text-sm font-medium text-slate-800">Request a swap</h2>
       <label className="block text-sm">
         <span className="text-slate-600">Your shift to offer</span>

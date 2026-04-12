@@ -9,7 +9,7 @@ export function EmployeeArchiveSection({ userId, archivedAt }: Props) {
   const isArchived = archivedAt != null;
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="surface-card p-6">
       <h2 className="text-sm font-medium text-slate-800">Archive employee</h2>
       <p className="mt-1 text-xs text-slate-500">
         Archived profiles stay in the database for history (past shifts, punches, and

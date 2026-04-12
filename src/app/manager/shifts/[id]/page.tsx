@@ -103,7 +103,7 @@ export default async function ShiftDetailPage({
         )}
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Edit shift</h2>
         <div className="mt-4">
           <EditShiftForm
@@ -126,7 +126,7 @@ export default async function ShiftDetailPage({
         </form>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Assignments</h2>
         <ul className="mt-3 divide-y divide-slate-100">
           {shift.assignments.map((a) => (
@@ -158,7 +158,7 @@ export default async function ShiftDetailPage({
         <AssignEmployeeForm shiftId={shift.id} employees={employees} />
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">
           Eligibility suggestions
         </h2>

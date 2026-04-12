@@ -38,7 +38,7 @@ export default async function ManagerInviteEmployeePage() {
         </Link>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <EmployeeInviteForm
           departments={deptOptions}
           locations={locations}

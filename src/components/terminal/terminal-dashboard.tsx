@@ -151,7 +151,7 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
             {dash.clockInOptions.map((opt) => (
               <li
                 key={opt.assignmentId}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="surface-card p-4"
               >
                 <form action={clockInAction} className="space-y-3">
                   <input type="hidden" name="assignmentId" value={opt.assignmentId} />

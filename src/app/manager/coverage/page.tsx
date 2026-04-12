@@ -71,7 +71,7 @@ export default async function ManagerCoveragePage({
         </Link>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Summary</h2>
         <ul className="mt-2 space-y-1 text-sm text-slate-600">
           {Object.entries(summary.byDepartment).map(([id, s]) => (
@@ -89,7 +89,7 @@ export default async function ManagerCoveragePage({
         </ul>
       </section>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto surface-card">
         <table className="min-w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
             <tr>

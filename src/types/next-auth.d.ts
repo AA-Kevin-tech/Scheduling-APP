@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { ThemePreference, UserRole } from "@prisma/client";
 import type { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
@@ -7,6 +7,7 @@ declare module "next-auth" {
       id: string;
       role: UserRole;
       employeeId?: string;
+      themePreference: ThemePreference;
     } & DefaultSession["user"];
   }
 
@@ -14,6 +15,7 @@ declare module "next-auth" {
     role: UserRole;
     employeeId?: string;
     credentialVersion?: number;
+    themePreference?: ThemePreference;
   }
 }
 
@@ -22,5 +24,6 @@ declare module "next-auth/jwt" {
     role: UserRole;
     employeeId?: string;
     credentialVersion?: number;
+    themePreference?: ThemePreference;
   }
 }

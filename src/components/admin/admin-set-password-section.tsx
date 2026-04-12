@@ -18,7 +18,7 @@ export function AdminSetPasswordSection({ userId, isSelf }: Props) {
   );
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="surface-card p-6">
       <h2 className="text-sm font-medium text-slate-800">Sign-in password</h2>
       <p className="mt-1 text-xs text-slate-500">
         Sets the password used on the login page. All active sessions for this user end

@@ -76,7 +76,7 @@ export default async function EmployeeTimeOffPage() {
         ) : null}
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">New request</h2>
         <div className="mt-4">
           <TimeOffRequestForm

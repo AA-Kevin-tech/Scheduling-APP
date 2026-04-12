@@ -37,7 +37,7 @@ export default async function ManagerTimeOffPage() {
       </div>
 
       {pending.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
+        <p className="surface-card p-6 text-sm text-slate-600">
           No pending time off requests.
         </p>
       ) : (
@@ -48,7 +48,7 @@ export default async function ManagerTimeOffPage() {
             return (
               <li
                 key={p.id}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="surface-card p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>

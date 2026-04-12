@@ -43,7 +43,7 @@ export default async function AdminDepartmentsPage() {
         reference it.
       </p>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800">Add department</h2>
         <DepartmentCreateForm locations={locations} />
       </section>

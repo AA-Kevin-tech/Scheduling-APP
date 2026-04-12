@@ -39,7 +39,7 @@ export default async function EmployeeShiftDetailPage({
         </Link>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="surface-card p-6">
         <span
           className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium ${badge}`}
         >

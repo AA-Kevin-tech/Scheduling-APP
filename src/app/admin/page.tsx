@@ -15,7 +15,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/admin/locations"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Locations</span>
             <p className="mt-1 text-sm text-slate-600">
@@ -26,7 +26,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/admin/departments"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Departments</span>
             <p className="mt-1 text-sm text-slate-600">
@@ -37,7 +37,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/admin/users"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Users</span>
             <p className="mt-1 text-sm text-slate-600">
@@ -48,7 +48,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/admin/holidays"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Company holidays</span>
             <p className="mt-1 text-sm text-slate-600">
@@ -59,7 +59,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/admin/time-off-blackouts"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Time off blackouts</span>
             <p className="mt-1 text-sm text-slate-600">
@@ -70,7 +70,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/admin/payroll-corrections"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Payroll corrections</span>
             <p className="mt-1 text-sm text-slate-600">
@@ -81,7 +81,7 @@ export default async function AdminHomePage() {
         <li>
           <Link
             href="/manager"
-            className="block rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-sky-300"
+            className="block surface-card p-4 hover:border-sky-300 dark:hover:border-sky-600"
           >
             <span className="font-medium text-slate-900">Scheduling</span>
             <p className="mt-1 text-sm text-slate-600">

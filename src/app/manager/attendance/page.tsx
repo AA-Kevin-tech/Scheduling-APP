@@ -59,7 +59,7 @@ export default async function ManagerAttendanceHubPage() {
           <li key={c.href}>
             <Link
               href={c.href}
-              className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-sky-300 hover:bg-sky-50/40"
+              className="block surface-card p-5 transition-colors hover:border-sky-300 hover:bg-sky-50/40"
             >
               <span className="font-medium text-slate-900">{c.title}</span>
               <span className="mt-1 block text-sm text-slate-600">

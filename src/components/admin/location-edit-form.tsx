@@ -12,7 +12,7 @@ export function LocationEditForm({ loc }: { loc: Location }) {
   const [state, formAction, pending] = useActionState(updateLocation, null);
 
   return (
-    <li className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <li className="surface-card p-4">
       <form
         action={formAction}
         className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"

@@ -3,6 +3,7 @@ import { requireEmployeeProfile } from "@/lib/auth/guards";
 import { ProfilePhoneForm } from "@/components/employee/profile-phone-form";
 import { ProfileTimezoneForm } from "@/components/employee/profile-timezone-form";
 import { NotificationPreferencesForm } from "@/components/settings/notification-preferences-form";
+import { ThemePreferenceForm } from "@/components/settings/theme-preference-form";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import { prisma } from "@/lib/db";
 import { getEffectiveHourCaps } from "@/lib/services/hours";
@@ -36,7 +37,7 @@ export default async function EmployeeProfilePage() {
         </Link>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Account</h2>
         <p className="mt-2 text-sm text-slate-700">
           {employee.user.name ?? "—"}
@@ -58,7 +59,17 @@ export default async function EmployeeProfilePage() {
         <ProfileTimezoneForm currentTimezone={employee.timezone} />
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
+        <h2 className="text-sm font-medium text-slate-800">Appearance</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Light, dark, or match your device settings.
+        </p>
+        <ThemePreferenceForm
+          initialPreference={employee.user.themePreference}
+        />
+      </section>
+
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Alert preferences</h2>
         <p className="mt-1 text-xs text-slate-500">
           Email and SMS when schedules publish, swaps change, or time off is
@@ -71,7 +82,7 @@ export default async function EmployeeProfilePage() {
         />
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Departments</h2>
         <ul className="mt-2 flex flex-wrap gap-2">
           {employee.departments.map((d) => (
@@ -88,7 +99,7 @@ export default async function EmployeeProfilePage() {
         </ul>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
         <p className="mt-1 text-xs text-slate-500">
           Effective weekly cap used for scheduling (your settings and department
@@ -106,7 +117,7 @@ export default async function EmployeeProfilePage() {
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="surface-card p-4">
         <h2 className="text-sm font-medium text-slate-800">Certifications</h2>
         {employee.certifications.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">None recorded.</p>
