@@ -24,7 +24,15 @@ function formatDecimalHoursFromMinutes(minutes: number): string {
 }
 
 const homeNavCardClass =
-  "surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600";
+  "surface-card flex h-full min-h-[8.5rem] flex-col p-4 text-left transition-colors active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600";
+
+const homeNavCardDescClass =
+  "mt-1 block flex-1 text-sm leading-snug text-slate-600 line-clamp-3 dark:text-zinc-400";
+
+/** Full-width bottom row: horizontal layout so width does not feel like a stretched tile. */
+const homeNavCardWideClass = `${homeNavCardClass} sm:flex-row sm:items-center sm:gap-8 sm:py-5`;
+
+const homeNavCardWideDescClass = `${homeNavCardDescClass} sm:mt-0 sm:flex-none sm:max-w-xl sm:text-right`;
 
 export default async function EmployeeHomePage() {
   const { session, employeeId } = await requireEmployeeProfile();
@@ -119,60 +127,56 @@ export default async function EmployeeHomePage() {
         </p>
       </section>
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <li>
+      <ul className="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
+        <li className="min-h-0">
           <Link href="/employee/schedule" className={homeNavCardClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Schedule</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className={homeNavCardDescClass}>
               Your week and shift details; use <strong>Full location</strong> there to see everyone
               published at your site (all departments).
             </span>
           </Link>
         </li>
-        <li>
+        <li className="min-h-0">
           <Link href="/terminal" className={homeNavCardClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Time clock</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className={homeNavCardDescClass}>
               Use your time clock PIN on the work computer
             </span>
           </Link>
         </li>
-        <li>
+        <li className="min-h-0">
           <Link href="/employee/availability" className={homeNavCardClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Can&apos;t work</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
-              Recurring times you are not available
-            </span>
+            <span className={homeNavCardDescClass}>Recurring times you are not available</span>
           </Link>
         </li>
-        <li>
+        <li className="min-h-0">
           <Link href="/employee/time-off" className={homeNavCardClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Time off</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className={homeNavCardDescClass}>
               Request and track PTO-style time away
             </span>
           </Link>
         </li>
-        <li>
+        <li className="min-h-0">
           <Link href="/employee/swaps" className={homeNavCardClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Shift swaps</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
-              Request and respond to swaps
-            </span>
+            <span className={homeNavCardDescClass}>Request and respond to swaps</span>
           </Link>
         </li>
-        <li>
+        <li className="min-h-0">
           <Link href="/employee/notifications" className={homeNavCardClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Notifications</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
-              Swaps and schedule updates
-            </span>
+            <span className={homeNavCardDescClass}>Swaps and schedule updates</span>
           </Link>
         </li>
-        <li>
-          <Link href="/employee/profile" className={homeNavCardClass}>
-            <span className="font-medium text-slate-900 dark:text-zinc-100">Settings</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+        <li className="min-h-0 sm:col-span-2">
+          <Link href="/employee/profile" className={homeNavCardWideClass}>
+            <span className="font-medium text-slate-900 dark:text-zinc-100 sm:shrink-0">
+              Settings
+            </span>
+            <span className={homeNavCardWideDescClass}>
               Profile, contact info, and account updates
             </span>
           </Link>
