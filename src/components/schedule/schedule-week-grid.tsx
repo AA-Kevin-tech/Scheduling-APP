@@ -299,7 +299,7 @@ export function ScheduleWeekGrid({
         </p>
       )}
 
-      <div className="overflow-x-auto surface-card">
+      <div className="surface-card overflow-x-auto">
         <table className="w-full min-w-[720px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">

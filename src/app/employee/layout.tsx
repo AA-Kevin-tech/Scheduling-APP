@@ -35,7 +35,7 @@ export default async function EmployeeLayout({
   return (
     <div className="surface-page flex min-h-screen flex-col">
       <header className="surface-header sticky top-0 z-10 border-b px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="mx-auto flex max-w-[1400px] flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <span className="shrink-0 text-sm font-semibold text-app-heading">
             {headerTitle}
           </span>
@@ -53,7 +53,7 @@ export default async function EmployeeLayout({
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6 pb-24">
+      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 pb-24">
         <RefreshBridge />
         {children}
       </main>
@@ -61,7 +61,7 @@ export default async function EmployeeLayout({
         className="sticky bottom-0 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-slate-700 dark:bg-slate-900"
         aria-label="Employee"
       >
-        <ul className="mx-auto flex max-w-lg justify-around gap-1 px-2 py-2">
+        <ul className="mx-auto flex max-w-[1400px] justify-around gap-1 px-2 py-2">
           {nav.map((item) => (
             <li key={item.href}>
               <Link

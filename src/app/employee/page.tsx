@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { formatInTimeZone } from "date-fns-tz";
 import { WeekAnnouncementStrip } from "@/components/schedule/week-announcement-strip";
@@ -21,6 +22,24 @@ import { getEmployeeAccountClockEnabled } from "@/lib/queries/organization-setti
 /** Payroll-style decimal hours from whole minutes (e.g. 7.50). */
 function formatDecimalHoursFromMinutes(minutes: number): string {
   return (minutes / 60).toFixed(2);
+}
+
+const navLinkClass =
+  "block rounded-xl px-3 py-3 text-left transition active:bg-slate-100 hover:bg-slate-50 dark:active:bg-slate-800/80 dark:hover:bg-slate-800/60";
+
+function HomePanel({
+  children,
+  title,
+}: {
+  children: ReactNode;
+  title: string;
+}) {
+  return (
+    <section className="surface-card flex flex-col overflow-hidden p-1">
+      <h2 className="sr-only">{title}</h2>
+      <div className="flex flex-col gap-1">{children}</div>
+    </section>
+  );
 }
 
 export default async function EmployeeHomePage() {
@@ -116,75 +135,65 @@ export default async function EmployeeHomePage() {
         </p>
       </section>
 
-      <ul className="grid gap-3">
-        <li>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <HomePanel title="Schedule and time clock">
           <Link
             href="/employee/schedule"
-            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
+            className={navLinkClass}
           >
             <span className="font-medium text-slate-900 dark:text-zinc-100">Schedule</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
-              Your week and shift details; use <strong>Full location</strong> there
-              to see everyone published at your site (all departments).
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
+              Your week and shifts; use <strong className="font-semibold">Full location</strong> to see
+              everyone at your site.
             </span>
           </Link>
-        </li>
-        <li>
-          <Link
-            href="/terminal"
-            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
-          >
+          <Link href="/terminal" className={navLinkClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Time clock</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
               Use your time clock PIN on the work computer
             </span>
           </Link>
-        </li>
-        <li>
-          <Link
-            href="/employee/availability"
-            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
-          >
+        </HomePanel>
+
+        <HomePanel title="Availability and time off">
+          <Link href="/employee/availability" className={navLinkClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Can&apos;t work</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
               Recurring times you are not available
             </span>
           </Link>
-        </li>
-        <li>
-          <Link
-            href="/employee/time-off"
-            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
-          >
+          <Link href="/employee/time-off" className={navLinkClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Time off</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
               Request and track PTO-style time away
             </span>
           </Link>
-        </li>
-        <li>
-          <Link
-            href="/employee/swaps"
-            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
-          >
+        </HomePanel>
+
+        <HomePanel title="Swaps and notifications">
+          <Link href="/employee/swaps" className={navLinkClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Shift swaps</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
               Request and respond to swaps
             </span>
           </Link>
-        </li>
-        <li>
-          <Link
-            href="/employee/notifications"
-            className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
-          >
+          <Link href="/employee/notifications" className={navLinkClass}>
             <span className="font-medium text-slate-900 dark:text-zinc-100">Notifications</span>
-            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
               Swaps and schedule updates
             </span>
           </Link>
-        </li>
-      </ul>
+        </HomePanel>
+
+        <HomePanel title="Settings">
+          <Link href="/employee/profile" className={navLinkClass}>
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Settings</span>
+            <span className="mt-1 block text-sm leading-snug text-slate-600 dark:text-zinc-400">
+              Profile, contact info, and account updates
+            </span>
+          </Link>
+        </HomePanel>
+      </div>
     </div>
   );
 }
