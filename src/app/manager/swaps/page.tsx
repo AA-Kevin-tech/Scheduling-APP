@@ -44,7 +44,10 @@ export default async function ManagerSwapsPage() {
         <ul className="mt-3 space-y-4">
           {ready.map((s) => {
             const from = s.fromAssignment.shift;
-            const badge = departmentBadgeClass(from.department.slug);
+            const badge = departmentBadgeClass(
+              from.department.slug,
+              from.department.colorToken,
+            );
             return (
               <li
                 key={s.id}
@@ -95,7 +98,10 @@ function SwapList({
     <ul className="mt-3 space-y-3">
       {swaps.map((s) => {
         const from = s.fromAssignment.shift;
-        const badge = departmentBadgeClass(from.department.slug);
+        const badge = departmentBadgeClass(
+          from.department.slug,
+          from.department.colorToken,
+        );
         return (
           <li
             key={s.id}

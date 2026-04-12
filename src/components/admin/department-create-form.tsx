@@ -2,16 +2,7 @@
 
 import { useActionState } from "react";
 import { createDepartment } from "@/actions/admin/departments";
-
-const COLORS = [
-  "emerald",
-  "amber",
-  "violet",
-  "teal",
-  "rose",
-  "slate",
-  "sky",
-] as const;
+import { DEPARTMENT_COLOR_OPTIONS } from "@/lib/departments/color-tokens";
 
 type LocationOption = { id: string; name: string; slug: string };
 
@@ -61,7 +52,7 @@ export function DepartmentCreateForm(props: { locations: LocationOption[] }) {
           defaultValue="slate"
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
         >
-          {COLORS.map((c) => (
+          {DEPARTMENT_COLOR_OPTIONS.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>

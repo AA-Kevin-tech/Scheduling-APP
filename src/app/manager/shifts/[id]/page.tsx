@@ -53,7 +53,10 @@ export default async function ShiftDetailPage({
   );
   const defaultEndsAtLocal = formatDatetimeLocalInTimezone(shift.endsAt, scheduleTz);
 
-  const badge = departmentBadgeClass(shift.department.slug);
+  const badge = departmentBadgeClass(
+    shift.department.slug,
+    shift.department.colorToken,
+  );
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">

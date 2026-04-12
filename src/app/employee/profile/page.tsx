@@ -88,7 +88,10 @@ export default async function EmployeeProfilePage() {
           {employee.departments.map((d) => (
             <li key={d.id}>
               <span
-                className={`inline-block rounded-full border px-2 py-1 text-xs ${departmentBadgeClass(d.department.slug)}`}
+                className={`inline-block rounded-full border px-2 py-1 text-xs ${departmentBadgeClass(
+                  d.department.slug,
+                  d.department.colorToken,
+                )}`}
               >
                 {d.department.name}
                 {d.role ? ` · ${d.role.name}` : ""}

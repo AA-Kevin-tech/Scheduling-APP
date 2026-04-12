@@ -19,16 +19,7 @@ import {
   updateDepartment,
 } from "@/actions/admin/departments";
 import { DeleteResourceForm } from "@/components/admin/delete-resource-form";
-
-const COLORS = [
-  "emerald",
-  "amber",
-  "violet",
-  "teal",
-  "rose",
-  "slate",
-  "sky",
-] as const;
+import { DEPARTMENT_COLOR_OPTIONS } from "@/lib/departments/color-tokens";
 
 type Dept = Department & {
   roles: Role[];
@@ -67,7 +58,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
             defaultValue={d.colorToken}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
-            {COLORS.map((c) => (
+            {DEPARTMENT_COLOR_OPTIONS.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>

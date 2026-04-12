@@ -110,6 +110,7 @@ export default async function ManagerEmployeesPage({
                         <span
                           className={`inline-block rounded-full border px-2 py-0.5 text-xs ${departmentBadgeClass(
                             ed.department?.slug ?? "",
+                            ed.department?.colorToken,
                           )}`}
                         >
                           {ed.department?.name ?? "—"}

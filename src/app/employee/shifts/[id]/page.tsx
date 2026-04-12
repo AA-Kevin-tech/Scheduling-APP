@@ -26,7 +26,10 @@ export default async function EmployeeShiftDetailPage({
   if (!shift) notFound();
 
   const tz = normalizeIanaTimezone(emp?.timezone);
-  const badge = departmentBadgeClass(shift.department.slug);
+  const badge = departmentBadgeClass(
+    shift.department.slug,
+    shift.department.colorToken,
+  );
 
   return (
     <div className="mx-auto max-w-lg space-y-6">

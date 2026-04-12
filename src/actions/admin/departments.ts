@@ -7,21 +7,12 @@ import { requireAdmin } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { writeAuditLog } from "@/lib/services/audit";
-
-const COLOR_TOKENS = [
-  "emerald",
-  "amber",
-  "violet",
-  "teal",
-  "rose",
-  "slate",
-  "sky",
-] as const;
+import { DEPARTMENT_COLOR_OPTIONS } from "@/lib/departments/color-tokens";
 
 const createSchema = z.object({
   locationId: z.string().min(1),
   name: z.string().min(1),
-  colorToken: z.enum(COLOR_TOKENS).optional().default("slate"),
+  colorToken: z.enum(DEPARTMENT_COLOR_OPTIONS).optional().default("slate"),
   sortOrder: z.coerce.number().int().optional().default(0),
 });
 
@@ -177,7 +168,7 @@ export async function createDepartment(
 const updateSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  colorToken: z.enum(COLOR_TOKENS),
+  colorToken: z.enum(DEPARTMENT_COLOR_OPTIONS),
   sortOrder: z.coerce.number().int(),
 });
 

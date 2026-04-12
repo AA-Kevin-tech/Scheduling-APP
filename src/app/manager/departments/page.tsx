@@ -25,7 +25,7 @@ export default async function ManagerDepartmentsPage() {
 
       <ul className="space-y-4">
         {departments.map((d) => {
-          const badge = departmentBadgeClass(d.slug);
+          const badge = departmentBadgeClass(d.slug, d.colorToken);
           return (
             <li
               key={d.id}
