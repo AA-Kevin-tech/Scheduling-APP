@@ -36,7 +36,7 @@ export function TerminalSetupForm({ kioskActive }: { kioskActive: boolean }) {
     <div className="space-y-4">
       {kioskActive ? (
         <form action={unlockAction} className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-slate-700">
+          <p className="text-sm text-slate-700 dark:text-zinc-300">
             This browser is locked as a time clock kiosk.
           </p>
           <SubmitLock label="Unlock kiosk" />
@@ -46,7 +46,7 @@ export function TerminalSetupForm({ kioskActive }: { kioskActive: boolean }) {
         </form>
       ) : (
         <form action={lockAction} className="space-y-2">
-          <p className="text-sm text-slate-700">
+          <p className="text-sm text-slate-700 dark:text-zinc-300">
             Use this on the computer that should only be used for clock in and
             clock out. Anyone can then open{" "}
             <span className="font-mono">/terminal</span> on this machine.

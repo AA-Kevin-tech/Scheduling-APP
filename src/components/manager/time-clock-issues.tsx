@@ -18,8 +18,8 @@ function Section({
 }) {
   return (
     <section className="surface-card p-4">
-      <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
-      <p className="mt-1 text-xs text-slate-500">{description}</p>
+      <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">{title}</h2>
+      <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">{description}</p>
       <div className="mt-3">{children}</div>
     </section>
   );
@@ -43,14 +43,14 @@ export function TimeClockIssuesPanel({
         description="Employee has an open punch but the scheduled shift has already ended. They should clock out at the kiosk."
       >
         {openPastEnd.length === 0 ? (
-          <p className="text-sm text-slate-500">None right now.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">None right now.</p>
         ) : (
           <ul className="divide-y divide-slate-100">
             {openPastEnd.map((r) => (
               <li key={r.punchId} className="py-3 first:pt-0">
-                <p className="font-medium text-slate-900">{r.employeeLabel}</p>
-                <p className="text-xs text-slate-500">{r.departmentName}</p>
-                <p className="mt-1 text-slate-600">
+                <p className="font-medium text-slate-900 dark:text-zinc-100">{r.employeeLabel}</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-500">{r.departmentName}</p>
+                <p className="mt-1 text-slate-600 dark:text-zinc-400">
                   Shift {formatShiftRange(r.shiftStartsAt, r.shiftEndsAt, tz)}
                 </p>
                 <p className="mt-1 text-xs text-amber-700">
@@ -68,14 +68,14 @@ export function TimeClockIssuesPanel({
         description="Shift started and the grace window passed, but there is no punch on record."
       >
         {missingClockIn.length === 0 ? (
-          <p className="text-sm text-slate-500">None right now.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">None right now.</p>
         ) : (
           <ul className="divide-y divide-slate-100">
             {missingClockIn.map((r) => (
               <li key={r.assignmentId} className="py-3 first:pt-0">
-                <p className="font-medium text-slate-900">{r.employeeLabel}</p>
-                <p className="text-xs text-slate-500">{r.departmentName}</p>
-                <p className="mt-1 text-slate-600">
+                <p className="font-medium text-slate-900 dark:text-zinc-100">{r.employeeLabel}</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-500">{r.departmentName}</p>
+                <p className="mt-1 text-slate-600 dark:text-zinc-400">
                   {formatShiftRange(r.shiftStartsAt, r.shiftEndsAt, tz)}
                 </p>
                 <p className="mt-1 text-xs text-amber-700">
@@ -92,14 +92,14 @@ export function TimeClockIssuesPanel({
         description="Payroll-relevant: the shift is over and there is no time punch for this assignment."
       >
         {missedNoPunch.length === 0 ? (
-          <p className="text-sm text-slate-500">None in the recent window.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">None in the recent window.</p>
         ) : (
           <ul className="divide-y divide-slate-100">
             {missedNoPunch.map((r) => (
               <li key={r.assignmentId} className="py-3 first:pt-0">
-                <p className="font-medium text-slate-900">{r.employeeLabel}</p>
-                <p className="text-xs text-slate-500">{r.departmentName}</p>
-                <p className="mt-1 text-slate-600">
+                <p className="font-medium text-slate-900 dark:text-zinc-100">{r.employeeLabel}</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-500">{r.departmentName}</p>
+                <p className="mt-1 text-slate-600 dark:text-zinc-400">
                   {formatShiftRange(r.shiftStartsAt, r.shiftEndsAt, tz)}
                 </p>
               </li>

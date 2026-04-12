@@ -22,8 +22,8 @@ export default async function ManagerTimeOffPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Time off</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Time off</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
             Approve or deny pending requests. Overlap counts assigned shifts
             that intersect the requested window (for context only).
           </p>
@@ -37,7 +37,7 @@ export default async function ManagerTimeOffPage() {
       </div>
 
       {pending.length === 0 ? (
-        <p className="surface-card p-6 text-sm text-slate-600">
+        <p className="surface-card p-6 text-sm text-slate-600 dark:text-zinc-400">
           No pending time off requests.
         </p>
       ) : (
@@ -52,14 +52,14 @@ export default async function ManagerTimeOffPage() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="font-medium text-slate-900">{name}</p>
-                    <p className="mt-1 text-sm text-slate-700">
+                    <p className="font-medium text-slate-900 dark:text-zinc-100">{name}</p>
+                    <p className="mt-1 text-sm text-slate-700 dark:text-zinc-300">
                       {p.startsAt.toLocaleString()} → {p.endsAt.toLocaleString()}
                     </p>
                     {p.reason ? (
-                      <p className="mt-2 text-sm text-slate-600">{p.reason}</p>
+                      <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">{p.reason}</p>
                     ) : null}
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-slate-500 dark:text-zinc-500">
                       {overlap > 0
                         ? `${overlap} assigned shift(s) overlap this window`
                         : "No assigned shifts overlap this window"}
@@ -79,7 +79,7 @@ export default async function ManagerTimeOffPage() {
                       <input type="hidden" name="id" value={p.id} />
                       <button
                         type="submit"
-                        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+                        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
                       >
                         Deny
                       </button>

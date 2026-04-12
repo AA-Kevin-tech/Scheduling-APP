@@ -19,8 +19,8 @@ export function AdminSetPasswordSection({ userId, isSelf }: Props) {
 
   return (
     <section className="surface-card p-6">
-      <h2 className="text-sm font-medium text-slate-800">Sign-in password</h2>
-      <p className="mt-1 text-xs text-slate-500">
+      <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Sign-in password</h2>
+      <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
         Sets the password used on the login page. All active sessions for this user end
         immediately after a successful change.
         {isSelf ? (
@@ -32,7 +32,7 @@ export function AdminSetPasswordSection({ userId, isSelf }: Props) {
       </p>
       <form action={formAction} className="mt-4 max-w-md space-y-3">
         <input type="hidden" name="userId" value={userId} />
-        <label className="block text-xs font-medium text-slate-700">
+        <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
           New password
           <input
             name="password"
@@ -40,10 +40,10 @@ export function AdminSetPasswordSection({ userId, isSelf }: Props) {
             autoComplete="new-password"
             required
             minLength={8}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 shadow-sm"
           />
         </label>
-        <label className="block text-xs font-medium text-slate-700">
+        <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
           Confirm new password
           <input
             name="confirmPassword"
@@ -51,7 +51,7 @@ export function AdminSetPasswordSection({ userId, isSelf }: Props) {
             autoComplete="new-password"
             required
             minLength={8}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 shadow-sm"
           />
         </label>
         {state?.error ? (

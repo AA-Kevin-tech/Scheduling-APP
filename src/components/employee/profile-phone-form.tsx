@@ -12,7 +12,7 @@ export function ProfilePhoneForm({ currentPhone }: { currentPhone: string | null
   return (
     <form action={formAction} className="mt-3 space-y-2">
       <label className="text-sm">
-        <span className="block text-slate-600">Mobile or best contact number</span>
+        <span className="block text-slate-600 dark:text-zinc-400">Mobile or best contact number</span>
         <input
           name="phone"
           type="tel"
@@ -40,7 +40,7 @@ export function ProfilePhoneForm({ currentPhone }: { currentPhone: string | null
           <p className="text-sm text-emerald-700">Saved.</p>
         )}
       </div>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-zinc-500">
         Optional. Used so your team can reach you about shifts. Digits, spaces, dashes,
         +, and parentheses only.
       </p>

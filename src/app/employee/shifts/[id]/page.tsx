@@ -45,22 +45,22 @@ export default async function EmployeeShiftDetailPage({
         >
           {shift.department.name}
         </span>
-        <h1 className="mt-3 text-xl font-semibold text-slate-900">
+        <h1 className="mt-3 text-xl font-semibold text-slate-900 dark:text-zinc-100">
           {shift.title || "Shift"}
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           {formatInTimeZone(shift.startsAt, tz, "MMM d, yyyy h:mm a")} →{" "}
           {formatInTimeZone(shift.endsAt, tz, "MMM d, yyyy h:mm a")}
         </p>
         <p className="mt-1 text-xs text-slate-400">{tz}</p>
         {shift.role && (
-          <p className="mt-2 text-sm text-slate-600">Role: {shift.role.name}</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">Role: {shift.role.name}</p>
         )}
         {shift.zone && (
-          <p className="text-sm text-slate-600">Zone: {shift.zone.name}</p>
+          <p className="text-sm text-slate-600 dark:text-zinc-400">Zone: {shift.zone.name}</p>
         )}
         {shift.location && (
-          <p className="text-sm text-slate-600">Location: {shift.location.name}</p>
+          <p className="text-sm text-slate-600 dark:text-zinc-400">Location: {shift.location.name}</p>
         )}
       </div>
     </div>

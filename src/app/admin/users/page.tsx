@@ -19,7 +19,7 @@ export default async function AdminUsersPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Users</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Users</h1>
         <div className="flex flex-wrap gap-2">
           <Link
             href="/admin/users/new"
@@ -35,7 +35,7 @@ export default async function AdminUsersPage() {
           </Link>
           <Link
             href="/admin/employee-onboarding"
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
           >
             Onboarding tracker
           </Link>
@@ -43,24 +43,24 @@ export default async function AdminUsersPage() {
       </div>
 
       {scoped ? (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-zinc-400">
           Listing users who work at the venue(s) selected above (and accounts
           without an employee profile). Choose <span className="font-medium">All venues</span>{" "}
           for the full directory.
         </p>
       ) : null}
 
-      <p className="text-sm text-slate-600">
-        <span className="font-medium text-slate-800">Add employee</span> creates
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
+        <span className="font-medium text-slate-800 dark:text-zinc-200">Add employee</span> creates
         the account now for someone who already works with you—you set their
         password (or share it once) and their locations and departments.{" "}
-        <span className="font-medium text-slate-800">Invite by email</span> sends
+        <span className="font-medium text-slate-800 dark:text-zinc-200">Invite by email</span> sends
         a link so they finish signup and payroll details themselves.
       </p>
 
       <div className="overflow-x-auto surface-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="table-head-row">
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Email</th>
@@ -73,19 +73,19 @@ export default async function AdminUsersPage() {
           <tbody>
             {users.map((u) => (
               <tr key={u.id} className="border-b border-slate-100 last:border-0">
-                <td className="px-3 py-2 font-medium text-slate-900">
+                <td className="px-3 py-2 font-medium text-slate-900 dark:text-zinc-100">
                   <span className="inline-flex flex-wrap items-center gap-2">
                     {u.name ?? "—"}
                     {u.employee?.archivedAt != null && (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700 dark:text-zinc-300">
                         Archived
                       </span>
                     )}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-slate-600">{u.email}</td>
-                <td className="px-3 py-2 text-slate-700">{u.role}</td>
-                <td className="px-3 py-2 text-slate-600">
+                <td className="px-3 py-2 text-slate-600 dark:text-zinc-400">{u.email}</td>
+                <td className="px-3 py-2 text-slate-700 dark:text-zinc-300">{u.role}</td>
+                <td className="px-3 py-2 text-slate-600 dark:text-zinc-400">
                   {u.employee?.locations.length ? (
                     <ul className="max-w-[10rem]">
                       {u.employee.locations.map((el) => (
@@ -96,7 +96,7 @@ export default async function AdminUsersPage() {
                     "—"
                   )}
                 </td>
-                <td className="px-3 py-2 text-slate-600">
+                <td className="px-3 py-2 text-slate-600 dark:text-zinc-400">
                   {u.employee?.departments.length ? (
                     <ul className="max-w-[12rem]">
                       {u.employee.departments.map((ed) => (

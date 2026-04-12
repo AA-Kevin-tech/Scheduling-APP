@@ -20,7 +20,7 @@ export function CancelTimeOffButton({ id }: { id: string }) {
           router.refresh();
         });
       }}
-      className="shrink-0 text-xs text-slate-700 underline hover:text-slate-900 disabled:opacity-50"
+      className="shrink-0 text-xs text-slate-700 dark:text-zinc-300 underline hover:text-slate-900 dark:hover:text-zinc-100 dark:text-zinc-100 dark:hover:text-zinc-100 dark:text-zinc-100 disabled:opacity-50"
     >
       {pending ? "…" : "Cancel"}
     </button>

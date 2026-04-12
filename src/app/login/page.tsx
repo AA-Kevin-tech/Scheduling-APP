@@ -25,7 +25,7 @@ export default async function LoginPage({
         <h1 className="text-center text-xl font-semibold text-app-heading">
           Sign in
         </h1>
-        <p className="mt-1 text-center text-sm text-slate-500">
+        <p className="mt-1 text-center text-sm text-slate-500 dark:text-zinc-500">
           Staff sign-in
         </p>
         {params.onboarded === "1" ? (

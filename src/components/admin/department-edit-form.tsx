@@ -42,9 +42,9 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
 
   return (
     <li className="surface-card p-4">
-      <p className="mb-2 text-xs text-slate-500">
+      <p className="mb-2 text-xs text-slate-500 dark:text-zinc-500">
         Venue:{" "}
-        <span className="font-medium text-slate-700">{d.location.name}</span>
+        <span className="font-medium text-slate-700 dark:text-zinc-300">{d.location.name}</span>
       </p>
       <form
         action={formAction}
@@ -52,7 +52,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
       >
         <input type="hidden" name="id" value={d.id} />
         <div className="min-w-[10rem] flex-1">
-          <label className="text-xs font-medium text-slate-600">Name</label>
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Name</label>
           <input
             name="name"
             defaultValue={d.name}
@@ -61,7 +61,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
           />
         </div>
         <div className="w-36">
-          <label className="text-xs font-medium text-slate-600">Color</label>
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Color</label>
           <select
             name="colorToken"
             defaultValue={d.colorToken}
@@ -75,7 +75,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
           </select>
         </div>
         <div className="w-24">
-          <label className="text-xs font-medium text-slate-600">Order</label>
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Order</label>
           <input
             name="sortOrder"
             type="number"
@@ -86,7 +86,7 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
         >
           {pending ? "…" : "Save"}
         </button>
@@ -96,8 +96,8 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
       ) : null}
       <div className="mt-3 grid gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2">
         <div>
-          <h3 className="text-xs font-medium uppercase text-slate-500">Roles</h3>
-          <ul className="mt-1 text-sm text-slate-700">
+          <h3 className="text-xs font-medium uppercase text-slate-500 dark:text-zinc-500">Roles</h3>
+          <ul className="mt-1 text-sm text-slate-700 dark:text-zinc-300">
             {d.roles.map((r) => (
               <li key={r.id}>
                 {r.name} <span className="text-slate-400">({r.slug})</span>
@@ -106,8 +106,8 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
           </ul>
         </div>
         <div>
-          <h3 className="text-xs font-medium uppercase text-slate-500">Zones</h3>
-          <ul className="mt-1 space-y-1 text-sm text-slate-700">
+          <h3 className="text-xs font-medium uppercase text-slate-500 dark:text-zinc-500">Zones</h3>
+          <ul className="mt-1 space-y-1 text-sm text-slate-700 dark:text-zinc-300">
             {d.zones.length === 0 ? (
               <li className="text-slate-400">None yet</li>
             ) : (
@@ -134,10 +134,10 @@ export function DepartmentEditForm({ d }: { d: Dept }) {
       </div>
 
       <div className="mt-3 border-t border-slate-100 pt-3">
-        <h3 className="text-xs font-medium uppercase text-slate-500">
+        <h3 className="text-xs font-medium uppercase text-slate-500 dark:text-zinc-500">
           Coverage minimums
         </h3>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Used on the manager coverage report. Department-wide rules count everyone
           scheduled in this department that day. Zone rules count only shifts tagged
           with that zone. If several rules apply, the report uses the tightest
@@ -179,7 +179,7 @@ function AddDepartmentZoneForm({ departmentId }: { departmentId: string }) {
       className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3 sm:flex-row sm:flex-wrap sm:items-end"
     >
       <input type="hidden" name="departmentId" value={departmentId} />
-      <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600">
+      <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
         <span className="block">Add zone</span>
         <input
           name="name"
@@ -192,7 +192,7 @@ function AddDepartmentZoneForm({ departmentId }: { departmentId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
       >
         {pending ? "…" : "Add zone"}
       </button>
@@ -225,7 +225,7 @@ function CoverageRuleEditRow({
         <input type="hidden" name="id" value={rule.id} />
         <input type="hidden" name="departmentId" value={departmentId} />
         <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
-          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span>Min staff</span>
             <input
               name="minStaffCount"
@@ -237,7 +237,7 @@ function CoverageRuleEditRow({
               className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm tabular-nums shadow-sm"
             />
           </label>
-          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span>Zone (optional)</span>
             <select
               name="zoneId"
@@ -252,7 +252,7 @@ function CoverageRuleEditRow({
               ))}
             </select>
           </label>
-          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 sm:col-span-2">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-zinc-400 sm:col-span-2">
             <span>Note (optional)</span>
             <input
               name="note"
@@ -269,7 +269,7 @@ function CoverageRuleEditRow({
           form={formId}
           type="submit"
           disabled={pending}
-          className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
         >
           {pending ? "…" : "Save rule"}
         </button>
@@ -352,9 +352,9 @@ function AddCoverageRuleFormInner({
     <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4">
       <form id={formId} action={formAction} className="flex flex-col gap-3">
         <input type="hidden" name="departmentId" value={departmentId} />
-        <p className="text-xs font-medium text-slate-600">Add coverage rule</p>
+        <p className="text-xs font-medium text-slate-600 dark:text-zinc-400">Add coverage rule</p>
         <div className="grid max-w-lg grid-cols-1 gap-3 sm:grid-cols-[5.5rem_minmax(0,1fr)]">
-          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span>Min staff</span>
             <input
               name="minStaffCount"
@@ -366,7 +366,7 @@ function AddCoverageRuleFormInner({
               className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm tabular-nums shadow-sm"
             />
           </label>
-          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span>Zone (optional)</span>
             <select
               name="zoneId"
@@ -380,7 +380,7 @@ function AddCoverageRuleFormInner({
               ))}
             </select>
           </label>
-          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 sm:col-span-2">
+          <label className="flex min-w-0 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-zinc-400 sm:col-span-2">
             <span>Note (optional)</span>
             <input
               name="note"
@@ -395,7 +395,7 @@ function AddCoverageRuleFormInner({
           form={formId}
           type="submit"
           disabled={pending}
-          className="inline-flex h-9 w-fit items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex h-9 w-fit items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
         >
           {pending ? "…" : "Add rule"}
         </button>

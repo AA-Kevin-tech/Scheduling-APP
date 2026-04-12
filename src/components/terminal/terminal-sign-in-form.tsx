@@ -35,7 +35,7 @@ export function TerminalSignInForm() {
       <div>
         <label
           htmlFor="pin"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-zinc-300"
         >
           PIN
         </label>
@@ -50,7 +50,7 @@ export function TerminalSignInForm() {
           maxLength={8}
           pattern="[0-9]{4,8}"
           title="4 to 8 digits"
-          className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-lg tracking-widest text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+          className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-lg tracking-widest text-slate-900 dark:text-zinc-100 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
         />
       </div>
       {state.error ? (

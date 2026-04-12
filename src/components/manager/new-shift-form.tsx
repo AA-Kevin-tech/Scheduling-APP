@@ -45,7 +45,7 @@ export function NewShiftForm({
 
   if (departments.length === 0) {
     return (
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         No departments for your venues. Ask an admin to add departments or assign
         you to a location.
       </p>
@@ -55,16 +55,16 @@ export function NewShiftForm({
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="scheduleTimeZone" value={scheduleTimeZone} />
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-zinc-500">
         Times are saved in{" "}
-        <span className="font-medium text-slate-700">{scheduleTimeZone}</span>.
+        <span className="font-medium text-slate-700 dark:text-zinc-300">{scheduleTimeZone}</span>.
         New shifts are saved as{" "}
-        <span className="font-medium text-slate-700">drafts</span> until you
+        <span className="font-medium text-slate-700 dark:text-zinc-300">drafts</span> until you
         publish them from the schedule.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="text-slate-600">Department</span>
+          <span className="text-slate-600 dark:text-zinc-400">Department</span>
           <select
             name="departmentId"
             required
@@ -80,7 +80,7 @@ export function NewShiftForm({
           </select>
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Role (optional)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Role (optional)</span>
           <select
             name="roleId"
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
@@ -95,7 +95,7 @@ export function NewShiftForm({
           </select>
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="text-slate-600">Zone (optional)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Zone (optional)</span>
           <select
             name="zoneId"
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
@@ -109,7 +109,7 @@ export function NewShiftForm({
           </select>
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="text-slate-600">Title (optional)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Title (optional)</span>
           <input
             name="title"
             type="text"
@@ -118,7 +118,7 @@ export function NewShiftForm({
           />
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Starts</span>
+          <span className="text-slate-600 dark:text-zinc-400">Starts</span>
           <input
             name="startsAt"
             type="datetime-local"
@@ -128,7 +128,7 @@ export function NewShiftForm({
           />
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Ends</span>
+          <span className="text-slate-600 dark:text-zinc-400">Ends</span>
           <input
             name="endsAt"
             type="datetime-local"
@@ -138,7 +138,7 @@ export function NewShiftForm({
           />
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="text-slate-600">Repeat (weeks)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Repeat (weeks)</span>
           <input
             name="repeatWeeks"
             type="number"
@@ -147,7 +147,7 @@ export function NewShiftForm({
             defaultValue={1}
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
-          <span className="mt-1 block text-xs text-slate-500">
+          <span className="mt-1 block text-xs text-slate-500 dark:text-zinc-500">
             1 = single shift. Greater values create one copy per week with the same
             weekday and time (materialized).
           </span>

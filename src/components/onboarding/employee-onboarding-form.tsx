@@ -41,10 +41,10 @@ export function EmployeeOnboardingForm({
       <input type="hidden" name="token" value={token} />
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Account</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Account</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Password
             </label>
             <input
@@ -57,7 +57,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Confirm password
             </label>
             <input
@@ -73,13 +73,13 @@ export function EmployeeOnboardingForm({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Time clock PIN</h2>
-        <p className="text-xs text-slate-500">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Time clock PIN</h2>
+        <p className="text-xs text-slate-500 dark:text-zinc-500">
           4–8 digits. Used at the workplace time clock terminal.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               PIN
             </label>
             <input
@@ -93,7 +93,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Confirm PIN
             </label>
             <input
@@ -110,10 +110,10 @@ export function EmployeeOnboardingForm({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Your profile</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Your profile</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Legal first name
             </label>
             <input
@@ -125,7 +125,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Legal last name
             </label>
             <input
@@ -136,7 +136,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Mobile phone
             </label>
             <input
@@ -147,7 +147,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Time zone
             </label>
             <select
@@ -167,10 +167,10 @@ export function EmployeeOnboardingForm({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Mailing address</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Mailing address</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Address line 1
             </label>
             <input
@@ -181,7 +181,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Address line 2
             </label>
             <input
@@ -191,7 +191,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               City
             </label>
             <input
@@ -202,7 +202,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               State
             </label>
             <input
@@ -215,7 +215,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               ZIP / postal code
             </label>
             <input
@@ -229,10 +229,10 @@ export function EmployeeOnboardingForm({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Employment</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Employment</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Hire date
             </label>
             <input
@@ -242,7 +242,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Employment type
             </label>
             <select
@@ -256,7 +256,7 @@ export function EmployeeOnboardingForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Pay type
             </label>
             <select
@@ -274,7 +274,7 @@ export function EmployeeOnboardingForm({
           </div>
           {compensationType === "HOURLY" ? (
             <div>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
                 Hourly rate (USD)
               </label>
               <input
@@ -287,7 +287,7 @@ export function EmployeeOnboardingForm({
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
                 Annual salary (USD)
               </label>
               <input
@@ -303,16 +303,16 @@ export function EmployeeOnboardingForm({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
           Tax withholding (federal / state)
         </h2>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-zinc-500">
           Stored encrypted for payroll export. Adjust fields to match your
           payroll process.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Social Security number
             </label>
             <input
@@ -325,7 +325,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Federal filing status
             </label>
             <select
@@ -341,7 +341,7 @@ export function EmployeeOnboardingForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Federal dependents / credits ($)
             </label>
             <input
@@ -351,7 +351,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Extra federal withholding ($)
             </label>
             <input
@@ -361,7 +361,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               State withholding (code)
             </label>
             <input
@@ -372,7 +372,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               State allowances / notes
             </label>
             <input
@@ -382,7 +382,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Extra state withholding ($)
             </label>
             <input
@@ -395,10 +395,10 @@ export function EmployeeOnboardingForm({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Direct deposit</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Direct deposit</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Bank name (optional)
             </label>
             <input
@@ -408,7 +408,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Routing number
             </label>
             <input
@@ -420,7 +420,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Account type
             </label>
             <select
@@ -434,7 +434,7 @@ export function EmployeeOnboardingForm({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Account number
             </label>
             <input
@@ -446,7 +446,7 @@ export function EmployeeOnboardingForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Confirm account number
             </label>
             <input

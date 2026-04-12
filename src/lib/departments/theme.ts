@@ -11,7 +11,7 @@ export const DEPARTMENT_COLORS: Record<string, string> = {
   events:
     "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950 dark:text-rose-100 dark:border-rose-700",
   maintenance:
-    "bg-slate-200 text-slate-900 border-slate-400 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600",
+    "bg-slate-200 text-slate-900 dark:text-zinc-100 border-slate-400 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600",
   education:
     "bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950 dark:text-sky-100 dark:border-sky-700",
 };
@@ -19,6 +19,6 @@ export const DEPARTMENT_COLORS: Record<string, string> = {
 export function departmentBadgeClass(slug: string): string {
   return (
     DEPARTMENT_COLORS[slug] ??
-    "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
+    "bg-slate-100 text-slate-800 dark:text-zinc-200 border-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
   );
 }

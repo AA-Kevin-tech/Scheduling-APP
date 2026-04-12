@@ -19,7 +19,7 @@ export function LocationEditForm({ loc }: { loc: Location }) {
       >
         <input type="hidden" name="id" value={loc.id} />
         <div className="min-w-[10rem] flex-1">
-          <label className="text-xs font-medium text-slate-600">Name</label>
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Name</label>
           <input
             name="name"
             defaultValue={loc.name}
@@ -28,7 +28,7 @@ export function LocationEditForm({ loc }: { loc: Location }) {
           />
         </div>
         <div className="min-w-[12rem] flex-[2]">
-          <label className="text-xs font-medium text-slate-600">Address</label>
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Address</label>
           <input
             name="address"
             defaultValue={loc.address ?? ""}
@@ -36,7 +36,7 @@ export function LocationEditForm({ loc }: { loc: Location }) {
           />
         </div>
         <div className="w-24">
-          <label className="text-xs font-medium text-slate-600">Order</label>
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Order</label>
           <input
             name="sortOrder"
             type="number"
@@ -47,7 +47,7 @@ export function LocationEditForm({ loc }: { loc: Location }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
         >
           {pending ? "…" : "Save"}
         </button>

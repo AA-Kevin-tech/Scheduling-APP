@@ -83,8 +83,8 @@ export default async function EmployeeHomePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">Hello, {name}</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-zinc-100">Hello, {name}</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Your upcoming shifts and actions in one place.
         </p>
       </div>
@@ -100,15 +100,15 @@ export default async function EmployeeHomePage() {
       />
 
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-500">Hours this week (UTC)</h2>
-        <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-900">
+        <h2 className="text-sm font-medium text-slate-500 dark:text-zinc-500">Hours this week (UTC)</h2>
+        <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
           {hoursWorked}h worked
           {capH != null ? ` / ${capH}h cap` : ""}
         </p>
-        <p className="mt-1 text-base font-medium tabular-nums text-slate-700">
+        <p className="mt-1 text-base font-medium tabular-nums text-slate-700 dark:text-zinc-300">
           {hoursScheduled}h scheduled this week
         </p>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           {weeklyCap != null && workedMinutes > weeklyCap * 0.9 && (
             <span className="font-medium text-amber-800">Near weekly limit · </span>
           )}
@@ -122,8 +122,8 @@ export default async function EmployeeHomePage() {
             href="/employee/schedule"
             className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
-            <span className="font-medium text-slate-900">Schedule</span>
-            <span className="mt-1 block text-sm text-slate-600">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Schedule</span>
+            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
               Your week and shift details; use <strong>Full location</strong> there
               to see everyone published at your site (all departments).
             </span>
@@ -134,8 +134,8 @@ export default async function EmployeeHomePage() {
             href="/terminal"
             className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
-            <span className="font-medium text-slate-900">Time clock</span>
-            <span className="mt-1 block text-sm text-slate-600">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Time clock</span>
+            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
               Use your time clock PIN on the work computer
             </span>
           </Link>
@@ -145,8 +145,8 @@ export default async function EmployeeHomePage() {
             href="/employee/availability"
             className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
-            <span className="font-medium text-slate-900">Can&apos;t work</span>
-            <span className="mt-1 block text-sm text-slate-600">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Can&apos;t work</span>
+            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
               Recurring times you are not available
             </span>
           </Link>
@@ -156,8 +156,8 @@ export default async function EmployeeHomePage() {
             href="/employee/time-off"
             className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
-            <span className="font-medium text-slate-900">Time off</span>
-            <span className="mt-1 block text-sm text-slate-600">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Time off</span>
+            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
               Request and track PTO-style time away
             </span>
           </Link>
@@ -167,8 +167,8 @@ export default async function EmployeeHomePage() {
             href="/employee/swaps"
             className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
-            <span className="font-medium text-slate-900">Shift swaps</span>
-            <span className="mt-1 block text-sm text-slate-600">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Shift swaps</span>
+            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
               Request and respond to swaps
             </span>
           </Link>
@@ -178,8 +178,8 @@ export default async function EmployeeHomePage() {
             href="/employee/notifications"
             className="surface-card block min-h-[52px] p-4 text-left active:bg-slate-50 hover:border-sky-300 dark:active:bg-slate-800 dark:hover:border-sky-600"
           >
-            <span className="font-medium text-slate-900">Notifications</span>
-            <span className="mt-1 block text-sm text-slate-600">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">Notifications</span>
+            <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
               Swaps and schedule updates
             </span>
           </Link>

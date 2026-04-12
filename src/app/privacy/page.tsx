@@ -10,14 +10,14 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <article className="mx-auto max-w-3xl surface-card px-6 py-10 md:px-10 md:py-12">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100 md:text-3xl">
           Privacy Policy
         </h1>
-        <p className="mt-2 text-sm text-slate-500">Effective date: April 7, 2026</p>
+        <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Effective date: April 7, 2026</p>
 
-        <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-700 md:text-base">
+        <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-700 dark:text-zinc-300 md:text-base">
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               1. Who we are
             </h2>
             <p>
@@ -30,37 +30,37 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               2. Information we collect
             </h2>
             <p>We may collect:</p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <strong className="font-medium text-slate-800">Account data:</strong> name,
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">Account data:</strong> name,
                 work email, role, organization identifiers, and credentials (passwords are
                 stored using secure hashing).
               </li>
               <li>
-                <strong className="font-medium text-slate-800">
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">
                   Scheduling and workforce data:
                 </strong>{" "}
                 shifts, departments, locations, time clock events, swap requests, approvals,
                 and similar operational records you or your organization enter.
               </li>
               <li>
-                <strong className="font-medium text-slate-800">Technical data:</strong> IP
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">Technical data:</strong> IP
                 address, device/browser type, timestamps, and logs used for security,
                 reliability, and troubleshooting.
               </li>
               <li>
-                <strong className="font-medium text-slate-800">
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">
                   Communications metadata:
                 </strong>{" "}
                 if your organization enables notifications, delivery-related information
                 associated with email or SMS alerts.
               </li>
               <li>
-                <strong className="font-medium text-slate-800">
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">
                   Integration data (optional):
                 </strong>{" "}
                 if an administrator connects third-party services (such as accounting
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               3. How we use information
             </h2>
             <p>We use personal information to:</p>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               4. Legal bases (EEA/UK users)
             </h2>
             <p>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               5. How we share information
             </h2>
             <p>
@@ -109,12 +109,12 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <strong className="font-medium text-slate-800">Service providers</strong> who
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">Service providers</strong> who
                 host infrastructure, send messages, or support the Service under contract and
                 confidentiality obligations.
               </li>
               <li>
-                <strong className="font-medium text-slate-800">
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">
                   Integration partners
                 </strong>{" "}
                 when your organization enables a connection; those partners receive
@@ -122,19 +122,19 @@ export default function PrivacyPage() {
                 choices.
               </li>
               <li>
-                <strong className="font-medium text-slate-800">Your employer</strong>, as
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">Your employer</strong>, as
                 the organization operating or purchasing access to Pulse may access
                 workforce data in the normal course of managing schedules and time.
               </li>
               <li>
-                <strong className="font-medium text-slate-800">Authorities</strong> when
+                <strong className="font-medium text-slate-800 dark:text-zinc-200">Authorities</strong> when
                 required by law or to protect rights, safety, and security.
               </li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               6. Retention
             </h2>
             <p>
@@ -145,7 +145,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               7. Security
             </h2>
             <p>
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               8. International transfers
             </h2>
             <p>
@@ -166,7 +166,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">9. Your choices</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">9. Your choices</h2>
             <p>
               Depending on your jurisdiction, you may have rights to access, correct,
               delete, restrict, or object to certain processing, or to portability.
@@ -176,7 +176,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               10. Children
             </h2>
             <p>
@@ -186,7 +186,7 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               11. Changes
             </h2>
             <p>
@@ -197,14 +197,14 @@ export default function PrivacyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">12. Contact</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">12. Contact</h2>
             <p>
               For privacy questions or requests, contact us at the address or email
               published on your Pulse deployment or your organization&apos;s administrator.
             </p>
           </section>
 
-          <p className="pt-4 text-xs text-slate-500">
+          <p className="pt-4 text-xs text-slate-500 dark:text-zinc-500">
             This policy is provided for transparency and integration requirements. Have
             qualified counsel review it for your entity and jurisdictions.
           </p>

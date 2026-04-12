@@ -116,7 +116,7 @@ export function EmployeeHrDetailsForm({
 
         <FieldRow label="Holiday pay" alignTop>
           <div className="space-y-1">
-            <label className="flex items-center gap-2 text-sm text-slate-800">
+            <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-zinc-200">
               <input
                 type="checkbox"
                 name="holidayPayEligible"
@@ -126,7 +126,7 @@ export function EmployeeHrDetailsForm({
               />
               Eligible for company holiday rules
             </label>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-zinc-500">
               Paid holiday hours (when not working) and work premiums use admin
               holiday settings. Uncheck for contractors or others excluded from
               holiday pay.

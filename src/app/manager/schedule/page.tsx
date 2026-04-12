@@ -160,7 +160,7 @@ export default async function ManagerSchedulePage({
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Schedule</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Schedule</h1>
         <Link
           href="/manager/shifts/new"
           className="rounded-md bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800"
@@ -177,7 +177,7 @@ export default async function ManagerSchedulePage({
         >
           ←
         </Link>
-        <span className="min-w-[220px] text-center text-sm font-semibold text-slate-800">
+        <span className="min-w-[220px] text-center text-sm font-semibold text-slate-800 dark:text-zinc-200">
           {rangeLabel}
         </span>
         <Link
@@ -201,7 +201,7 @@ export default async function ManagerSchedulePage({
       >
         <input type="hidden" name="week" value={mondayIso} />
         <label className="text-sm">
-          <span className="block text-slate-600">Department</span>
+          <span className="block text-slate-600 dark:text-zinc-400">Department</span>
           <select
             name="departmentId"
             defaultValue={departmentId ?? ""}
@@ -216,7 +216,7 @@ export default async function ManagerSchedulePage({
           </select>
         </label>
         <label className="text-sm">
-          <span className="block text-slate-600">Role</span>
+          <span className="block text-slate-600 dark:text-zinc-400">Role</span>
           <select
             name="roleId"
             defaultValue={roleId ?? ""}
@@ -234,7 +234,7 @@ export default async function ManagerSchedulePage({
           </select>
         </label>
         <label className="text-sm">
-          <span className="block text-slate-600">Staff rows</span>
+          <span className="block text-slate-600 dark:text-zinc-400">Staff rows</span>
           <select
             name="roster"
             defaultValue={rosterMode === "all" ? "all" : ""}
@@ -245,7 +245,7 @@ export default async function ManagerSchedulePage({
           </select>
         </label>
         <label className="text-sm">
-          <span className="block text-slate-600">Search name</span>
+          <span className="block text-slate-600 dark:text-zinc-400">Search name</span>
           <input
             name="q"
             type="search"

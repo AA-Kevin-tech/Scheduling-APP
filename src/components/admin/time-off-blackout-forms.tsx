@@ -20,9 +20,9 @@ export function AddTimeOffBlackoutForm() {
       action={formAction}
       className="mt-6 space-y-3 rounded-lg border border-slate-200 bg-slate-50/80 p-4"
     >
-      <h3 className="text-sm font-medium text-slate-800">Add blackout</h3>
+      <h3 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Add blackout</h3>
       <div className="flex flex-wrap gap-3">
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">From (date)</span>
           <input
             name="startsOnYmd"
@@ -31,7 +31,7 @@ export function AddTimeOffBlackoutForm() {
             className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Through (date)</span>
           <input
             name="endsOnYmd"
@@ -40,7 +40,7 @@ export function AddTimeOffBlackoutForm() {
             className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600">
+        <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Label (optional)</span>
           <input
             name="label"
@@ -78,7 +78,7 @@ export function EditTimeOffBlackoutForm({ row }: { row: TimeOffBlackout }) {
         className="flex flex-wrap items-end gap-3"
       >
         <input type="hidden" name="id" value={row.id} />
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">From</span>
           <input
             name="startsOnYmd"
@@ -88,7 +88,7 @@ export function EditTimeOffBlackoutForm({ row }: { row: TimeOffBlackout }) {
             className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Through</span>
           <input
             name="endsOnYmd"
@@ -98,7 +98,7 @@ export function EditTimeOffBlackoutForm({ row }: { row: TimeOffBlackout }) {
             className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="min-w-[10rem] flex-1 text-xs font-medium text-slate-600">
+        <label className="min-w-[10rem] flex-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Label</span>
           <input
             name="label"
@@ -112,7 +112,7 @@ export function EditTimeOffBlackoutForm({ row }: { row: TimeOffBlackout }) {
           form={formId}
           type="submit"
           disabled={pending}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
         >
           {pending ? "…" : "Save"}
         </button>

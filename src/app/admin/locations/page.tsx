@@ -9,17 +9,17 @@ export default async function AdminLocationsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <h1 className="text-xl font-semibold text-slate-900">Locations</h1>
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Locations</h1>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Add location</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Add location</h2>
         <LocationCreateForm />
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-slate-800">All locations</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">All locations</h2>
         {locations.length === 0 ? (
-          <p className="text-sm text-slate-500">No locations yet.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">No locations yet.</p>
         ) : (
           <ul className="space-y-4">
             {locations.map((loc) => (

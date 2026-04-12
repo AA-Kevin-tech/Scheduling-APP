@@ -48,10 +48,10 @@ export default async function ManagerEmployeeOnboardingPage({
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
             Employee onboarding
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
             {isManagerOnly
               ? "Invites you sent and their progress."
               : "All invites across the organization (you are signed in as admin)."}

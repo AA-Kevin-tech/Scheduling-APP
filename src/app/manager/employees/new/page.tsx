@@ -27,7 +27,7 @@ export default async function ManagerNewEmployeePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Add employee</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Add employee</h1>
         <Link
           href="/manager/employees"
           className="text-sm text-sky-700 hover:underline"
@@ -35,7 +35,7 @@ export default async function ManagerNewEmployeePage() {
           ← Employees
         </Link>
       </div>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         New accounts are created as employees. Admins can change roles under
         Admin → Users. To have them set password, PIN, and payroll info
         themselves, use{" "}

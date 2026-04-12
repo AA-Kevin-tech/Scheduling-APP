@@ -15,10 +15,10 @@ export function WeekAnnouncementStrip({
         {items.map((a) => (
           <li
             key={a.id}
-            className="rounded-lg border border-sky-100/80 bg-white/70 px-3 py-2 text-slate-800"
+            className="rounded-lg border border-sky-100/80 bg-white/70 px-3 py-2 text-slate-800 dark:text-zinc-200"
           >
-            <span className="font-medium text-slate-900">{a.title}</span>
-            <span className="text-slate-500">
+            <span className="font-medium text-slate-900 dark:text-zinc-100">{a.title}</span>
+            <span className="text-slate-500 dark:text-zinc-500">
               {" "}
               · {a.locationName}
               {a.startsOnYmd === a.endsOnYmd
@@ -26,7 +26,7 @@ export function WeekAnnouncementStrip({
                 : ` · ${a.startsOnYmd} → ${a.endsOnYmd}`}
             </span>
             {a.businessClosed ? (
-              <span className="ml-2 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-medium text-slate-800">
+              <span className="ml-2 rounded bg-slate-200 px-1.5 py-0.5 text-[11px] font-medium text-slate-800 dark:text-zinc-200">
                 Closed
               </span>
             ) : null}
@@ -36,7 +36,7 @@ export function WeekAnnouncementStrip({
               </span>
             ) : null}
             {a.message ? (
-              <p className="mt-1 whitespace-pre-wrap text-xs text-slate-600">
+              <p className="mt-1 whitespace-pre-wrap text-xs text-slate-600 dark:text-zinc-400">
                 {a.message}
               </p>
             ) : null}

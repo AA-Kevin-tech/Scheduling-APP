@@ -27,7 +27,7 @@ export default async function ManagerInviteEmployeePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Invite employee
         </h1>
         <Link

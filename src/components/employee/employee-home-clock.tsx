@@ -35,8 +35,8 @@ export function EmployeeHomeClockSection({
   if (!allowWebClock) {
     return (
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-800">Time clock</h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Time clock</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           Your organization requires clock in and out at the work kiosk using your
           time clock PIN. Use the kiosk or ask a manager if you need help.
         </p>
@@ -112,14 +112,14 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
           <p className="text-xs font-medium uppercase tracking-wide text-sky-900">
             On shift
           </p>
-          <p className="mt-1 text-lg font-semibold text-slate-900">
+          <p className="mt-1 text-lg font-semibold text-slate-900 dark:text-zinc-100">
             {dash.openPunch.shiftLabel}
           </p>
-          <p className="text-sm text-slate-700">{dash.openPunch.departmentName}</p>
+          <p className="text-sm text-slate-700 dark:text-zinc-300">{dash.openPunch.departmentName}</p>
           {dash.openPunch.locationName ? (
-            <p className="text-xs text-slate-600">{dash.openPunch.locationName}</p>
+            <p className="text-xs text-slate-600 dark:text-zinc-400">{dash.openPunch.locationName}</p>
           ) : null}
-          <p className="mt-3 text-sm text-slate-600">
+          <p className="mt-3 text-sm text-slate-600 dark:text-zinc-400">
             Clocked in at{" "}
             <time dateTime={dash.openPunch.clockInAt}>
               {new Date(dash.openPunch.clockInAt).toLocaleString(undefined, {
@@ -144,7 +144,7 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
               name="note"
               rows={2}
               placeholder="Optional note for your manager"
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
             />
             {clockOutError ? (
               <p className="text-sm text-red-700">{clockOutError}</p>
@@ -161,7 +161,7 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
       ) : null}
 
       {!dash.openPunch && dash.clockInOptions.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-600">
+        <p className="mt-4 text-sm text-slate-600 dark:text-zinc-400">
           No shifts available to clock in right now. Check with your manager if
           this looks wrong.
         </p>
@@ -183,12 +183,12 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
               >
                 <input type="hidden" name="assignmentId" value={opt.assignmentId} />
                 <div>
-                  <p className="font-medium text-slate-900">{opt.title}</p>
-                  <p className="text-sm text-slate-600">{opt.departmentName}</p>
+                  <p className="font-medium text-slate-900 dark:text-zinc-100">{opt.title}</p>
+                  <p className="text-sm text-slate-600 dark:text-zinc-400">{opt.departmentName}</p>
                   {opt.locationName ? (
-                    <p className="text-xs text-slate-500">{opt.locationName}</p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-500">{opt.locationName}</p>
                   ) : null}
-                  <p className="mt-2 text-sm text-slate-700">
+                  <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">
                     {opt.startsAtLabel} – {opt.endsAtLabel}
                   </p>
                 </div>
@@ -200,7 +200,7 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
                   name="note"
                   rows={2}
                   placeholder="Optional note"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
                 />
                 <button
                   type="submit"

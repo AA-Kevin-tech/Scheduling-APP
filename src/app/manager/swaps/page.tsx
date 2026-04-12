@@ -21,7 +21,7 @@ export default async function ManagerSwapsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Swap approvals</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Swap approvals</h1>
         <Link
           href="/manager/schedule"
           className="text-sm text-sky-700 hover:underline"
@@ -31,14 +31,14 @@ export default async function ManagerSwapsPage() {
       </div>
 
       <section>
-        <h2 className="text-sm font-semibold text-slate-700">
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-300">
           Awaiting employee response
         </h2>
         <SwapList swaps={pending} showManagerActions={false} />
       </section>
 
       <section>
-        <h2 className="text-sm font-semibold text-slate-700">
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-300">
           Ready for your approval
         </h2>
         <ul className="mt-3 space-y-4">
@@ -58,11 +58,11 @@ export default async function ManagerSwapsPage() {
                   </span>
                   <span className="text-xs text-amber-800">Accepted by employee</span>
                 </div>
-                <p className="mt-2 text-sm text-slate-800">
+                <p className="mt-2 text-sm text-slate-800 dark:text-zinc-200">
                   {new Date(from.startsAt).toLocaleString()} →{" "}
                   {new Date(from.endsAt).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-zinc-500">
                   {s.requester.user.name ?? s.requester.user.email} ↔{" "}
                   {s.target?.user.name ?? s.target?.user.email}
                 </p>
@@ -74,7 +74,7 @@ export default async function ManagerSwapsPage() {
           })}
         </ul>
         {ready.length === 0 && (
-          <p className="mt-2 text-sm text-slate-500">Nothing waiting for approval.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Nothing waiting for approval.</p>
         )}
       </section>
     </div>
@@ -89,7 +89,7 @@ function SwapList({
   showManagerActions: boolean;
 }) {
   if (swaps.length === 0) {
-    return <p className="mt-2 text-sm text-slate-500">None.</p>;
+    return <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">None.</p>;
   }
   return (
     <ul className="mt-3 space-y-3">
@@ -107,12 +107,12 @@ function SwapList({
               >
                 {from.department.name}
               </span>
-              <span className="text-xs text-slate-500">{s.status}</span>
+              <span className="text-xs text-slate-500 dark:text-zinc-500">{s.status}</span>
             </div>
-            <p className="mt-2 text-sm text-slate-800">
+            <p className="mt-2 text-sm text-slate-800 dark:text-zinc-200">
               {new Date(from.startsAt).toLocaleString()}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-zinc-500">
               {s.requester.user.name ?? s.requester.user.email} →{" "}
               {s.target?.user.name ?? s.target?.user.email}
             </p>

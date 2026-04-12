@@ -36,7 +36,7 @@ export default async function ManagerCoveragePage({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Department coverage
         </h1>
         <Link
@@ -46,7 +46,7 @@ export default async function ManagerCoveragePage({
           Schedule board
         </Link>
       </div>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Required headcounts come from coverage rules your administrator sets for
         each department (and optional zones). Published shifts only count toward
         scheduled staff.
@@ -59,9 +59,9 @@ export default async function ManagerCoveragePage({
         >
           ← Prev week
         </Link>
-        <span className="text-sm font-medium text-slate-800">
+        <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Week of {weekStart.toLocaleDateString()}{" "}
-          <span className="font-normal text-slate-500">(UTC)</span>
+          <span className="font-normal text-slate-500 dark:text-zinc-500">(UTC)</span>
         </span>
         <Link
           href={`/manager/coverage?week=${toIsoDate(nextWeek)}`}
@@ -72,11 +72,11 @@ export default async function ManagerCoveragePage({
       </div>
 
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-800">Summary</h2>
-        <ul className="mt-2 space-y-1 text-sm text-slate-600">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Summary</h2>
+        <ul className="mt-2 space-y-1 text-sm text-slate-600 dark:text-zinc-400">
           {Object.entries(summary.byDepartment).map(([id, s]) => (
             <li key={id}>
-              <span className="font-medium text-slate-800">{s.name}</span>:{" "}
+              <span className="font-medium text-slate-800 dark:text-zinc-200">{s.name}</span>:{" "}
               {s.daysBelowMin > 0 ? (
                 <span className="text-amber-800">
                   {s.daysBelowMin} day(s) below minimum (worst gap {s.worstGap})
@@ -91,7 +91,7 @@ export default async function ManagerCoveragePage({
 
       <div className="overflow-x-auto surface-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="table-head-row">
             <tr>
               <th className="px-3 py-2">Date</th>
               <th className="px-3 py-2">Department</th>

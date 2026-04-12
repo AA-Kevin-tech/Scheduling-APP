@@ -31,7 +31,7 @@ export default async function AdminNewUserPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Add employee</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Add employee</h1>
         <Link
           href="/admin/users"
           className="text-sm text-sky-700 hover:underline"
@@ -40,7 +40,7 @@ export default async function AdminNewUserPage() {
         </Link>
       </div>
 
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Use this for staff who already work with you and need an account right
         away. For a self-service link instead,{" "}
         <Link href="/admin/users/invite" className="text-sky-700 hover:underline">
@@ -50,7 +50,7 @@ export default async function AdminNewUserPage() {
       </p>
 
       {venueScope != null && venueScope.length > 0 ? (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-zinc-400">
           Locations and departments match the venue switcher. Use{" "}
           <span className="font-medium">All venues</span> to assign multiple
           sites in one step.

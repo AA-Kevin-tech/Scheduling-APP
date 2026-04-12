@@ -15,7 +15,7 @@ export default async function EmployeeNotificationsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold text-slate-900">Notifications</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Notifications</h1>
         <Link href="/employee" className="text-sm text-sky-700 hover:underline">
           Home
         </Link>

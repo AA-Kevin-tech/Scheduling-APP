@@ -32,8 +32,8 @@ export function FieldRow({
       <span
         className={
           alignTop
-            ? "text-sm text-slate-600 sm:pt-1.5"
-            : "text-sm text-slate-600 sm:pt-0"
+            ? "text-sm text-slate-600 dark:text-zinc-400 sm:pt-1.5"
+            : "text-sm text-slate-600 dark:text-zinc-400 sm:pt-0"
         }
       >
         {label}

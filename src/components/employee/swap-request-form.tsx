@@ -70,9 +70,9 @@ export function SwapRequestForm({
 
   return (
     <form action={action} className="space-y-4 surface-card p-4">
-      <h2 className="text-sm font-medium text-slate-800">Request a swap</h2>
+      <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Request a swap</h2>
       <label className="block text-sm">
-        <span className="text-slate-600">Your shift to offer</span>
+        <span className="text-slate-600 dark:text-zinc-400">Your shift to offer</span>
         <select
           name="fromAssignmentId"
           required
@@ -93,14 +93,14 @@ export function SwapRequestForm({
       </label>
       <div className="space-y-2">
         <label className="block text-sm">
-          <span className="text-slate-600">Other employee</span>
+          <span className="text-slate-600 dark:text-zinc-400">Other employee</span>
           {selectedAssignment && !showAllColleagues && shiftDeptId ? (
-            <span className="mt-0.5 block text-xs text-slate-500">
+            <span className="mt-0.5 block text-xs text-slate-500 dark:text-zinc-500">
               Suggesting people assigned to {selectedAssignment.shift.department.name}. Role and
               hours are still checked when you submit.
             </span>
           ) : selectedAssignment && showAllColleagues ? (
-            <span className="mt-0.5 block text-xs text-slate-500">
+            <span className="mt-0.5 block text-xs text-slate-500 dark:text-zinc-500">
               Showing all employees. Department and role rules still apply at submit.
             </span>
           ) : null}
@@ -121,7 +121,7 @@ export function SwapRequestForm({
           </select>
         </label>
         {fromId && shiftDeptId && departmentColleagues.length < colleagues.length ? (
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-zinc-300">
             <input
               type="checkbox"
               checked={showAllColleagues}
@@ -139,7 +139,7 @@ export function SwapRequestForm({
         ) : null}
       </div>
       <label className="block text-sm">
-        <span className="text-slate-600">
+        <span className="text-slate-600 dark:text-zinc-400">
           Their shift to trade (optional — one-way if empty)
         </span>
         <select

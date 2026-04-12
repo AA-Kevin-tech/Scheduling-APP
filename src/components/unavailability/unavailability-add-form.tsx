@@ -20,7 +20,7 @@ export function UnavailabilityAddForm({
       {children}
       <div className="grid gap-3 sm:grid-cols-4">
       <label className="text-sm">
-        <span className="text-slate-600">Day</span>
+        <span className="text-slate-600 dark:text-zinc-400">Day</span>
         <select
           name="dayOfWeek"
           required
@@ -34,7 +34,7 @@ export function UnavailabilityAddForm({
         </select>
       </label>
       <label className="text-sm">
-        <span className="text-slate-600">From</span>
+        <span className="text-slate-600 dark:text-zinc-400">From</span>
         <input
           name="startsAt"
           type="time"
@@ -44,7 +44,7 @@ export function UnavailabilityAddForm({
         />
       </label>
       <label className="text-sm">
-        <span className="text-slate-600">To</span>
+        <span className="text-slate-600 dark:text-zinc-400">To</span>
         <input
           name="endsAt"
           type="time"

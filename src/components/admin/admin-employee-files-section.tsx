@@ -29,8 +29,8 @@ export function AdminEmployeeFilesSection({
 }) {
   return (
     <div className="surface-card p-6">
-      <h2 className="text-sm font-medium text-slate-800">Employee files</h2>
-      <p className="mt-1 text-xs text-slate-500">
+      <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Employee files</h2>
+      <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
         Upload contracts, certifications, or other records. Files are only
         visible to administrators (not shown on the employee app). Maximum 10
         MB per file; stored in your database.
@@ -44,7 +44,7 @@ export function AdminEmployeeFilesSection({
       </div>
 
       {files.length === 0 ? (
-        <p className="mt-6 text-sm text-slate-500">No files yet.</p>
+        <p className="mt-6 text-sm text-slate-500 dark:text-zinc-500">No files yet.</p>
       ) : (
         <ul className="mt-6 divide-y divide-slate-100 border-t border-slate-100">
           {files.map((f) => (
@@ -56,7 +56,7 @@ export function AdminEmployeeFilesSection({
                 >
                   {f.fileName}
                 </a>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-zinc-500">
                   {formatBytes(f.sizeBytes)}
                   {f.contentType ? ` · ${f.contentType}` : null}
                   {" · "}
@@ -64,7 +64,7 @@ export function AdminEmployeeFilesSection({
                   {f.uploadedByLabel ? ` · ${f.uploadedByLabel}` : null}
                 </p>
                 {f.description ? (
-                  <p className="text-sm text-slate-600">{f.description}</p>
+                  <p className="text-sm text-slate-600 dark:text-zinc-400">{f.description}</p>
                 ) : null}
               </div>
               <AdminEmployeeFileDeleteForm

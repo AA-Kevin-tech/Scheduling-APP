@@ -53,10 +53,10 @@ export default async function ManagerDashboardPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-zinc-100">
           Dashboard — {name}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Department-first scheduling, coverage, and approvals.
         </p>
       </div>
@@ -66,8 +66,8 @@ export default async function ManagerDashboardPage() {
           href="/manager/schedule"
           className="surface-card p-4 hover:border-sky-300"
         >
-          <p className="text-sm text-slate-500">Unassigned future shifts</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Unassigned future shifts</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {openShifts}
           </p>
           <p className="mt-1 text-xs text-slate-400">Needs staffing</p>
@@ -76,8 +76,8 @@ export default async function ManagerDashboardPage() {
           href="/manager/swaps"
           className="surface-card p-4 hover:border-sky-300"
         >
-          <p className="text-sm text-slate-500">Swap queue</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Swap queue</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {pendingTotal}
           </p>
           <p className="mt-1 text-xs text-slate-400">
@@ -88,8 +88,8 @@ export default async function ManagerDashboardPage() {
           href="/manager/time-off"
           className="surface-card p-4 hover:border-sky-300"
         >
-          <p className="text-sm text-slate-500">Time off pending</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Time off pending</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {pendingTimeOff}
           </p>
           <p className="mt-1 text-xs text-slate-400">Awaiting approval</p>
@@ -98,8 +98,8 @@ export default async function ManagerDashboardPage() {
           href="/manager/coverage"
           className="surface-card p-4 hover:border-sky-300"
         >
-          <p className="text-sm text-slate-500">Coverage gaps (week)</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Coverage gaps (week)</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {coverageGapDays}
           </p>
           <p className="mt-1 text-xs text-slate-400">Day × dept below min</p>
@@ -108,8 +108,8 @@ export default async function ManagerDashboardPage() {
           href="/manager/time-clock"
           className="surface-card p-4 hover:border-sky-300"
         >
-          <p className="text-sm text-slate-500">Time clock issues</p>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Time clock issues</p>
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {timeClock.total}
           </p>
           <p className="mt-1 text-xs text-slate-400">
@@ -118,8 +118,8 @@ export default async function ManagerDashboardPage() {
         </Link>
       </div>
 
-      <section className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-6 text-sm text-slate-600">
-        <p className="font-medium text-slate-800">Shortcuts</p>
+      <section className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-6 text-sm text-slate-600 dark:text-zinc-400">
+        <p className="font-medium text-slate-800 dark:text-zinc-200">Shortcuts</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
           <li>
             <Link href="/manager/shifts/new" className="text-sky-700 hover:underline">

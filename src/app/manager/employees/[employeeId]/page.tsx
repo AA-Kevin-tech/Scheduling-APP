@@ -63,7 +63,7 @@ export default async function ManagerEmployeeHourLimitsPage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Employee</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Employee</h1>
         <Link
           href="/manager/employees"
           className="text-sm text-sky-700 hover:underline"
@@ -75,19 +75,19 @@ export default async function ManagerEmployeeHourLimitsPage({
       <div className="surface-card p-6">
         <div className="space-y-3">
           <FieldRow label="Name">
-            <p className="text-sm font-medium text-slate-900">
+            <p className="text-sm font-medium text-slate-900 dark:text-zinc-100">
               {employee.user?.name ?? "—"}
             </p>
           </FieldRow>
           <FieldRow label="Email">
-            <p className="text-sm text-slate-600">{employee.user?.email}</p>
+            <p className="text-sm text-slate-600 dark:text-zinc-400">{employee.user?.email}</p>
           </FieldRow>
           <EmployeePhoneStaffForm
             employeeId={employeeId}
             currentPhone={employee.phone}
           />
           <FieldRow label="Employee #">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-zinc-500">
               {employee.employeeNumber ? `#${employee.employeeNumber}` : "—"}
             </p>
           </FieldRow>
@@ -95,24 +95,24 @@ export default async function ManagerEmployeeHourLimitsPage({
       </div>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Effective weekly cap (scheduling &amp; swaps)
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Tightest limit after combining this employee&apos;s settings with
           department/role rules.
         </p>
         <div className="mt-3">
           <FieldRow label="Effective cap">
             <div>
-              <p className="text-sm text-slate-700">{effectiveLabel}</p>
+              <p className="text-sm text-slate-700 dark:text-zinc-300">{effectiveLabel}</p>
             </div>
           </FieldRow>
         </div>
       </section>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Time clock PIN</h2>
         <div className="mt-4">
           <EmployeeTimeClockPinForm
             employeeId={employeeId}
@@ -122,8 +122,8 @@ export default async function ManagerEmployeeHourLimitsPage({
       </section>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">HR details</h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">HR details</h2>
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Manager notes, hourly rate or annual salary, and employment type are not visible
           to the employee.
         </p>
@@ -141,10 +141,10 @@ export default async function ManagerEmployeeHourLimitsPage({
       </section>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Employee-specific weekly limit
         </h2>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-slate-500 dark:text-zinc-500">
           Only managers and admins can change this. Leave blank and save to remove
           the employee-only weekly cap.
         </p>

@@ -188,7 +188,7 @@ export function EmployeeInviteForm(props: Props) {
         <input key={id} type="hidden" name="locationIds" value={id} />
       ))}
 
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         We will email a secure link. They choose a password, set a time clock
         PIN, and enter payroll information (encrypted) for future QuickBooks
         export.
@@ -196,7 +196,7 @@ export function EmployeeInviteForm(props: Props) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             First name
           </label>
           <input
@@ -207,7 +207,7 @@ export function EmployeeInviteForm(props: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Last name
           </label>
           <input
@@ -218,7 +218,7 @@ export function EmployeeInviteForm(props: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Email
           </label>
           <input
@@ -230,7 +230,7 @@ export function EmployeeInviteForm(props: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Employee #
           </label>
           <input
@@ -242,11 +242,11 @@ export function EmployeeInviteForm(props: Props) {
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-slate-800">Locations</h3>
+        <h3 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Locations</h3>
         <ul className="mt-2 space-y-2">
           {locations.map((loc) => (
             <li key={loc.id}>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300">
                 <input
                   type="checkbox"
                   checked={locIds.has(loc.id)}
@@ -261,7 +261,7 @@ export function EmployeeInviteForm(props: Props) {
 
       <div>
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-medium text-slate-800">Departments</h3>
+          <h3 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Departments</h3>
           <button
             type="button"
             onClick={addRow}
@@ -288,7 +288,7 @@ export function EmployeeInviteForm(props: Props) {
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="text-xs font-medium text-slate-600">
+                    <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
                       Department
                     </label>
                     <select
@@ -317,7 +317,7 @@ export function EmployeeInviteForm(props: Props) {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-600">
+                    <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
                       Role
                     </label>
                     <select
@@ -339,7 +339,7 @@ export function EmployeeInviteForm(props: Props) {
                   </div>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-zinc-400">
                     <input
                       type="radio"
                       name="primaryDept"

@@ -20,9 +20,9 @@ function statusClass(status: string) {
     case "DENIED":
       return "bg-rose-50 text-rose-900 border-rose-200";
     case "CANCELLED":
-      return "bg-slate-100 text-slate-600 border-slate-200";
+      return "bg-slate-100 text-slate-600 dark:text-zinc-400 border-slate-200";
     default:
-      return "bg-slate-50 text-slate-800 border-slate-200";
+      return "bg-slate-50 text-slate-800 dark:text-zinc-200 border-slate-200";
   }
 }
 
@@ -49,8 +49,8 @@ export default async function EmployeeTimeOffPage() {
         >
           ← Home
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900">Time off</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-zinc-100">Time off</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Request time away. Managers are notified to approve or deny. You
           cannot request time off on today through{" "}
           <span className="font-medium tabular-nums">{blockedThrough}</span>{" "}
@@ -77,7 +77,7 @@ export default async function EmployeeTimeOffPage() {
       </div>
 
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-800">New request</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">New request</h2>
         <div className="mt-4">
           <TimeOffRequestForm
             defaultStart={draft.start}
@@ -88,9 +88,9 @@ export default async function EmployeeTimeOffPage() {
       </section>
 
       <section>
-        <h2 className="text-sm font-medium text-slate-800">Your requests</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Your requests</h2>
         {requests.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">No requests yet.</p>
+          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">No requests yet.</p>
         ) : (
           <ul className="mt-3 space-y-3">
             {requests.map((r) => (
@@ -104,7 +104,7 @@ export default async function EmployeeTimeOffPage() {
                       {r.startsAt.toLocaleString()} → {r.endsAt.toLocaleString()}
                     </p>
                     {r.reason ? (
-                      <p className="mt-1 text-slate-700">{r.reason}</p>
+                      <p className="mt-1 text-slate-700 dark:text-zinc-300">{r.reason}</p>
                     ) : null}
                     <p className="mt-1 text-xs opacity-80">
                       Status: {r.status}

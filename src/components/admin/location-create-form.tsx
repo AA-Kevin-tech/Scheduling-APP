@@ -9,7 +9,7 @@ export function LocationCreateForm() {
   return (
     <form action={formAction} className="mt-4 grid gap-3 sm:grid-cols-2">
       <div>
-        <label className="text-xs font-medium text-slate-600">Name</label>
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Name</label>
         <input
           name="name"
           required
@@ -18,7 +18,7 @@ export function LocationCreateForm() {
         />
       </div>
       <div>
-        <label className="text-xs font-medium text-slate-600">Sort order</label>
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Sort order</label>
         <input
           name="sortOrder"
           type="number"
@@ -27,7 +27,7 @@ export function LocationCreateForm() {
         />
       </div>
       <div className="sm:col-span-2">
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           Address (optional)
         </label>
         <input

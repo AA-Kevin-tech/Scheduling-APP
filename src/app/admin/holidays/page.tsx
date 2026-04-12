@@ -19,12 +19,12 @@ export default async function AdminCompanyHolidaysPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Company holidays</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Company holidays</h1>
         <Link href="/admin" className="text-sm text-sky-700 hover:underline">
           ← Admin
         </Link>
       </div>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Each date uses the org schedule timezone ({scheduleTz}) for full-day
         boundaries. Set a <strong>work premium multiplier</strong> (e.g. 1.5 for
         time-and-a-half on hours worked that day) and optional{" "}
@@ -33,9 +33,9 @@ export default async function AdminCompanyHolidaysPage() {
       </p>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Configured holidays</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Configured holidays</h2>
         {holidays.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">None yet — add one below.</p>
+          <p className="mt-3 text-sm text-slate-500 dark:text-zinc-500">None yet — add one below.</p>
         ) : (
           <ul className="mt-4 space-y-6 divide-y divide-slate-100">
             {holidays.map((h) => (

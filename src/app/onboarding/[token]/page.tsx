@@ -25,10 +25,10 @@ export default async function OnboardingTokenPage({
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
         <div className="w-full max-w-md surface-card p-8">
-          <h1 className="text-lg font-semibold text-slate-900">
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
             Onboarding unavailable
           </h1>
-          <p className="mt-2 text-sm text-slate-600">{msg}</p>
+          <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">{msg}</p>
           <p className="mt-6 text-center text-sm">
             <Link href="/login" className="text-sky-700 hover:underline">
               Sign in
@@ -44,22 +44,22 @@ export default async function OnboardingTokenPage({
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-xl surface-card p-6 sm:p-8">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Complete your onboarding
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Setting up account for{" "}
           {meta.inviteDisplayName ? (
             <>
-              <span className="font-medium text-slate-800">
+              <span className="font-medium text-slate-800 dark:text-zinc-200">
                 {meta.inviteDisplayName}
               </span>
-              <span className="text-slate-500"> · </span>
+              <span className="text-slate-500 dark:text-zinc-500"> · </span>
             </>
           ) : null}
-          <span className="font-medium text-slate-800">{meta.email}</span>
+          <span className="font-medium text-slate-800 dark:text-zinc-200">{meta.email}</span>
         </p>
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-slate-500 dark:text-zinc-500">
           Payroll details (tax and direct deposit) are encrypted. QuickBooks
           export will be available when your payroll team enables it.
         </p>
@@ -70,7 +70,7 @@ export default async function OnboardingTokenPage({
             defaultLastName={meta.defaultLastName ?? undefined}
           />
         </div>
-        <p className="mt-8 text-center text-sm text-slate-500">
+        <p className="mt-8 text-center text-sm text-slate-500 dark:text-zinc-500">
           Already finished?{" "}
           <Link href="/login" className="text-sky-700 hover:underline">
             Sign in

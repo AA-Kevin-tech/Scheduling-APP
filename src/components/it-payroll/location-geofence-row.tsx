@@ -35,7 +35,7 @@ export function LocationGeofenceRow({
           inputMode="decimal"
           placeholder="e.g. 29.76"
           defaultValue={decToInput(loc.geofenceLatitude)}
-          className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-slate-900"
+          className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-slate-900 dark:text-zinc-100"
         />
         <label className="sr-only" htmlFor={`lng-${loc.id}`}>
           Longitude
@@ -47,7 +47,7 @@ export function LocationGeofenceRow({
           inputMode="decimal"
           placeholder="-95.37"
           defaultValue={decToInput(loc.geofenceLongitude)}
-          className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-slate-900"
+          className="w-28 rounded-md border border-slate-300 px-2 py-1.5 text-slate-900 dark:text-zinc-100"
         />
         <label className="sr-only" htmlFor={`r-${loc.id}`}>
           Radius feet
@@ -59,7 +59,7 @@ export function LocationGeofenceRow({
           inputMode="decimal"
           placeholder="500"
           defaultValue={decToInput(loc.geofenceRadiusFeet)}
-          className="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-slate-900"
+          className="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-slate-900 dark:text-zinc-100"
         />
         <button
           type="submit"
@@ -74,7 +74,7 @@ export function LocationGeofenceRow({
       {state.ok ? (
         <p className="mt-1 text-xs text-emerald-800">Saved.</p>
       ) : null}
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
         Leave all three empty and save to clear the geofence for this location.
       </p>
     </div>

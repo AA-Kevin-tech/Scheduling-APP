@@ -21,7 +21,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-slate-700"
+          className="block text-sm font-medium text-slate-700 dark:text-zinc-300"
         >
           New password
         </label>

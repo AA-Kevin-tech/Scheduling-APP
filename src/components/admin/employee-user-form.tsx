@@ -242,7 +242,7 @@ export function EmployeeUserForm(props: Props) {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Email
           </label>
           <input
@@ -256,7 +256,7 @@ export function EmployeeUserForm(props: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             First name
           </label>
           <input
@@ -268,7 +268,7 @@ export function EmployeeUserForm(props: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Last name
           </label>
           <input
@@ -283,7 +283,7 @@ export function EmployeeUserForm(props: Props) {
 
       {mode === "create" ? (
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Initial password
           </label>
           <input
@@ -294,7 +294,7 @@ export function EmployeeUserForm(props: Props) {
             autoComplete="new-password"
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
             At least 8 characters. They can change it after sign-in or use forgot
             password.
           </p>
@@ -304,7 +304,7 @@ export function EmployeeUserForm(props: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         {isAdminContext ? (
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
               Role
             </label>
             <select
@@ -323,7 +323,7 @@ export function EmployeeUserForm(props: Props) {
           <input type="hidden" name="role" value="EMPLOYEE" />
         )}
         <div>
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
             Employee #
           </label>
           <input
@@ -336,7 +336,7 @@ export function EmployeeUserForm(props: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700">
+        <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
           Phone
         </label>
         <input
@@ -348,13 +348,13 @@ export function EmployeeUserForm(props: Props) {
           placeholder="Optional — SMS when they opt in"
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Digits, spaces, dashes, +, and parentheses. Same field they can edit on their profile.
         </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700">
+        <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
           Time zone
         </label>
         <select
@@ -368,17 +368,17 @@ export function EmployeeUserForm(props: Props) {
             </option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Used for their schedule and calendar display.
         </p>
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-slate-800">Locations</h3>
+        <h3 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Locations</h3>
         <ul className="mt-2 space-y-2">
           {locations.map((loc) => (
             <li key={loc.id}>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300">
                 <input
                   type="checkbox"
                   checked={locIds.has(loc.id)}
@@ -393,7 +393,7 @@ export function EmployeeUserForm(props: Props) {
 
       <div>
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-medium text-slate-800">Departments</h3>
+          <h3 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Departments</h3>
           <button
             type="button"
             onClick={addRow}
@@ -420,7 +420,7 @@ export function EmployeeUserForm(props: Props) {
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="text-xs font-medium text-slate-600">
+                    <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
                       Department
                     </label>
                     <select
@@ -449,7 +449,7 @@ export function EmployeeUserForm(props: Props) {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-600">
+                    <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
                       Role
                     </label>
                     <select
@@ -471,7 +471,7 @@ export function EmployeeUserForm(props: Props) {
                   </div>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-zinc-400">
                     <input
                       type="radio"
                       name="primaryDept"

@@ -10,14 +10,14 @@ export default function EulaPage() {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <article className="mx-auto max-w-3xl surface-card px-6 py-10 md:px-10 md:py-12">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100 md:text-3xl">
           End User License Agreement
         </h1>
-        <p className="mt-2 text-sm text-slate-500">Effective date: April 7, 2026</p>
+        <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Effective date: April 7, 2026</p>
 
-        <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-700 md:text-base">
+        <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-700 dark:text-zinc-300 md:text-base">
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               1. Acceptance of these terms
             </h2>
             <p>
@@ -29,7 +29,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               2. The Service
             </h2>
             <p>
@@ -41,7 +41,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               3. License grant
             </h2>
             <p>
@@ -53,7 +53,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               4. Acceptable use
             </h2>
             <p>You agree not to:</p>
@@ -81,7 +81,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               5. Accounts and credentials
             </h2>
             <p>
@@ -92,7 +92,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               6. Customer data
             </h2>
             <p>
@@ -105,7 +105,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               7. Third-party services
             </h2>
             <p>
@@ -116,7 +116,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               8. Intellectual property
             </h2>
             <p>
@@ -127,7 +127,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               9. Disclaimers
             </h2>
             <p>
@@ -139,7 +139,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               10. Limitation of liability
             </h2>
             <p>
@@ -152,7 +152,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               11. Indemnity
             </h2>
             <p>
@@ -163,7 +163,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               12. Changes and termination
             </h2>
             <p>
@@ -175,7 +175,7 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">
               13. General
             </h2>
             <p>
@@ -187,14 +187,14 @@ export default function EulaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-slate-900">14. Contact</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">14. Contact</h2>
             <p>
               For questions about this Agreement, contact us at the address or email
               published on your Pulse deployment or your order documentation.
             </p>
           </section>
 
-          <p className="pt-4 text-xs text-slate-500">
+          <p className="pt-4 text-xs text-slate-500 dark:text-zinc-500">
             This document is provided for operational and integration requirements (such as
             developer platform listings). It is not personalized legal advice; have counsel
             review before relying on it commercially.

@@ -21,7 +21,7 @@ export default async function EmployeeAvailabilityPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Times I can&apos;t work
         </h1>
         <Link
@@ -31,7 +31,7 @@ export default async function EmployeeAvailabilityPage() {
           My schedule
         </Link>
       </div>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Add recurring blocks when you are not available each week (by day and
         time range). This is stored for visibility and future scheduling
         features; shift assignments and swaps still follow department assignments,
@@ -39,14 +39,14 @@ export default async function EmployeeAvailabilityPage() {
       </p>
 
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-800">Add unavailable time</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Add unavailable time</h2>
         <UnavailabilityAddForm createSlot={createAvailabilitySlot} />
       </section>
 
       <section>
-        <h2 className="text-sm font-medium text-slate-800">Your unavailable times</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Your unavailable times</h2>
         {slots.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
             No blocks yet. If you have no restrictions, leave this empty.
           </p>
         ) : (

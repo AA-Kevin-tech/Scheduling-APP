@@ -72,17 +72,17 @@ export default async function ShiftDetailPage({
         >
           {shift.department.name}
         </span>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900">
+        <h1 className="mt-2 text-xl font-semibold text-slate-900 dark:text-zinc-100">
           {shift.title || "Shift"}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           {shift.startsAt.toLocaleString()} → {shift.endsAt.toLocaleString()}
         </p>
         {shift.role && (
-          <p className="text-sm text-slate-500">Role: {shift.role.name}</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Role: {shift.role.name}</p>
         )}
         {shift.zone && (
-          <p className="text-sm text-slate-500">Zone: {shift.zone.name}</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Zone: {shift.zone.name}</p>
         )}
         {shift.publishedAt == null ? (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
@@ -93,7 +93,7 @@ export default async function ShiftDetailPage({
             <PublishShiftForm shiftId={shift.id} />
           </div>
         ) : (
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-slate-500 dark:text-zinc-500">
             Published{" "}
             {shift.publishedAt.toLocaleString(undefined, {
               dateStyle: "medium",
@@ -104,7 +104,7 @@ export default async function ShiftDetailPage({
       </div>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Edit shift</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Edit shift</h2>
         <div className="mt-4">
           <EditShiftForm
             shift={shift}
@@ -127,7 +127,7 @@ export default async function ShiftDetailPage({
       </section>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Assignments</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Assignments</h2>
         <ul className="mt-3 divide-y divide-slate-100">
           {shift.assignments.map((a) => (
             <li
@@ -151,7 +151,7 @@ export default async function ShiftDetailPage({
             </li>
           ))}
           {shift.assignments.length === 0 && (
-            <li className="py-2 text-sm text-slate-500">No one assigned yet.</li>
+            <li className="py-2 text-sm text-slate-500 dark:text-zinc-500">No one assigned yet.</li>
           )}
         </ul>
 
@@ -159,10 +159,10 @@ export default async function ShiftDetailPage({
       </section>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Eligibility suggestions
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Who can take this shift under current rules (qualification, hours, rest).
         </p>
         <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto text-sm">
@@ -173,7 +173,7 @@ export default async function ShiftDetailPage({
                 row.ok ? "border-emerald-200 bg-emerald-50" : "border-slate-200"
               }`}
             >
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-slate-900 dark:text-zinc-100">
                 {row.name ?? row.email}
               </span>
               {!row.ok && (

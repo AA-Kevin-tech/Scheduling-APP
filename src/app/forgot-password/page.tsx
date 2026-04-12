@@ -5,10 +5,10 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm surface-card p-8">
-        <h1 className="text-center text-xl font-semibold text-slate-900">
+        <h1 className="text-center text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Forgot password
         </h1>
-        <p className="mt-2 text-center text-sm text-slate-500">
+        <p className="mt-2 text-center text-sm text-slate-500 dark:text-zinc-500">
           We will email you a reset link if an account exists for that address.
         </p>
         <ForgotPasswordForm />

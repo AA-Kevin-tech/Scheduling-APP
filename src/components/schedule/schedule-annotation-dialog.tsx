@@ -73,26 +73,26 @@ export function ScheduleAnnotationDialog({
         <div className="flex items-start justify-between gap-2">
           <h2
             id="annotation-dialog-title"
-            className="text-lg font-semibold text-slate-900"
+            className="text-lg font-semibold text-slate-900 dark:text-zinc-100"
           >
             {editing ? "Edit day note" : "Add day note"} · {dayIso}
           </h2>
           <button
             type="button"
-            className="rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            className="rounded-md px-2 py-1 text-sm text-slate-500 dark:text-zinc-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:text-zinc-200 dark:text-zinc-200 dark:hover:text-zinc-200 dark:text-zinc-200"
             onClick={onClose}
           >
             Close
           </button>
         </div>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Optional announcement for the schedule, mark the site closed, and/or
           block new time off requests for employees at that venue.
         </p>
 
         {forDay.length > 0 && (
           <ul className="mt-4 space-y-2 border-t border-slate-100 pt-3">
-            <li className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <li className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-zinc-500">
               This day
             </li>
             {forDay.map((row) => (
@@ -101,9 +101,9 @@ export function ScheduleAnnotationDialog({
                 className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-2 text-sm"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-slate-900">{row.title}</p>
-                  <p className="text-xs text-slate-500">{row.locationName}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500">
+                  <p className="font-medium text-slate-900 dark:text-zinc-100">{row.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-500">{row.locationName}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-500 dark:text-zinc-500">
                     {row.startsOnYmd === row.endsOnYmd
                       ? row.startsOnYmd
                       : `${row.startsOnYmd} → ${row.endsOnYmd}`}
@@ -117,14 +117,14 @@ export function ScheduleAnnotationDialog({
                       .join(", ")}
                   </p>
                   {row.message ? (
-                    <p className="mt-1 whitespace-pre-wrap text-xs text-slate-600">
+                    <p className="mt-1 whitespace-pre-wrap text-xs text-slate-600 dark:text-zinc-400">
                       {row.message}
                     </p>
                   ) : null}
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  className="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
                   onClick={() => onStartEdit(row)}
                 >
                   Edit
@@ -141,7 +141,7 @@ export function ScheduleAnnotationDialog({
         >
           <input type="hidden" name="id" value={editing?.id ?? ""} />
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
               <span className="block">Venue</span>
               <select
                 name="locationId"
@@ -156,7 +156,7 @@ export function ScheduleAnnotationDialog({
                 ))}
               </select>
             </label>
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
               <span className="block">Highlight</span>
               <select
                 name="highlightHex"
@@ -170,7 +170,7 @@ export function ScheduleAnnotationDialog({
                 ))}
               </select>
             </label>
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
               <span className="block">Start date</span>
               <input
                 name="startsOnYmd"
@@ -180,7 +180,7 @@ export function ScheduleAnnotationDialog({
                 className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
               />
             </label>
-            <label className="block text-xs font-medium text-slate-600">
+            <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
               <span className="block">End date</span>
               <input
                 name="endsOnYmd"
@@ -191,7 +191,7 @@ export function ScheduleAnnotationDialog({
               />
             </label>
           </div>
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="block">Title</span>
             <input
               name="title"
@@ -202,7 +202,7 @@ export function ScheduleAnnotationDialog({
               placeholder="e.g. Inventory morning"
             />
           </label>
-          <label className="block text-xs font-medium text-slate-600">
+          <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="block">Message (optional)</span>
             <textarea
               name="message"
@@ -212,10 +212,10 @@ export function ScheduleAnnotationDialog({
             />
           </label>
           <fieldset className="space-y-2 rounded-lg border border-slate-200 p-3">
-            <legend className="px-1 text-xs font-medium text-slate-600">
+            <legend className="px-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
               Types (one or more)
             </legend>
-            <label className="flex items-center gap-2 text-sm text-slate-800">
+            <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-zinc-200">
               <input
                 type="checkbox"
                 name="showAnnouncement"
@@ -223,7 +223,7 @@ export function ScheduleAnnotationDialog({
               />
               Announcement (visible on schedule & home)
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-800">
+            <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-zinc-200">
               <input
                 type="checkbox"
                 name="businessClosed"
@@ -231,7 +231,7 @@ export function ScheduleAnnotationDialog({
               />
               Business closed (shown on schedule)
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-800">
+            <label className="flex items-center gap-2 text-sm text-slate-800 dark:text-zinc-200">
               <input
                 type="checkbox"
                 name="blockTimeOffRequests"
@@ -254,7 +254,7 @@ export function ScheduleAnnotationDialog({
             {editing ? (
               <button
                 type="button"
-                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
                 onClick={onClearEditing}
               >
                 New note instead
@@ -265,13 +265,13 @@ export function ScheduleAnnotationDialog({
 
         {forDay.length > 0 && (
           <div className="mt-6 border-t border-slate-100 pt-4">
-            <p className="text-xs font-medium text-slate-500">Delete a note</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-zinc-500">Delete a note</p>
             <ul className="mt-2 space-y-2">
               {forDay.map((row) => (
                 <li key={`del-${row.id}`}>
                   <form action={delAction} className="flex items-center gap-2">
                     <input type="hidden" name="id" value={row.id} />
-                    <span className="min-w-0 flex-1 truncate text-sm text-slate-700">
+                    <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-zinc-300">
                       {row.title}
                     </span>
                     <button

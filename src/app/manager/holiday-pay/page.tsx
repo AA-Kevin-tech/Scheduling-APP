@@ -34,7 +34,7 @@ export default async function ManagerHolidayPayPage({
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Holiday pay</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Holiday pay</h1>
         <Link
           href="/manager/employees"
           className="text-sm text-sky-700 hover:underline"
@@ -43,7 +43,7 @@ export default async function ManagerHolidayPayPage({
         </Link>
       </div>
 
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Estimates from <strong>time clock punches</strong> overlapping the holiday
         date in <strong>{scheduleTz}</strong>. Premium = extra hours above straight
         time (multiplier − 1 × hours worked). Paid absence applies to eligible{" "}
@@ -63,7 +63,7 @@ export default async function ManagerHolidayPayPage({
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-slate-600">Holiday:</span>
+            <span className="text-sm text-slate-600 dark:text-zinc-400">Holiday:</span>
             {holidays.map((h) => (
               <Link
                 key={h.id}
@@ -71,7 +71,7 @@ export default async function ManagerHolidayPayPage({
                 className={`rounded-full border px-3 py-1 text-sm ${
                   selected?.id === h.id
                     ? "border-sky-600 bg-sky-600 text-white"
-                    : "border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                    : "border-slate-200 bg-white text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
                 }`}
               >
                 {h.holidayDateYmd} — {h.name}
@@ -82,7 +82,7 @@ export default async function ManagerHolidayPayPage({
           {selected && report && !report.error ? (
             <div className="overflow-x-auto surface-card">
               <table className="min-w-full text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+                <thead className="table-head-row">
                   <tr>
                     <th className="px-3 py-2">Employee</th>
                     <th className="px-3 py-2">Type</th>
@@ -103,10 +103,10 @@ export default async function ManagerHolidayPayPage({
                       }
                     >
                       <td className="px-3 py-2">
-                        <div className="font-medium text-slate-900">{r.name}</div>
-                        <div className="text-xs text-slate-500">{r.email}</div>
+                        <div className="font-medium text-slate-900 dark:text-zinc-100">{r.name}</div>
+                        <div className="text-xs text-slate-500 dark:text-zinc-500">{r.email}</div>
                       </td>
-                      <td className="px-3 py-2 text-slate-600">
+                      <td className="px-3 py-2 text-slate-600 dark:text-zinc-400">
                         {r.compensationType === "HOURLY" ? "Hourly" : "Salary"}
                       </td>
                       <td className="px-3 py-2 text-center">
@@ -133,7 +133,7 @@ export default async function ManagerHolidayPayPage({
           ) : null}
 
           {selected ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-zinc-500">
               Holiday: <strong>{selected.name}</strong> · Premium multiplier{" "}
               <strong>{Number(selected.workPremiumMultiplier)}×</strong>
               {selected.paidAbsenceHours != null

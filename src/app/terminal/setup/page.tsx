@@ -42,10 +42,10 @@ export default async function TerminalSetupPage() {
         >
           ← Manager
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold text-slate-900">
+        <h1 className="mt-4 text-2xl font-semibold text-slate-900 dark:text-zinc-100">
           Time clock terminal
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           Configure the shared computer employees use to clock in and out. After you
           lock this browser, employees open <span className="font-mono">/terminal</span>{" "}
           and sign in with the time clock PIN you set on each employee&apos;s profile
@@ -54,18 +54,18 @@ export default async function TerminalSetupPage() {
       </div>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">This browser</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">This browser</h2>
         <div className="mt-4">
           <TerminalSetupForm kioskActive={kioskActive} />
         </div>
       </section>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Employee URL</h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Employee URL</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           After locking, bookmark or set the home page to:
         </p>
-        <p className="mt-2 break-all font-mono text-sm text-slate-900">
+        <p className="mt-2 break-all font-mono text-sm text-slate-900 dark:text-zinc-100">
           {employeeTerminalUrl ?? (
             <span className="text-amber-900">
               Set{" "}

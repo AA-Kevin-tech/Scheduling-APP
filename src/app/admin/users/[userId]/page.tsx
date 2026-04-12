@@ -123,7 +123,7 @@ export default async function AdminEditUserPage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Edit user</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Edit user</h1>
         <Link
           href="/admin/users"
           className="text-sm text-sky-700 hover:underline"
@@ -133,7 +133,7 @@ export default async function AdminEditUserPage({
       </div>
 
       {venueScope != null && venueScope.length > 0 ? (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-zinc-400">
           Venue filter is on. You can still assign any location or department
           here; switch to <span className="font-medium">All venues</span> above
           when you need the full lists while editing.
@@ -157,7 +157,7 @@ export default async function AdminEditUserPage({
       />
 
       <div className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Time clock PIN</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Time clock PIN</h2>
         <div className="mt-4">
           <EmployeeTimeClockPinForm
             employeeId={employeeId}
@@ -168,8 +168,8 @@ export default async function AdminEditUserPage({
       </div>
 
       <div className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">HR details</h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">HR details</h2>
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Manager notes, hourly rate or annual salary, and employment type are not visible
           to the employee.
         </p>
@@ -203,16 +203,16 @@ export default async function AdminEditUserPage({
       />
 
       <div className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Times they can&apos;t work
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Recurring weekly blocks when this person is not available (same as
           their employee &ldquo;Can&apos;t work&rdquo; page). Shift assignment
           rules are unchanged; this is for visibility and future scheduling use.
         </p>
         <div className="mt-4 rounded-lg border border-slate-100 bg-slate-50/80 p-4">
-          <h3 className="text-xs font-medium text-slate-700">Add block</h3>
+          <h3 className="text-xs font-medium text-slate-700 dark:text-zinc-300">Add block</h3>
           <UnavailabilityAddForm createSlot={adminCreateUnavailabilitySlot}>
             <input type="hidden" name="employeeId" value={employeeId} />
             <input
@@ -223,9 +223,9 @@ export default async function AdminEditUserPage({
           </UnavailabilityAddForm>
         </div>
         <div className="mt-4">
-          <h3 className="text-xs font-medium text-slate-700">Existing blocks</h3>
+          <h3 className="text-xs font-medium text-slate-700 dark:text-zinc-300">Existing blocks</h3>
           {unavailabilitySlots.length === 0 ? (
-            <p className="mt-2 text-sm text-slate-500">None on file.</p>
+            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">None on file.</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {unavailabilitySlots.map((s) => (
@@ -266,15 +266,15 @@ export default async function AdminEditUserPage({
       </div>
 
       <div className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Hour limits</h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Hour limits</h2>
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           Department limits may tighten the effective cap below.
         </p>
         <div className="mt-3">
           <FieldRow label="Effective weekly cap">
             <div>
-              <p className="text-sm text-slate-700">{effectiveWeeklyLabel}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="text-sm text-slate-700 dark:text-zinc-300">{effectiveWeeklyLabel}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
                 Scheduling and swaps use this effective cap.
               </p>
             </div>

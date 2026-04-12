@@ -34,7 +34,7 @@ function QuickPickHolidayRow(props: {
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-slate-300 bg-white/60 px-3 py-2">
-      <label className="text-xs font-medium text-slate-600">
+      <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
         <span className="block">Quick pick year</span>
         <select
           value={props.year}
@@ -48,7 +48,7 @@ function QuickPickHolidayRow(props: {
           ))}
         </select>
       </label>
-      <label className="min-w-[14rem] flex-1 text-xs font-medium text-slate-600">
+      <label className="min-w-[14rem] flex-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
         <span className="block">Common US holidays</span>
         <select
           key={props.holidaySelectKey}
@@ -68,7 +68,7 @@ function QuickPickHolidayRow(props: {
           ))}
         </select>
       </label>
-      <p className="w-full text-[11px] leading-snug text-slate-500">
+      <p className="w-full text-[11px] leading-snug text-slate-500 dark:text-zinc-500">
         Fills the date and name for the selected year (movable holidays like Thanksgiving
         and Easter). You can still edit either field afterward. For observed Mondays or
         custom names, adjust manually.
@@ -92,7 +92,7 @@ export function AddCompanyHolidayForm() {
       action={formAction}
       className="mt-6 space-y-3 rounded-lg border border-slate-200 bg-slate-50/80 p-4"
     >
-      <h3 className="text-sm font-medium text-slate-800">Add company holiday</h3>
+      <h3 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Add company holiday</h3>
       <QuickPickHolidayRow
         year={yearPick}
         onYearChange={(y) => {
@@ -110,7 +110,7 @@ export function AddCompanyHolidayForm() {
         }}
       />
       <div className="flex flex-wrap gap-3">
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Date</span>
           <input
             name="holidayDateYmd"
@@ -121,7 +121,7 @@ export function AddCompanyHolidayForm() {
             className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600">
+        <label className="min-w-[12rem] flex-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Name</span>
           <input
             name="name"
@@ -132,7 +132,7 @@ export function AddCompanyHolidayForm() {
             className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Work premium ×</span>
           <input
             name="workPremiumMultiplier"
@@ -145,7 +145,7 @@ export function AddCompanyHolidayForm() {
             className="mt-1 w-24 rounded-md border border-slate-300 px-2 py-1.5 text-sm tabular-nums"
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Paid hours if off</span>
           <input
             name="paidAbsenceHours"
@@ -158,7 +158,7 @@ export function AddCompanyHolidayForm() {
           />
         </label>
       </div>
-      <label className="block text-xs font-medium text-slate-600">
+      <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
         <span className="block">Notes (optional)</span>
         <input
           name="notes"
@@ -216,7 +216,7 @@ export function EditCompanyHolidayForm({ h }: { h: CompanyHoliday }) {
           }}
         />
         <div className="flex flex-wrap items-end gap-3">
-          <label className="text-xs font-medium text-slate-600">
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="block">Date</span>
             <input
               name="holidayDateYmd"
@@ -227,7 +227,7 @@ export function EditCompanyHolidayForm({ h }: { h: CompanyHoliday }) {
               className="mt-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm"
             />
           </label>
-          <label className="min-w-[10rem] flex-1 text-xs font-medium text-slate-600">
+          <label className="min-w-[10rem] flex-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="block">Name</span>
             <input
               name="name"
@@ -237,7 +237,7 @@ export function EditCompanyHolidayForm({ h }: { h: CompanyHoliday }) {
               className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
             />
           </label>
-          <label className="text-xs font-medium text-slate-600">
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="block">Premium ×</span>
             <input
               name="workPremiumMultiplier"
@@ -250,7 +250,7 @@ export function EditCompanyHolidayForm({ h }: { h: CompanyHoliday }) {
               className="mt-1 w-24 rounded-md border border-slate-300 px-2 py-1.5 text-sm tabular-nums"
             />
           </label>
-          <label className="text-xs font-medium text-slate-600">
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
             <span className="block">Paid if off</span>
             <input
               name="paidAbsenceHours"
@@ -264,7 +264,7 @@ export function EditCompanyHolidayForm({ h }: { h: CompanyHoliday }) {
             />
           </label>
         </div>
-        <label className="block text-xs font-medium text-slate-600">
+        <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
           <span className="block">Notes</span>
           <input
             name="notes"
@@ -279,7 +279,7 @@ export function EditCompanyHolidayForm({ h }: { h: CompanyHoliday }) {
           form={formId}
           type="submit"
           disabled={pending}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50 disabled:opacity-50"
         >
           {pending ? "…" : "Save"}
         </button>

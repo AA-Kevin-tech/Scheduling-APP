@@ -38,8 +38,8 @@ export default async function AdminPayrollCorrectionsPage({
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Payroll time corrections</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Payroll time corrections</h1>
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           Adjust kiosk time punches or add a missing punch after the fact. Every change is
           written to the audit log with your user and a required reason. Times use the org
           default timezone ({tz}).
@@ -54,7 +54,7 @@ export default async function AdminPayrollCorrectionsPage({
           ← Previous day
         </Link>
         <form action="/admin/payroll-corrections" method="get" className="flex items-center gap-2">
-          <label className="text-slate-600">
+          <label className="text-slate-600 dark:text-zinc-400">
             Date
             <input
               type="date"
@@ -79,11 +79,11 @@ export default async function AdminPayrollCorrectionsPage({
       </div>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Punches on this day ({punches.length})
         </h2>
         {punches.length === 0 ? (
-          <p className="text-sm text-slate-500">No punches overlap this calendar day.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">No punches overlap this calendar day.</p>
         ) : (
           <ul className="space-y-4">
             {punches.map((row) => (
@@ -92,10 +92,10 @@ export default async function AdminPayrollCorrectionsPage({
                 className="surface-card p-4"
               >
                 <div className="text-sm">
-                  <span className="font-medium text-slate-900">{row.employeeLabel}</span>
-                  <span className="text-slate-500"> · {row.departmentName}</span>
+                  <span className="font-medium text-slate-900 dark:text-zinc-100">{row.employeeLabel}</span>
+                  <span className="text-slate-500 dark:text-zinc-500"> · {row.departmentName}</span>
                 </div>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
                   Scheduled {row.shiftStartsAt.toLocaleString()} →{" "}
                   {row.shiftEndsAt.toLocaleString()}
                 </p>
@@ -115,14 +115,14 @@ export default async function AdminPayrollCorrectionsPage({
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           Published shifts this day without a punch ({missing.length})
         </h2>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-zinc-500">
           Use only when the employee truly worked; defaults follow scheduled start/end.
         </p>
         {missing.length === 0 ? (
-          <p className="text-sm text-slate-500">No gaps for this day.</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">No gaps for this day.</p>
         ) : (
           <ul className="space-y-4">
             {missing.map((row) => (
@@ -131,10 +131,10 @@ export default async function AdminPayrollCorrectionsPage({
                 className="surface-card p-4"
               >
                 <div className="text-sm">
-                  <span className="font-medium text-slate-900">{row.employeeLabel}</span>
-                  <span className="text-slate-500"> · {row.departmentName}</span>
+                  <span className="font-medium text-slate-900 dark:text-zinc-100">{row.employeeLabel}</span>
+                  <span className="text-slate-500 dark:text-zinc-500"> · {row.departmentName}</span>
                 </div>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
                   Scheduled {row.shiftStartsAt.toLocaleString()} →{" "}
                   {row.shiftEndsAt.toLocaleString()}
                 </p>

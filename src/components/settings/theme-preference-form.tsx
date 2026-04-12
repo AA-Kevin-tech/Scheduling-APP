@@ -53,7 +53,7 @@ export function ThemePreferenceForm({
       </label>
       <select
         id="theme-pref"
-        className="w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+        className="w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
         value={value}
         onChange={(e) =>
           handleChange(e.target.value as "light" | "dark" | "system")
@@ -64,7 +64,7 @@ export function ThemePreferenceForm({
         <option value="dark">Dark</option>
         <option value="system">Match device</option>
       </select>
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+      <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400">
         Saved to your account and applied on every device you use.
       </p>
     </div>

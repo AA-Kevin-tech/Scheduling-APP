@@ -12,7 +12,7 @@ export function ForgotPasswordForm() {
   return (
     <form action={formAction} className="mt-6 space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
           Email
         </label>
         <input

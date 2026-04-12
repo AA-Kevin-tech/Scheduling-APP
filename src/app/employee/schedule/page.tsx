@@ -339,7 +339,7 @@ export default async function EmployeeSchedulePage({
         }
       />
       {openCount > 0 && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-zinc-500">
           {openCount} open shift{openCount === 1 ? "" : "s"} this week — ask a
           manager if you want to pick one up.
         </p>
@@ -378,7 +378,7 @@ function SchedulePageShell({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
           {title ?? "My schedule"}
         </h1>
         <Link
@@ -406,7 +406,7 @@ function SchedulePageShell({
             className={`rounded-md px-3 py-1.5 text-sm font-medium ${
               view === v
                 ? "bg-sky-700 text-white"
-                : "text-slate-700 hover:bg-slate-100"
+                : "text-slate-700 dark:text-zinc-300 hover:bg-slate-100"
             }`}
           >
             {label}
@@ -414,7 +414,7 @@ function SchedulePageShell({
         ))}
       </nav>
 
-      {blurb ? <p className="text-sm text-slate-600">{blurb}</p> : null}
+      {blurb ? <p className="text-sm text-slate-600 dark:text-zinc-400">{blurb}</p> : null}
 
       <div className="flex flex-wrap items-center gap-2">
         <Link
@@ -424,7 +424,7 @@ function SchedulePageShell({
         >
           ←
         </Link>
-        <span className="min-w-[220px] text-center text-sm font-semibold text-slate-800">
+        <span className="min-w-[220px] text-center text-sm font-semibold text-slate-800 dark:text-zinc-200">
           {rangeLabel}
         </span>
         <Link

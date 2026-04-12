@@ -43,13 +43,13 @@ export function EditShiftForm({
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="id" value={shift.id} />
       <input type="hidden" name="scheduleTimeZone" value={scheduleTimeZone} />
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-zinc-500">
         Times use{" "}
-        <span className="font-medium text-slate-700">{scheduleTimeZone}</span>.
+        <span className="font-medium text-slate-700 dark:text-zinc-300">{scheduleTimeZone}</span>.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="text-slate-600">Department</span>
+          <span className="text-slate-600 dark:text-zinc-400">Department</span>
           <select
             name="departmentId"
             required
@@ -65,7 +65,7 @@ export function EditShiftForm({
           </select>
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Role (optional)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Role (optional)</span>
           <select
             name="roleId"
             defaultValue={shift.roleId ?? ""}
@@ -80,7 +80,7 @@ export function EditShiftForm({
           </select>
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="text-slate-600">Zone (optional)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Zone (optional)</span>
           <select
             name="zoneId"
             defaultValue={shift.zoneId ?? ""}
@@ -95,7 +95,7 @@ export function EditShiftForm({
           </select>
         </label>
         <label className="block text-sm sm:col-span-2">
-          <span className="text-slate-600">Title (optional)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Title (optional)</span>
           <input
             name="title"
             type="text"
@@ -104,7 +104,7 @@ export function EditShiftForm({
           />
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Starts</span>
+          <span className="text-slate-600 dark:text-zinc-400">Starts</span>
           <input
             name="startsAt"
             type="datetime-local"
@@ -114,7 +114,7 @@ export function EditShiftForm({
           />
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Ends</span>
+          <span className="text-slate-600 dark:text-zinc-400">Ends</span>
           <input
             name="endsAt"
             type="datetime-local"

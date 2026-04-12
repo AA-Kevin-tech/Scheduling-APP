@@ -29,15 +29,15 @@ export function EmployeeTimeClockPinForm({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-zinc-500">
         Employees sign in at the time clock with this PIN only (no email or account
         password). Use 4–8 digits. Each PIN must be unique.
       </p>
 
       <FieldRow label="Status">
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-slate-700 dark:text-zinc-300">
           <span
-            className={hasPin ? "font-medium text-emerald-800" : "text-slate-500"}
+            className={hasPin ? "font-medium text-emerald-800" : "text-slate-500 dark:text-zinc-500"}
           >
             {hasPin ? "PIN is set" : "No PIN — terminal sign-in disabled"}
           </span>
@@ -115,7 +115,7 @@ export function EmployeeTimeClockPinForm({
           <button
             type="submit"
             disabled={clearPending}
-            className="text-sm font-medium text-slate-600 underline hover:text-slate-900 disabled:opacity-50"
+            className="text-sm font-medium text-slate-600 dark:text-zinc-400 underline hover:text-slate-900 dark:hover:text-zinc-100 dark:text-zinc-100 dark:hover:text-zinc-100 dark:text-zinc-100 disabled:opacity-50"
           >
             {clearPending ? "Removing…" : "Remove PIN"}
           </button>

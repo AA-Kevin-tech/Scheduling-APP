@@ -10,8 +10,8 @@ export function EmployeeArchiveSection({ userId, archivedAt }: Props) {
 
   return (
     <section className="surface-card p-6">
-      <h2 className="text-sm font-medium text-slate-800">Archive employee</h2>
-      <p className="mt-1 text-xs text-slate-500">
+      <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Archive employee</h2>
+      <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
         Archived profiles stay in the database for history (past shifts, punches, and
         limits) but no longer appear on scheduling rosters, swap lists, or the
         employee mobile app. Restore anytime to bring them back into scheduling.
@@ -25,7 +25,7 @@ export function EmployeeArchiveSection({ userId, archivedAt }: Props) {
           <input type="hidden" name="archived" value="false" />
           <button
             type="submit"
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
           >
             Restore to scheduling
           </button>

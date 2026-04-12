@@ -92,7 +92,7 @@ function BlockCard({
 }) {
   const base =
     block.variant === "time_off"
-      ? "border-slate-300 bg-slate-200/90 text-slate-800"
+      ? "border-slate-300 bg-slate-200/90 text-slate-800 dark:text-zinc-200"
       : block.variant === "open"
         ? "border-amber-300/80 bg-amber-100/90 text-amber-950"
         : "border-amber-400/70 bg-[#e8dcc8] text-amber-950";
@@ -294,7 +294,7 @@ export function ScheduleWeekGrid({
         </p>
       )}
       {!hasAnyBlock && emptyMessage && (
-        <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600">
+        <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600 dark:text-zinc-400">
           {emptyMessage}
         </p>
       )}
@@ -305,7 +305,7 @@ export function ScheduleWeekGrid({
             <tr className="border-b border-slate-200 bg-slate-50">
               <th
                 scope="col"
-                className="sticky left-0 z-20 min-w-[180px] border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+                className="sticky left-0 z-20 min-w-[180px] border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-500"
               >
                 {timezoneLabel ? (
                   <span className="normal-case text-slate-400">{timezoneLabel}</span>
@@ -328,7 +328,7 @@ export function ScheduleWeekGrid({
                     title={tip}
                     style={thStyle}
                     className={`border-b border-slate-200 px-2 py-2 text-center ${
-                      isToday ? "bg-sky-600 text-white" : "text-slate-700"
+                      isToday ? "bg-sky-600 text-white" : "text-slate-700 dark:text-zinc-300"
                     } ${!isToday && pto ? "ring-1 ring-inset ring-amber-400/60" : ""}`}
                   >
                     {canManageAnnotations ? (
@@ -348,7 +348,7 @@ export function ScheduleWeekGrid({
                     ) : noteCount > 0 ? (
                       <div
                         className={`mb-1 text-[10px] font-medium ${
-                          isToday ? "text-white/80" : "text-slate-500"
+                          isToday ? "text-white/80" : "text-slate-500 dark:text-zinc-500"
                         }`}
                       >
                         ● Note
@@ -383,9 +383,9 @@ export function ScheduleWeekGrid({
                     scope="row"
                     className={`sticky left-0 z-10 border-b border-r border-slate-200 px-3 py-2 text-left align-top ${stripeTh}`}
                   >
-                    <div className="font-semibold text-slate-900">{row.name}</div>
+                    <div className="font-semibold text-slate-900 dark:text-zinc-100">{row.name}</div>
                     {row.detail && (
-                      <div className="mt-0.5 text-xs font-normal text-slate-500">
+                      <div className="mt-0.5 text-xs font-normal text-slate-500 dark:text-zinc-500">
                         {row.detail}
                       </div>
                     )}
@@ -451,10 +451,10 @@ export function ScheduleWeekGrid({
           </tbody>
           {footerHoursByDay && (
             <tfoot>
-              <tr className="border-t-2 border-slate-300 bg-slate-100 font-medium text-slate-800">
+              <tr className="border-t-2 border-slate-300 bg-slate-100 font-medium text-slate-800 dark:text-zinc-200">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 border-r border-slate-200 bg-slate-100 px-3 py-2 text-left text-xs uppercase tracking-wide text-slate-600"
+                  className="sticky left-0 z-10 border-r border-slate-200 bg-slate-100 px-3 py-2 text-left text-xs uppercase tracking-wide text-slate-600 dark:text-zinc-400"
                 >
                   Assigned total
                 </th>

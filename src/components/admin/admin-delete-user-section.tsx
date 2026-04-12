@@ -28,14 +28,14 @@ export function AdminDeleteUserSection({ userId, userEmail }: Props) {
       </p>
       <form action={formAction} className="mt-4 space-y-3">
         <input type="hidden" name="userId" value={userId} />
-        <label className="block text-xs font-medium text-slate-700">
+        <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
           Type the user&apos;s email to confirm
           <input
             name="confirmEmail"
             type="email"
             autoComplete="off"
             placeholder={userEmail}
-            className="mt-1 w-full max-w-md rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm"
+            className="mt-1 w-full max-w-md rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 shadow-sm"
             required
             aria-required
           />

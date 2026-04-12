@@ -26,8 +26,8 @@ export default async function AdminIntegrationsPage({
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Integrations</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Integrations</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Connect external services used by HR and payroll. Only administrators
           can authorize or remove connections.
         </p>
@@ -37,10 +37,10 @@ export default async function AdminIntegrationsPage({
         className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
         aria-labelledby="qb-heading"
       >
-        <h2 id="qb-heading" className="text-base font-semibold text-slate-900">
+        <h2 id="qb-heading" className="text-base font-semibold text-slate-900 dark:text-zinc-100">
           QuickBooks Online
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
           Link your company&apos;s QuickBooks Online company file so approved
           time can be exported to QuickBooks Payroll in a later step. This uses
           Intuit&apos;s secure sign-in; Pulse never sees your QuickBooks
@@ -58,7 +58,7 @@ export default async function AdminIntegrationsPage({
         ) : null}
         {qbDisconnected ? (
           <p
-            className="mt-3 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-800"
+            className="mt-3 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-800 dark:text-zinc-200"
             role="status"
           >
             QuickBooks was disconnected.
@@ -74,7 +74,7 @@ export default async function AdminIntegrationsPage({
         ) : null}
 
         {!oauthReady ? (
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="mt-4 text-sm text-slate-600 dark:text-zinc-400">
             QuickBooks is not enabled on this server yet. Add{" "}
             <code className="rounded bg-slate-100 px-1 text-xs">
               INTUIT_CLIENT_ID
@@ -95,17 +95,17 @@ export default async function AdminIntegrationsPage({
         {qb ? (
           <dl className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm">
             <div className="flex flex-wrap gap-x-2">
-              <dt className="font-medium text-slate-700">Company</dt>
-              <dd className="text-slate-900">
+              <dt className="font-medium text-slate-700 dark:text-zinc-300">Company</dt>
+              <dd className="text-slate-900 dark:text-zinc-100">
                 {qb.companyName ?? "—"}
-                <span className="ml-2 text-slate-500">
+                <span className="ml-2 text-slate-500 dark:text-zinc-500">
                   (realm {qb.realmId})
                 </span>
               </dd>
             </div>
             <div className="flex flex-wrap gap-x-2">
-              <dt className="font-medium text-slate-700">Connected</dt>
-              <dd className="text-slate-900">
+              <dt className="font-medium text-slate-700 dark:text-zinc-300">Connected</dt>
+              <dd className="text-slate-900 dark:text-zinc-100">
                 {qb.connectedAt.toLocaleString(undefined, {
                   dateStyle: "medium",
                   timeStyle: "short",
@@ -113,8 +113,8 @@ export default async function AdminIntegrationsPage({
               </dd>
             </div>
             <div className="flex flex-wrap gap-x-2">
-              <dt className="font-medium text-slate-700">Access token expires</dt>
-              <dd className="text-slate-900">
+              <dt className="font-medium text-slate-700 dark:text-zinc-300">Access token expires</dt>
+              <dd className="text-slate-900 dark:text-zinc-100">
                 {qb.accessTokenExpiresAt.toLocaleString(undefined, {
                   dateStyle: "medium",
                   timeStyle: "short",
@@ -123,8 +123,8 @@ export default async function AdminIntegrationsPage({
             </div>
             {qb.scope ? (
               <div className="flex flex-wrap gap-x-2">
-                <dt className="font-medium text-slate-700">Scopes</dt>
-                <dd className="break-all text-slate-700">{qb.scope}</dd>
+                <dt className="font-medium text-slate-700 dark:text-zinc-300">Scopes</dt>
+                <dd className="break-all text-slate-700 dark:text-zinc-300">{qb.scope}</dd>
               </div>
             ) : null}
           </dl>
@@ -143,7 +143,7 @@ export default async function AdminIntegrationsPage({
             <form action={disconnectQuickBooksAction}>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
               >
                 Disconnect
               </button>
@@ -151,7 +151,7 @@ export default async function AdminIntegrationsPage({
           ) : null}
         </div>
 
-        <p className="mt-4 text-xs text-slate-500">
+        <p className="mt-4 text-xs text-slate-500 dark:text-zinc-500">
           Use a QuickBooks Online company with Payroll (US) that matches your
           Intuit app settings. Sandbox companies use{" "}
           <code className="rounded bg-slate-100 px-1">INTUIT_USE_PRODUCTION</code>{" "}

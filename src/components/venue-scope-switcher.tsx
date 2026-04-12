@@ -32,9 +32,9 @@ export function VenueScopeSwitcher({
   if (compact) {
     return (
       <label className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-xs font-medium text-slate-500">{label}</span>
+        <span className="text-xs font-medium text-slate-500 dark:text-zinc-500">{label}</span>
         <select
-          className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 disabled:opacity-60"
+          className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-900 disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
           value={payload.selected}
           disabled={pending}
           onChange={(e) =>
@@ -53,13 +53,13 @@ export function VenueScopeSwitcher({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-zinc-500">
         {label}
       </span>
       <div
         role="tablist"
         aria-label={label}
-        className="flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-slate-100/80 p-1"
+        className="flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-slate-100/80 p-1 dark:border-zinc-800 dark:bg-zinc-950"
       >
         {items.map((item) => {
           const on = payload.selected === item.id;
@@ -73,8 +73,8 @@ export function VenueScopeSwitcher({
               onClick={() => pick(item.id)}
               className={
                 on
-                  ? "rounded-md bg-white px-3 py-1.5 text-sm font-medium text-sky-900 shadow-sm"
-                  : "rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-white/70"
+                  ? "rounded-md bg-white px-3 py-1.5 text-sm font-medium text-sky-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-50 dark:shadow-none"
+                  : "rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-white/70 dark:text-zinc-400 dark:hover:bg-zinc-800/80"
               }
             >
               {item.name}

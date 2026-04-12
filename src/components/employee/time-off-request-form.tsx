@@ -21,7 +21,7 @@ export function TimeOffRequestForm({
     <form action={formAction} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="text-slate-600">Starts</span>
+          <span className="text-slate-600 dark:text-zinc-400">Starts</span>
           <input
             name="startsAt"
             type="datetime-local"
@@ -32,7 +32,7 @@ export function TimeOffRequestForm({
           />
         </label>
         <label className="block text-sm">
-          <span className="text-slate-600">Ends</span>
+          <span className="text-slate-600 dark:text-zinc-400">Ends</span>
           <input
             name="endsAt"
             type="datetime-local"
@@ -44,7 +44,7 @@ export function TimeOffRequestForm({
         </label>
       </div>
       <label className="block text-sm">
-        <span className="text-slate-600">Reason (optional)</span>
+        <span className="text-slate-600 dark:text-zinc-400">Reason (optional)</span>
         <textarea
           name="reason"
           rows={2}

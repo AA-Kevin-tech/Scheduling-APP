@@ -29,8 +29,8 @@ export default async function ManagerTimeClockPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Time clock issues</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Time clock issues</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
             Kiosk/tablet punches only (no geofence). Alerts also appear under{" "}
             <Link href="/manager/notifications" className="text-sky-700 hover:underline">
               Alerts
@@ -38,8 +38,8 @@ export default async function ManagerTimeClockPage() {
             .
           </p>
         </div>
-        <p className="text-sm text-slate-500">
-          <span className="font-medium tabular-nums text-slate-800">{total}</span> open
+        <p className="text-sm text-slate-500 dark:text-zinc-500">
+          <span className="font-medium tabular-nums text-slate-800 dark:text-zinc-200">{total}</span> open
           issue{total === 1 ? "" : "s"}
         </p>
       </div>

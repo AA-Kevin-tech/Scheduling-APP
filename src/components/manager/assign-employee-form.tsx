@@ -25,7 +25,7 @@ export function AssignEmployeeForm({
     <form action={formAction} className="mt-4 space-y-3 border-t border-slate-100 pt-4">
       <input type="hidden" name="shiftId" value={shiftId} />
       <label className="block text-sm">
-        <span className="text-slate-600">Assign employee</span>
+        <span className="text-slate-600 dark:text-zinc-400">Assign employee</span>
         <select
           name="employeeId"
           required
@@ -40,7 +40,7 @@ export function AssignEmployeeForm({
         </select>
       </label>
       <label className="block text-sm">
-        <span className="text-slate-600">
+        <span className="text-slate-600 dark:text-zinc-400">
           Override reason (required if qualification, overlap, hours, or rest
           rules block assignment)
         </span>

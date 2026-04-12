@@ -14,7 +14,7 @@ export default async function ManagerDepartmentsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Departments</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Departments</h1>
         <Link
           href="/manager/schedule"
           className="text-sm text-sky-700 hover:underline"
@@ -37,16 +37,16 @@ export default async function ManagerDepartmentsPage() {
                 >
                   {d.name}
                 </span>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-slate-500 dark:text-zinc-500">
                   {d.location.name} · {d.slug}
                 </span>
               </div>
               <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 <div>
-                  <h3 className="text-xs font-medium uppercase text-slate-500">
+                  <h3 className="text-xs font-medium uppercase text-slate-500 dark:text-zinc-500">
                     Roles
                   </h3>
-                  <ul className="mt-1 text-sm text-slate-700">
+                  <ul className="mt-1 text-sm text-slate-700 dark:text-zinc-300">
                     {d.roles.map((r) => (
                       <li key={r.id}>
                         {r.name} <span className="text-slate-400">({r.slug})</span>
@@ -55,10 +55,10 @@ export default async function ManagerDepartmentsPage() {
                   </ul>
                 </div>
                 <div>
-                  <h3 className="text-xs font-medium uppercase text-slate-500">
+                  <h3 className="text-xs font-medium uppercase text-slate-500 dark:text-zinc-500">
                     Zones
                   </h3>
-                  <ul className="mt-1 text-sm text-slate-700">
+                  <ul className="mt-1 text-sm text-slate-700 dark:text-zinc-300">
                     {d.zones.length === 0 ? (
                       <li className="text-slate-400">None yet</li>
                     ) : (

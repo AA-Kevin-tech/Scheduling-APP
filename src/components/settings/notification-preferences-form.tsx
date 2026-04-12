@@ -19,7 +19,7 @@ export function NotificationPreferencesForm({
 
   return (
     <form action={formAction} className="mt-3 space-y-3">
-      <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+      <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700 dark:text-zinc-300">
         <input
           type="checkbox"
           name="notifyEmail"
@@ -27,14 +27,14 @@ export function NotificationPreferencesForm({
           className="mt-1 rounded border-slate-300"
         />
         <span>
-          <span className="font-medium text-slate-800">Email</span>
-          <span className="block text-xs text-slate-500">
+          <span className="font-medium text-slate-800 dark:text-zinc-200">Email</span>
+          <span className="block text-xs text-slate-500 dark:text-zinc-500">
             Send scheduling alerts to your login email when the server has mail
             configured.
           </span>
         </span>
       </label>
-      <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+      <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700 dark:text-zinc-300">
         <input
           type="checkbox"
           name="notifySms"
@@ -42,15 +42,15 @@ export function NotificationPreferencesForm({
           className="mt-1 rounded border-slate-300"
         />
         <span>
-          <span className="font-medium text-slate-800">Text (SMS)</span>
-          <span className="block text-xs text-slate-500">
+          <span className="font-medium text-slate-800 dark:text-zinc-200">Text (SMS)</span>
+          <span className="block text-xs text-slate-500 dark:text-zinc-500">
             Short message to your profile mobile (employees) or account mobile
             (manager-only accounts). Requires consent below and Twilio on the
             server.
           </span>
         </span>
       </label>
-      <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+      <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700 dark:text-zinc-300">
         <input
           type="checkbox"
           name="smsOptIn"
@@ -58,8 +58,8 @@ export function NotificationPreferencesForm({
           className="mt-1 rounded border-slate-300"
         />
         <span>
-          <span className="font-medium text-slate-800">SMS consent</span>
-          <span className="block text-xs text-slate-500">
+          <span className="font-medium text-slate-800 dark:text-zinc-200">SMS consent</span>
+          <span className="block text-xs text-slate-500 dark:text-zinc-500">
             I agree to receive automated scheduling alerts by text. Message and
             data rates may apply. Turn off SMS above to stop.
             {smsOptInAt ? (

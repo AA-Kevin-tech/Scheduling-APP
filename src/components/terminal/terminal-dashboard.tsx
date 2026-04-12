@@ -79,13 +79,13 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
         <div>
-          <p className="text-sm text-slate-500">Signed in</p>
-          <p className="text-xl font-semibold text-slate-900">{dash.displayName}</p>
+          <p className="text-sm text-slate-500 dark:text-zinc-500">Signed in</p>
+          <p className="text-xl font-semibold text-slate-900 dark:text-zinc-100">{dash.displayName}</p>
         </div>
         <form action={terminalSignOut}>
           <button
             type="submit"
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
           >
             Sign out
           </button>
@@ -97,14 +97,14 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
           <p className="text-sm font-medium uppercase tracking-wide text-sky-900">
             On shift
           </p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-zinc-100">
             {dash.openPunch.shiftLabel}
           </h2>
-          <p className="mt-1 text-slate-700">{dash.openPunch.departmentName}</p>
+          <p className="mt-1 text-slate-700 dark:text-zinc-300">{dash.openPunch.departmentName}</p>
           {dash.openPunch.locationName ? (
-            <p className="text-sm text-slate-600">{dash.openPunch.locationName}</p>
+            <p className="text-sm text-slate-600 dark:text-zinc-400">{dash.openPunch.locationName}</p>
           ) : null}
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="mt-4 text-sm text-slate-600 dark:text-zinc-400">
             Clocked in at{" "}
             <time dateTime={dash.openPunch.clockInAt}>
               {new Date(dash.openPunch.clockInAt).toLocaleString(undefined, {
@@ -123,7 +123,7 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
               name="note"
               rows={2}
               placeholder="Optional note for your manager"
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
             />
             {clockOutState.error ? (
               <p className="text-sm text-red-700">{clockOutState.error}</p>
@@ -138,7 +138,7 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
       ) : null}
 
       {!dash.openPunch && dash.clockInOptions.length === 0 ? (
-        <p className="text-center text-slate-600">
+        <p className="text-center text-slate-600 dark:text-zinc-400">
           No shifts available to clock in right now. Check with your manager if
           this looks wrong.
         </p>
@@ -146,7 +146,7 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
 
       {!dash.openPunch && dash.clockInOptions.length > 0 ? (
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-slate-900">Clock in</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">Clock in</h2>
           <ul className="space-y-3">
             {dash.clockInOptions.map((opt) => (
               <li
@@ -156,12 +156,12 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
                 <form action={clockInAction} className="space-y-3">
                   <input type="hidden" name="assignmentId" value={opt.assignmentId} />
                   <div>
-                    <p className="font-medium text-slate-900">{opt.title}</p>
-                    <p className="text-sm text-slate-600">{opt.departmentName}</p>
+                    <p className="font-medium text-slate-900 dark:text-zinc-100">{opt.title}</p>
+                    <p className="text-sm text-slate-600 dark:text-zinc-400">{opt.departmentName}</p>
                     {opt.locationName ? (
-                      <p className="text-xs text-slate-500">{opt.locationName}</p>
+                      <p className="text-xs text-slate-500 dark:text-zinc-500">{opt.locationName}</p>
                     ) : null}
-                    <p className="mt-2 text-sm text-slate-700">
+                    <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">
                       {opt.startsAtLabel} – {opt.endsAtLabel}
                     </p>
                   </div>
@@ -173,7 +173,7 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
                     name="note"
                     rows={2}
                     placeholder="Optional note"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
                   />
                   <PendingButton label="Clock in" pendingLabel="Clocking in…" />
                 </form>

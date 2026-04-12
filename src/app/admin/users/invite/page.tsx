@@ -31,7 +31,7 @@ export default async function AdminInviteUserPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Invite by email
         </h1>
         <Link
@@ -42,7 +42,7 @@ export default async function AdminInviteUserPage() {
         </Link>
       </div>
 
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         They receive a link to create their password and complete onboarding
         (payroll and profile fields). To create the account yourself instead, use{" "}
         <Link href="/admin/users/new" className="text-sky-700 hover:underline">
@@ -52,7 +52,7 @@ export default async function AdminInviteUserPage() {
       </p>
 
       {venueScope != null && venueScope.length > 0 ? (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-zinc-400">
           Locations and departments match the venue switcher. Use{" "}
           <span className="font-medium">All venues</span> to include multiple
           sites on the invite.

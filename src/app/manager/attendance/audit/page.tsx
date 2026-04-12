@@ -17,8 +17,8 @@ export default async function ManagerAttendanceAuditPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Audit log</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Audit log</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
             Schedule edits, assignments, swaps, and overrides (last 150 entries).
           </p>
         </div>
@@ -34,7 +34,7 @@ export default async function ManagerAttendanceAuditPage() {
 
       <div className="overflow-x-auto surface-card">
         <table className="min-w-full text-left text-xs sm:text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="table-head-row">
             <tr>
               <th className="px-2 py-2 sm:px-3">When</th>
               <th className="px-2 py-2 sm:px-3">Actor</th>
@@ -46,19 +46,19 @@ export default async function ManagerAttendanceAuditPage() {
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className="border-b border-slate-100 last:border-0">
-                <td className="whitespace-nowrap px-2 py-2 text-slate-600 sm:px-3">
+                <td className="whitespace-nowrap px-2 py-2 text-slate-600 dark:text-zinc-400 sm:px-3">
                   {r.createdAt.toLocaleString()}
                 </td>
-                <td className="px-2 py-2 text-slate-800 sm:px-3">
+                <td className="px-2 py-2 text-slate-800 dark:text-zinc-200 sm:px-3">
                   {r.actor?.email ?? "—"}
                 </td>
-                <td className="px-2 py-2 font-medium text-slate-900 sm:px-3">
+                <td className="px-2 py-2 font-medium text-slate-900 dark:text-zinc-100 sm:px-3">
                   {r.action}
                 </td>
-                <td className="px-2 py-2 text-slate-600 sm:px-3">
+                <td className="px-2 py-2 text-slate-600 dark:text-zinc-400 sm:px-3">
                   {r.entityType} {r.entityId.slice(0, 8)}…
                 </td>
-                <td className="max-w-[200px] truncate px-2 py-2 text-slate-500 sm:px-3">
+                <td className="max-w-[200px] truncate px-2 py-2 text-slate-500 dark:text-zinc-500 sm:px-3">
                   {r.reason ?? "—"}
                 </td>
               </tr>

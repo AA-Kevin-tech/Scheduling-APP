@@ -27,7 +27,7 @@ export function UnavailabilitySlotForm({
     <form action={formAction} className="flex flex-wrap items-end gap-2">
       {children}
       <input type="hidden" name="id" value={id} />
-      <label className="text-xs text-slate-600">
+      <label className="text-xs text-slate-600 dark:text-zinc-400">
         Day
         <select
           name="dayOfWeek"
@@ -41,7 +41,7 @@ export function UnavailabilitySlotForm({
           ))}
         </select>
       </label>
-      <label className="text-xs text-slate-600">
+      <label className="text-xs text-slate-600 dark:text-zinc-400">
         From
         <input
           name="startsAt"
@@ -51,7 +51,7 @@ export function UnavailabilitySlotForm({
           className="mt-0.5 block rounded-md border border-slate-300 px-2 py-1.5 text-sm"
         />
       </label>
-      <label className="text-xs text-slate-600">
+      <label className="text-xs text-slate-600 dark:text-zinc-400">
         To
         <input
           name="endsAt"
@@ -70,7 +70,7 @@ export function UnavailabilitySlotForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-200 disabled:opacity-50"
+          className="rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-200 disabled:opacity-50"
         >
           {pending ? "…" : "Save"}
         </button>

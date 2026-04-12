@@ -62,8 +62,8 @@ export default async function NewShiftPage({
           ← Schedule
         </Link>
       </div>
-      <h1 className="text-xl font-semibold text-slate-900">Create shift</h1>
-      <p className="text-sm text-slate-600">
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Create shift</h1>
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Shifts can repeat weekly; each occurrence is stored as its own row (series
         link via parent shift).
       </p>

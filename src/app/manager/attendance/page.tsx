@@ -44,8 +44,8 @@ export default async function ManagerAttendanceHubPage() {
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Attendance</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Attendance</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
             Timesheets, day timeline, audit log, clock issues, and the kiosk terminal.
           </p>
         </div>
@@ -61,8 +61,8 @@ export default async function ManagerAttendanceHubPage() {
               href={c.href}
               className="block surface-card p-5 transition-colors hover:border-sky-300 hover:bg-sky-50/40"
             >
-              <span className="font-medium text-slate-900">{c.title}</span>
-              <span className="mt-1 block text-sm text-slate-600">
+              <span className="font-medium text-slate-900 dark:text-zinc-100">{c.title}</span>
+              <span className="mt-1 block text-sm text-slate-600 dark:text-zinc-400">
                 {c.description}
               </span>
             </Link>

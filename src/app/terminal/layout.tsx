@@ -11,11 +11,11 @@ export default async function TerminalLayout({
     <div className="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200">
       <header className="border-b border-slate-200 bg-white/90 px-4 py-4 shadow-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <span className="text-lg font-semibold tracking-tight text-slate-900">
+          <span className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
             Pulse
           </span>
           {venueName ? (
-            <span className="text-xs text-slate-500">{venueName}</span>
+            <span className="text-xs text-slate-500 dark:text-zinc-500">{venueName}</span>
           ) : null}
         </div>
       </header>

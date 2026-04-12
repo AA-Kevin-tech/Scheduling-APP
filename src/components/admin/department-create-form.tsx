@@ -32,7 +32,7 @@ export function DepartmentCreateForm(props: { locations: LocationOption[] }) {
       className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
     >
       <div className="min-w-[10rem] flex-1">
-        <label className="text-xs font-medium text-slate-600">Venue</label>
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Venue</label>
         <select
           name="locationId"
           required
@@ -47,7 +47,7 @@ export function DepartmentCreateForm(props: { locations: LocationOption[] }) {
         </select>
       </div>
       <div className="min-w-[10rem] flex-1">
-        <label className="text-xs font-medium text-slate-600">Name</label>
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Name</label>
         <input
           name="name"
           required
@@ -55,7 +55,7 @@ export function DepartmentCreateForm(props: { locations: LocationOption[] }) {
         />
       </div>
       <div className="w-36">
-        <label className="text-xs font-medium text-slate-600">Color</label>
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Color</label>
         <select
           name="colorToken"
           defaultValue="slate"
@@ -69,7 +69,7 @@ export function DepartmentCreateForm(props: { locations: LocationOption[] }) {
         </select>
       </div>
       <div className="w-24">
-        <label className="text-xs font-medium text-slate-600">Order</label>
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">Order</label>
         <input
           name="sortOrder"
           type="number"

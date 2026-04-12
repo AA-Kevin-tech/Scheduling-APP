@@ -51,7 +51,7 @@ export function TimeTrackerDayGrid({
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2 text-[10px] text-slate-500 sm:text-xs">
+      <div className="flex gap-2 text-[10px] text-slate-500 dark:text-zinc-500 sm:text-xs">
         <div className="w-32 shrink-0 sm:w-36" />
         <div
           className="grid min-w-0 flex-1 gap-0"
@@ -71,10 +71,10 @@ export function TimeTrackerDayGrid({
         </div>
       </div>
 
-      <p className="text-xs text-slate-500">Times in {tzLabel} (calendar day).</p>
+      <p className="text-xs text-slate-500 dark:text-zinc-500">Times in {tzLabel} (calendar day).</p>
 
       {rows.length === 0 ? (
-        <p className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600">
+        <p className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:text-zinc-400">
           No published shifts overlap this day for your location scope.
         </p>
       ) : (
@@ -84,7 +84,7 @@ export function TimeTrackerDayGrid({
               key={row.employeeId}
               className="flex gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:gap-3 sm:p-3"
             >
-              <div className="w-32 shrink-0 text-sm font-medium text-slate-900 sm:w-36">
+              <div className="w-32 shrink-0 text-sm font-medium text-slate-900 dark:text-zinc-100 sm:w-36">
                 {row.label}
               </div>
               <div className="relative min-h-12 min-w-0 flex-1">
@@ -134,7 +134,7 @@ export function TimeTrackerDayGrid({
         </ul>
       )}
 
-      <div className="flex flex-wrap gap-4 text-xs text-slate-600">
+      <div className="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-zinc-400">
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block h-2 w-6 rounded-sm bg-slate-400/50" />
           Scheduled shift

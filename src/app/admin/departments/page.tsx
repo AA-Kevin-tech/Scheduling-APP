@@ -26,15 +26,15 @@ export default async function AdminDepartmentsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <h1 className="text-xl font-semibold text-slate-900">Departments</h1>
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Departments</h1>
       {scoped ? (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-zinc-400">
           Showing departments for the venue(s) selected in the switcher above.
           Choose <span className="font-medium">All venues</span> to manage every
           site.
         </p>
       ) : null}
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-slate-600 dark:text-zinc-400">
         Each department belongs to one venue. The same department name can exist
         at different venues with separate rosters and schedules. New departments
         get default roles (Attendant, Lead). Add zones and coverage minimums per
@@ -44,12 +44,12 @@ export default async function AdminDepartmentsPage() {
       </p>
 
       <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800">Add department</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Add department</h2>
         <DepartmentCreateForm locations={locations} />
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-slate-800">
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
           {scoped ? "Departments at selected venue(s)" : "All departments"}
         </h2>
         <ul className="space-y-4">

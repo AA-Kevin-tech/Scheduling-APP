@@ -52,8 +52,8 @@ export default async function EmployeeSwapsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Swaps</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Swaps</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Request a one-way or two-way trade. The other person must accept, then a
           manager approves.
         </p>
@@ -70,7 +70,7 @@ export default async function EmployeeSwapsPage() {
       />
 
       <section>
-        <h2 className="text-sm font-medium text-slate-800">Your swap activity</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Your swap activity</h2>
         <ul className="mt-3 space-y-3">
           {swaps.map((s) => {
             const from = s.fromAssignment.shift;
@@ -90,19 +90,19 @@ export default async function EmployeeSwapsPage() {
                   >
                     {from.department.name}
                   </span>
-                  <span className="text-xs text-slate-500">{s.status}</span>
+                  <span className="text-xs text-slate-500 dark:text-zinc-500">{s.status}</span>
                 </div>
-                <p className="mt-2 text-sm text-slate-800">
+                <p className="mt-2 text-sm text-slate-800 dark:text-zinc-200">
                   {new Date(from.startsAt).toLocaleString()} →{" "}
                   {new Date(from.endsAt).toLocaleString()}
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-zinc-500">
                   Requester: {s.requester.user.name ?? s.requester.user.email}
                   {s.target &&
                     ` · Target: ${s.target.user.name ?? s.target.user.email}`}
                 </p>
                 {s.toAssignment && (
-                  <p className="mt-1 text-xs text-slate-600">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
                     Exchange for:{" "}
                     {new Date(s.toAssignment.shift.startsAt).toLocaleString()}
                   </p>
@@ -113,7 +113,7 @@ export default async function EmployeeSwapsPage() {
           })}
         </ul>
         {swaps.length === 0 && (
-          <p className="mt-3 text-sm text-slate-500">No swap requests yet.</p>
+          <p className="mt-3 text-sm text-slate-500 dark:text-zinc-500">No swap requests yet.</p>
         )}
       </section>
     </div>

@@ -29,8 +29,8 @@ export default async function TerminalPage() {
     return (
       <div className="mx-auto max-w-lg space-y-8">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-slate-900">Clock in</h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-zinc-100">Clock in</h1>
+          <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
             Enter your time clock PIN.
           </p>
         </div>
@@ -43,7 +43,7 @@ export default async function TerminalPage() {
   if (!dash) {
     return (
       <div className="mx-auto max-w-lg space-y-6 text-center">
-        <p className="text-slate-700">Session expired. Sign in again.</p>
+        <p className="text-slate-700 dark:text-zinc-300">Session expired. Sign in again.</p>
         <TerminalSignInForm />
       </div>
     );

@@ -36,10 +36,10 @@ export default async function ItPayrollTimeClockPage() {
         >
           ← IT / Payroll
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-slate-900">
+        <h1 className="mt-2 text-xl font-semibold text-slate-900 dark:text-zinc-100">
           Time clock & geofence
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           Only IT and Payroll can change these settings. Configure whether
           employees may clock from their signed-in account, and optional
           per-location geofences (center latitude/longitude, radius in feet) for
@@ -48,7 +48,7 @@ export default async function ItPayrollTimeClockPage() {
       </div>
 
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-900">
+        <h2 className="text-sm font-medium text-slate-900 dark:text-zinc-100">
           Employee account clocking
         </h2>
         <div className="mt-3">
@@ -59,10 +59,10 @@ export default async function ItPayrollTimeClockPage() {
       </section>
 
       <section className="surface-card p-4">
-        <h2 className="text-sm font-medium text-slate-900">
+        <h2 className="text-sm font-medium text-slate-900 dark:text-zinc-100">
           Per-location geofences
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           When all three values are set for a location, employee-account clock
           in/out for shifts at that site requires the device location to be
           within the radius. Uses the shift&apos;s location (or department

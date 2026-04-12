@@ -103,8 +103,8 @@ export default async function ManagerTimesheetsPage({
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Timesheets</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Timesheets</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
             Published shifts and time clock punches by employee and week (
             {tz}). Managers view; only administrators can correct or add punches.
           </p>
@@ -122,16 +122,16 @@ export default async function ManagerTimesheetsPage({
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm">
         <Link
           href={weekHref(prevMonday, selectedId)}
-          className="rounded-md border border-slate-200 px-2 py-1 text-slate-700 hover:bg-slate-50"
+          className="rounded-md border border-slate-200 px-2 py-1 text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
         >
           ← Prev week
         </Link>
-        <span className="font-medium tabular-nums text-slate-800">
+        <span className="font-medium tabular-nums text-slate-800 dark:text-zinc-200">
           Week of {mondayIso}
         </span>
         <Link
           href={weekHref(nextMonday, selectedId)}
-          className="rounded-md border border-slate-200 px-2 py-1 text-slate-700 hover:bg-slate-50"
+          className="rounded-md border border-slate-200 px-2 py-1 text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
         >
           Next week →
         </Link>
@@ -144,7 +144,7 @@ export default async function ManagerTimesheetsPage({
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,220px)_1fr]">
           <aside className="surface-card p-3">
-            <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-zinc-500">
               Employee
             </h2>
             <ul className="mt-2 max-h-[min(60vh,28rem)] space-y-1 overflow-y-auto text-sm">
@@ -158,7 +158,7 @@ export default async function ManagerTimesheetsPage({
                       className={`block rounded-md px-2 py-1.5 ${
                         active
                           ? "bg-sky-100 font-medium text-sky-950"
-                          : "text-slate-700 hover:bg-slate-50"
+                          : "text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
                       }`}
                     >
                       {name}
@@ -171,34 +171,34 @@ export default async function ManagerTimesheetsPage({
 
           <div className="space-y-4">
             {label ? (
-              <p className="text-sm text-slate-700">
-                <span className="font-medium text-slate-900">{label}</span>
-                <span className="text-slate-500"> · punches from kiosk / terminal</span>
+              <p className="text-sm text-slate-700 dark:text-zinc-300">
+                <span className="font-medium text-slate-900 dark:text-zinc-100">{label}</span>
+                <span className="text-slate-500 dark:text-zinc-500"> · punches from kiosk / terminal</span>
               </p>
             ) : null}
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm">
-                <p className="text-xs text-slate-500">Scheduled (in week)</p>
-                <p className="text-lg font-semibold tabular-nums text-slate-900">
+                <p className="text-xs text-slate-500 dark:text-zinc-500">Scheduled (in week)</p>
+                <p className="text-lg font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
                   {formatHm(totalSchedMin)}
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm">
-                <p className="text-xs text-slate-500">Worked (punched, in week)</p>
-                <p className="text-lg font-semibold tabular-nums text-slate-900">
+                <p className="text-xs text-slate-500 dark:text-zinc-500">Worked (punched, in week)</p>
+                <p className="text-lg font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
                   {formatHm(totalWorkMin)}
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm">
-                <p className="text-xs text-slate-500">Difference</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-500">Difference</p>
                 <p
                   className={`text-lg font-semibold tabular-nums ${
                     totalWorkMin - totalSchedMin > 0
                       ? "text-amber-800"
                       : totalWorkMin - totalSchedMin < 0
-                        ? "text-slate-800"
-                        : "text-slate-900"
+                        ? "text-slate-800 dark:text-zinc-200"
+                        : "text-slate-900 dark:text-zinc-100"
                   }`}
                 >
                   {totalWorkMin - totalSchedMin >= 0 ? "+" : ""}
@@ -208,7 +208,7 @@ export default async function ManagerTimesheetsPage({
             </div>
 
             {assignments.length === 0 ? (
-              <p className="surface-card p-6 text-sm text-slate-600">
+              <p className="surface-card p-6 text-sm text-slate-600 dark:text-zinc-400">
                 No published assignments overlap this week for this employee.
               </p>
             ) : (
@@ -256,36 +256,36 @@ export default async function ManagerTimesheetsPage({
                     >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-medium text-slate-900">
+                          <p className="text-sm font-medium text-slate-900 dark:text-zinc-100">
                             {sh.startsAt.toLocaleString(undefined, {
                               weekday: "short",
                               month: "short",
                               day: "numeric",
                             })}
                           </p>
-                          <p className="mt-1 text-xs text-slate-600">
+                          <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
                             {dept}
                             {roleName ? ` · ${roleName}` : ""}
                             {locName ? ` · ${locName}` : ""}
                           </p>
                         </div>
-                        <div className="text-right text-xs text-slate-600">
+                        <div className="text-right text-xs text-slate-600 dark:text-zinc-400">
                           <p>
-                            <span className="text-slate-500">Scheduled </span>
-                            <span className="font-medium tabular-nums text-slate-800">
+                            <span className="text-slate-500 dark:text-zinc-500">Scheduled </span>
+                            <span className="font-medium tabular-nums text-slate-800 dark:text-zinc-200">
                               {formatHm(schedInWeek)}
                             </span>
                           </p>
                           <p className="mt-0.5">
-                            <span className="text-slate-500">Worked </span>
-                            <span className="font-medium tabular-nums text-slate-800">
+                            <span className="text-slate-500 dark:text-zinc-500">Worked </span>
+                            <span className="font-medium tabular-nums text-slate-800 dark:text-zinc-200">
                               {punches.length > 0 ? formatHm(workInWeek) : "—"}
                             </span>
                           </p>
                           {diffMin != null ? (
                             <p
                               className={`mt-0.5 font-medium tabular-nums ${
-                                diffMin > 0 ? "text-amber-800" : "text-slate-800"
+                                diffMin > 0 ? "text-amber-800" : "text-slate-800 dark:text-zinc-200"
                               }`}
                             >
                               Δ {diffMin >= 0 ? "+" : ""}
@@ -295,16 +295,16 @@ export default async function ManagerTimesheetsPage({
                         </div>
                       </div>
 
-                      <div className="mt-3 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+                      <div className="mt-3 grid gap-2 text-sm text-slate-700 dark:text-zinc-300 sm:grid-cols-2">
                         <div>
-                          <span className="text-slate-500">Shift </span>
+                          <span className="text-slate-500 dark:text-zinc-500">Shift </span>
                           <span className="tabular-nums">
                             {sh.startsAt.toLocaleString()} →{" "}
                             {sh.endsAt.toLocaleString()}
                           </span>
                         </div>
                         <div>
-                          <span className="text-slate-500">Punched </span>
+                          <span className="text-slate-500 dark:text-zinc-500">Punched </span>
                           {punches.length === 0 ? (
                             <span className="text-amber-800">No punch</span>
                           ) : (
@@ -370,7 +370,7 @@ export default async function ManagerTimesheetsPage({
                           }
                         >
                           {punches.length > 0 ? (
-                            <p className="mb-2 text-xs text-slate-500">
+                            <p className="mb-2 text-xs text-slate-500 dark:text-zinc-500">
                               Add another segment (e.g. after a break).
                             </p>
                           ) : null}
@@ -388,7 +388,7 @@ export default async function ManagerTimesheetsPage({
                         </div>
                       ) : null}
                       {!canEditPunches && punches.length === 0 ? (
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-slate-500 dark:text-zinc-500">
                           Ask an administrator to add a punch if this shift was worked.
                         </p>
                       ) : null}

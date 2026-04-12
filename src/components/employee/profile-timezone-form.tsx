@@ -13,7 +13,7 @@ export function ProfileTimezoneForm({ currentTimezone }: { currentTimezone: stri
   return (
     <form action={formAction} className="mt-3 flex flex-wrap items-end gap-3">
       <label className="text-sm">
-        <span className="block text-slate-600">Time zone</span>
+        <span className="block text-slate-600 dark:text-zinc-400">Time zone</span>
         <select
           name="timezone"
           defaultValue={currentTimezone}

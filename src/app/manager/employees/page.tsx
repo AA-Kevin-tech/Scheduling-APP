@@ -22,33 +22,33 @@ export default async function ManagerEmployeesPage({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-slate-900">Employees</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Employees</h1>
         <div className="flex flex-wrap items-center gap-4 text-sm">
           {showAllStaff ? (
-            <Link href="/manager/employees" className="text-sky-700 hover:underline">
+            <Link href="/manager/employees" className="link-app">
               Active only
             </Link>
           ) : (
             <Link
               href="/manager/employees?staff=all"
-              className="text-sky-700 hover:underline"
+              className="link-app"
             >
               Include archived
             </Link>
           )}
           <Link
             href="/manager/employees/onboarding"
-            className="text-sky-700 hover:underline"
+            className="link-app"
           >
             Onboarding tracker
           </Link>
-          <Link href="/manager/employees/invite" className="text-sky-700 hover:underline">
+          <Link href="/manager/employees/invite" className="link-app">
             Invite employee
           </Link>
-          <Link href="/manager/employees/new" className="text-sky-700 hover:underline">
+          <Link href="/manager/employees/new" className="link-app">
             Add employee
           </Link>
-          <Link href="/manager/schedule" className="text-sky-700 hover:underline">
+          <Link href="/manager/schedule" className="link-app">
             Schedule board
           </Link>
         </div>
@@ -56,7 +56,7 @@ export default async function ManagerEmployeesPage({
 
       <div className="overflow-x-auto surface-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="table-head-row">
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Email</th>
@@ -70,31 +70,31 @@ export default async function ManagerEmployeesPage({
             {employees.map((e) => (
               <tr
                 key={e.id}
-                className={`border-b border-slate-100 last:border-0 ${e.archivedAt ? "bg-slate-50/80" : ""}`}
+                className={`table-row-divider last:border-0 ${e.archivedAt ? "bg-slate-50/80 dark:bg-zinc-950/60" : ""}`}
               >
-                <td className="px-3 py-2 font-medium text-slate-900">
+                <td className="px-3 py-2 font-medium text-slate-900 dark:text-zinc-100">
                   <span className="inline-flex flex-wrap items-center gap-2">
                     {e.user?.name ?? "—"}
                     {e.archivedAt && (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700 dark:text-zinc-300">
                         Archived
                       </span>
                     )}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-slate-600">
+                <td className="px-3 py-2 text-slate-600 dark:text-zinc-400">
                   {e.user?.email ?? "—"}
                 </td>
-                <td className="px-3 py-2 text-slate-500">{e.employeeNumber ?? "—"}</td>
+                <td className="px-3 py-2 text-slate-500 dark:text-zinc-500">{e.employeeNumber ?? "—"}</td>
                 <td className="px-3 py-2">
                   <ul className="flex flex-wrap gap-1">
                     {e.locations.length === 0 ? (
-                      <li className="text-slate-400">—</li>
+                      <li className="text-slate-400 dark:text-zinc-500">—</li>
                     ) : (
                       e.locations.map((el) => (
                         <li
                           key={el.id}
-                          className="text-xs text-slate-600"
+                          className="text-xs text-slate-600 dark:text-zinc-400"
                         >
                           {el.location?.name ?? "—"}
                           {el.isPrimary ? " · primary" : ""}
@@ -122,7 +122,7 @@ export default async function ManagerEmployeesPage({
                 <td className="px-3 py-2">
                   <Link
                     href={`/manager/employees/${e.id}`}
-                    className="text-sky-700 hover:underline"
+                    className="link-app"
                   >
                     Edit
                   </Link>

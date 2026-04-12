@@ -13,10 +13,10 @@ export function ItPayrollTimeClockSettingsForm({
   return (
     <form action={action} className="space-y-4">
       <fieldset>
-        <legend className="text-sm font-medium text-slate-900">
+        <legend className="text-sm font-medium text-slate-900 dark:text-zinc-100">
           Where may employees clock in and out?
         </legend>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
           The kiosk always works when a manager has activated it. This setting
           controls whether staff may also use Clock in / Clock out while signed
           in to their employee account. Geofences below apply only to that
@@ -32,8 +32,8 @@ export function ItPayrollTimeClockSettingsForm({
               className="mt-1"
             />
             <span>
-              <span className="font-medium text-slate-900">Kiosk only</span>
-              <span className="mt-0.5 block text-sm text-slate-600">
+              <span className="font-medium text-slate-900 dark:text-zinc-100">Kiosk only</span>
+              <span className="mt-0.5 block text-sm text-slate-600 dark:text-zinc-400">
                 Employees must use the time clock PIN on the work terminal.
               </span>
             </span>
@@ -47,10 +47,10 @@ export function ItPayrollTimeClockSettingsForm({
               className="mt-1"
             />
             <span>
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-slate-900 dark:text-zinc-100">
                 Kiosk and employee account
               </span>
-              <span className="mt-0.5 block text-sm text-slate-600">
+              <span className="mt-0.5 block text-sm text-slate-600 dark:text-zinc-400">
                 Employees may clock in/out from the kiosk or from their employee
                 home screen (subject to per-location geofences when configured).
               </span>

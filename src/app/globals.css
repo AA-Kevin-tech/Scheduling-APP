@@ -12,11 +12,11 @@
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #f1f5f9;
-  --muted: #94a3b8;
-  --border: #334155;
-  --card: #0f172a;
+  --background: #000000;
+  --foreground: #fafafa;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  --card: #000000;
   --ring: #38bdf8;
 }
 
@@ -27,23 +27,23 @@ body {
 
 @layer components {
   .surface-page {
-    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-slate-50 text-slate-900 dark:bg-black dark:text-zinc-100;
   }
 
   .surface-header {
-    @apply border-slate-200 bg-white/95 dark:border-slate-700 dark:bg-slate-900/95;
+    @apply border-slate-200 bg-white/95 dark:border-zinc-800 dark:bg-black/95;
   }
 
   .surface-aside {
-    @apply border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900;
+    @apply border-slate-200 bg-white dark:border-zinc-800 dark:bg-black;
   }
 
   .surface-card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/90 dark:shadow-none;
+    @apply rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-zinc-800 dark:bg-black dark:text-zinc-100 dark:shadow-none;
   }
 
   .surface-nav-link {
-    @apply text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800;
+    @apply text-slate-700 hover:bg-slate-100 dark:text-zinc-200 dark:hover:bg-zinc-900;
   }
 
   .surface-nav-link-accent {
@@ -55,14 +55,23 @@ body {
   }
 
   .text-app-muted {
-    @apply text-slate-600 dark:text-slate-400;
+    @apply text-slate-600 dark:text-zinc-400;
   }
 
   .text-app-heading {
-    @apply text-slate-900 dark:text-slate-100;
+    @apply text-slate-900 dark:text-zinc-50;
   }
 
   .kbd-app {
-    @apply rounded bg-slate-100 px-1 dark:bg-slate-800;
+    @apply rounded bg-slate-100 px-1 dark:bg-zinc-900;
+  }
+
+  /** Table regions (paired with per-cell slate utilities that include dark: pairs) */
+  .table-head-row {
+    @apply border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300;
+  }
+
+  .table-row-divider {
+    @apply border-b border-slate-100 dark:border-zinc-800/90;
   }
 }

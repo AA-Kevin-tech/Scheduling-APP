@@ -18,7 +18,7 @@ export default async function ManagerNotificationsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold text-slate-900">Notifications</h1>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Notifications</h1>
         <Link href="/manager" className="text-sm text-sky-700 hover:underline">
           Dashboard
         </Link>

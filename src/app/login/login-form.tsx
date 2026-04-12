@@ -34,7 +34,7 @@ export function LoginForm({ callbackUrl }: Props) {
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
           Email
         </label>
         <input
@@ -49,7 +49,7 @@ export function LoginForm({ callbackUrl }: Props) {
         />
       </div>
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-zinc-300">
           Password
         </label>
         <input

@@ -28,7 +28,7 @@ export function SwapIncomingActions({ swapId }: { swapId: string }) {
         <input type="hidden" name="id" value={swapId} />
         <button
           type="submit"
-          className="min-h-11 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 hover:bg-slate-50"
+          className="min-h-11 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
         >
           Decline
         </button>

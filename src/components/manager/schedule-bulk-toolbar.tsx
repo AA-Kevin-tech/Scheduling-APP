@@ -45,14 +45,14 @@ function Modal({
         <div className="mb-4 flex items-center justify-between gap-2">
           <h2
             id="schedule-bulk-modal-title"
-            className="text-base font-semibold text-slate-900"
+            className="text-base font-semibold text-slate-900 dark:text-zinc-100"
           >
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-sm text-slate-600 hover:bg-slate-100"
+            className="rounded-md px-2 py-1 text-sm text-slate-600 dark:text-zinc-400 hover:bg-slate-100"
           >
             Close
           </button>
@@ -124,7 +124,7 @@ export function ScheduleBulkToolbar({
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/90 p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-medium text-slate-700">
+        <span className="text-sm font-medium text-slate-700 dark:text-zinc-300">
           Schedule shortcuts
         </span>
         <button
@@ -166,7 +166,7 @@ export function ScheduleBulkToolbar({
           Delete template
         </button>
       </div>
-      <p className="mt-2 text-xs text-slate-600">
+      <p className="mt-2 text-xs text-slate-600 dark:text-zinc-400">
         Copy and templates use your current department and role filters. New
         shifts are drafts until published.
       </p>
@@ -185,7 +185,7 @@ export function ScheduleBulkToolbar({
             <input type="hidden" name="intent" value="copy_previous_week" />
             {hiddenFilters}
             <label className="block text-sm">
-              <span className="text-slate-600">When shifts conflict</span>
+              <span className="text-slate-600 dark:text-zinc-400">When shifts conflict</span>
               <select
                 name="mode"
                 className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
@@ -211,7 +211,7 @@ export function ScheduleBulkToolbar({
             <input type="hidden" name="intent" value="save_template" />
             {hiddenFilters}
             <label className="block text-sm">
-              <span className="text-slate-600">Name</span>
+              <span className="text-slate-600 dark:text-zinc-400">Name</span>
               <input
                 name="name"
                 required
@@ -221,7 +221,7 @@ export function ScheduleBulkToolbar({
               />
             </label>
             <label className="block text-sm">
-              <span className="text-slate-600">Description (optional)</span>
+              <span className="text-slate-600 dark:text-zinc-400">Description (optional)</span>
               <textarea
                 name="description"
                 rows={2}
@@ -229,7 +229,7 @@ export function ScheduleBulkToolbar({
                 className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
               />
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
+            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300">
               <input type="checkbox" name="includeRepeating" className="rounded" />
               Include repeating / series shifts
             </label>
@@ -250,11 +250,11 @@ export function ScheduleBulkToolbar({
             <input type="hidden" name="intent" value="load_template" />
             {hiddenFilters}
             <label className="block text-sm">
-              <span className="text-slate-600">Template</span>
+              <span className="text-slate-600 dark:text-zinc-400">Template</span>
               {templateSelectRequired}
             </label>
             <label className="block text-sm">
-              <span className="text-slate-600">When shifts conflict</span>
+              <span className="text-slate-600 dark:text-zinc-400">When shifts conflict</span>
               <select
                 name="mode"
                 className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
@@ -279,7 +279,7 @@ export function ScheduleBulkToolbar({
           <form action={formAction} className="space-y-3">
             <input type="hidden" name="intent" value="delete_template" />
             <label className="block text-sm">
-              <span className="text-slate-600">Template</span>
+              <span className="text-slate-600 dark:text-zinc-400">Template</span>
               {templateSelectRequired}
             </label>
             <button
@@ -299,10 +299,10 @@ export function ScheduleBulkToolbar({
             <input type="hidden" name="intent" value="update_template" />
             {hiddenFilters}
             <label className="block text-sm">
-              <span className="text-slate-600">Template to replace</span>
+              <span className="text-slate-600 dark:text-zinc-400">Template to replace</span>
               {templateSelectRequired}
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-700">
+            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-zinc-300">
               <input type="checkbox" name="includeRepeating" className="rounded" />
               Include repeating / series shifts
             </label>

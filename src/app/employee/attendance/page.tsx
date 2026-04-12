@@ -54,8 +54,8 @@ export default async function EmployeeAttendancePage() {
         >
           ← Home
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900">Attendance</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-zinc-100">Attendance</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
           {allowWebClock
             ? "Your punches from the kiosk or from your employee home screen. This page is read-only; for corrections, contact a manager or administrator."
             : "Time clock punches from the work terminal (read-only). For corrections, contact a manager or administrator."}
@@ -64,31 +64,31 @@ export default async function EmployeeAttendancePage() {
 
       <section className="grid gap-4 sm:grid-cols-2">
         <div className="surface-card p-4">
-          <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-zinc-500">
             This week (UTC)
           </h2>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {formatHoursMinutes(weekMinutes)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
             {weekStart.toLocaleDateString()} – {weekEnd.toLocaleDateString()}
           </p>
         </div>
         <div className="surface-card p-4">
-          <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-zinc-500">
             Last 30 days (UTC)
           </h2>
-          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900">
+          <p className="mt-2 text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
             {formatHoursMinutes(last30Minutes)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Punched time only</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">Punched time only</p>
         </div>
       </section>
 
       <section>
-        <h2 className="text-sm font-medium text-slate-800">Punch history</h2>
+        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Punch history</h2>
         {punches.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
             No time punches yet. Clock in from the{" "}
             <Link href="/terminal" className="text-sky-700 hover:underline">
               time clock
@@ -98,7 +98,7 @@ export default async function EmployeeAttendancePage() {
         ) : (
           <div className="mt-3 overflow-x-auto surface-card">
             <table className="min-w-full text-left text-xs sm:text-sm">
-              <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+              <thead className="table-head-row">
                 <tr>
                   <th className="px-3 py-2">Clock in</th>
                   <th className="px-3 py-2">Clock out</th>
@@ -122,10 +122,10 @@ export default async function EmployeeAttendancePage() {
                       key={p.id}
                       className="border-b border-slate-100 last:border-0"
                     >
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-800">
+                      <td className="whitespace-nowrap px-3 py-2 text-slate-800 dark:text-zinc-200">
                         {p.clockInAt.toLocaleString()}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 text-slate-800">
+                      <td className="whitespace-nowrap px-3 py-2 text-slate-800 dark:text-zinc-200">
                         {p.clockOutAt
                           ? p.clockOutAt.toLocaleString()
                           : (
@@ -134,14 +134,14 @@ export default async function EmployeeAttendancePage() {
                               </span>
                             )}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 tabular-nums text-slate-700">
+                      <td className="whitespace-nowrap px-3 py-2 tabular-nums text-slate-700 dark:text-zinc-300">
                         {formatHoursMinutes(durationMin)}
                         {open ? " · still running" : ""}
                       </td>
-                      <td className="px-3 py-2 text-slate-600">
+                      <td className="px-3 py-2 text-slate-600 dark:text-zinc-400">
                         <span className="block">{dept}</span>
                         {roleLabel ? (
-                          <span className="text-xs text-slate-500">{roleLabel}</span>
+                          <span className="text-xs text-slate-500 dark:text-zinc-500">{roleLabel}</span>
                         ) : null}
                         <span className="mt-0.5 block text-xs text-slate-400">
                           Scheduled{" "}

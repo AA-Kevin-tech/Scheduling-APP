@@ -17,7 +17,7 @@ export function ManagerAccountPhoneForm({
   return (
     <form action={formAction} className="mt-3 space-y-2">
       <label className="text-sm">
-        <span className="block text-slate-600">Mobile for text alerts</span>
+        <span className="block text-slate-600 dark:text-zinc-400">Mobile for text alerts</span>
         <input
           name="phone"
           type="tel"
@@ -43,7 +43,7 @@ export function ManagerAccountPhoneForm({
         ) : null}
         {state?.ok ? <p className="text-sm text-emerald-700">Saved.</p> : null}
       </div>
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-500 dark:text-zinc-500">
         Stored in E.164 for Twilio. Clear the field and save to remove.
       </p>
     </form>

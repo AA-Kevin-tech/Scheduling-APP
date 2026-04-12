@@ -30,13 +30,13 @@ function badgeClass(status: ReturnType<typeof deriveInvitePipelineStatus>) {
     case "completed":
       return "bg-emerald-100 text-emerald-900";
     case "expired":
-      return "bg-slate-200 text-slate-700";
+      return "bg-slate-200 text-slate-700 dark:text-zinc-300";
     case "in_progress":
       return "bg-amber-100 text-amber-900";
     case "invite_sent":
       return "bg-sky-100 text-sky-900";
     default:
-      return "bg-slate-100 text-slate-800";
+      return "bg-slate-100 text-slate-800 dark:text-zinc-200";
   }
 }
 
@@ -60,7 +60,7 @@ export function EmployeeOnboardingTrackerTable(props: Props) {
               className={`rounded-full px-3 py-1.5 text-xs font-medium ${
                 on
                   ? "bg-slate-900 text-white"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  : "border border-slate-200 bg-white text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
               }`}
             >
               {v.label}
@@ -71,7 +71,7 @@ export function EmployeeOnboardingTrackerTable(props: Props) {
 
       <div className="overflow-x-auto surface-card">
         <table className="min-w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-slate-600">
+          <thead className="table-head-row">
             <tr>
               <th className="px-3 py-2">Email</th>
               <th className="px-3 py-2">Stage</th>
@@ -89,7 +89,7 @@ export function EmployeeOnboardingTrackerTable(props: Props) {
               <tr>
                 <td
                   colSpan={showAccountCol ? 9 : 8}
-                  className="px-3 py-8 text-center text-slate-500"
+                  className="px-3 py-8 text-center text-slate-500 dark:text-zinc-500"
                 >
                   No invites match this filter.
                 </td>
@@ -105,15 +105,15 @@ export function EmployeeOnboardingTrackerTable(props: Props) {
                     key={row.id}
                     className="border-b border-slate-100 last:border-0"
                   >
-                    <td className="px-3 py-2 font-medium text-slate-900">
+                    <td className="px-3 py-2 font-medium text-slate-900 dark:text-zinc-100">
                       <span className="block">{row.email}</span>
                       {row.employeeNumber ? (
-                        <span className="text-xs font-normal text-slate-500">
+                        <span className="text-xs font-normal text-slate-500 dark:text-zinc-500">
                           #{row.employeeNumber}
                         </span>
                       ) : null}
                     </td>
-                    <td className="px-3 py-2 text-slate-700">
+                    <td className="px-3 py-2 text-slate-700 dark:text-zinc-300">
                       {inviteStageLabel(row.stage)}
                     </td>
                     <td className="px-3 py-2">
@@ -123,21 +123,21 @@ export function EmployeeOnboardingTrackerTable(props: Props) {
                         {pipelineStatusLabel(pipeline)}
                       </span>
                     </td>
-                    <td className="max-w-[10rem] truncate px-3 py-2 text-slate-600">
+                    <td className="max-w-[10rem] truncate px-3 py-2 text-slate-600 dark:text-zinc-400">
                       {row.invitedBy.name ?? row.invitedBy.email}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-slate-600">
+                    <td className="whitespace-nowrap px-3 py-2 text-slate-600 dark:text-zinc-400">
                       {format(row.createdAt, "MMM d, yyyy h:mm a")}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-slate-600">
+                    <td className="whitespace-nowrap px-3 py-2 text-slate-600 dark:text-zinc-400">
                       {row.startedAt
                         ? format(row.startedAt, "MMM d, yyyy h:mm a")
                         : "—"}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-slate-600">
+                    <td className="whitespace-nowrap px-3 py-2 text-slate-600 dark:text-zinc-400">
                       {format(row.expiresAt, "MMM d, yyyy h:mm a")}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-slate-600">
+                    <td className="whitespace-nowrap px-3 py-2 text-slate-600 dark:text-zinc-400">
                       {row.consumedAt
                         ? format(row.consumedAt, "MMM d, yyyy h:mm a")
                         : "—"}

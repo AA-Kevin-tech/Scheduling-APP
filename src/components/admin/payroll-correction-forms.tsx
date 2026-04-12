@@ -37,10 +37,10 @@ export function AdminCorrectPunchForm({
   return (
     <form action={formAction} className="mt-3 space-y-3 rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-sm">
       <input type="hidden" name="punchId" value={row.punchId} />
-      <p className="text-xs font-medium text-slate-700">Correct punch (audit log)</p>
+      <p className="text-xs font-medium text-slate-700 dark:text-zinc-300">Correct punch (audit log)</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="text-slate-600">Clock in</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock in</span>
           <input
             name="clockInAt"
             type="datetime-local"
@@ -50,7 +50,7 @@ export function AdminCorrectPunchForm({
           />
         </label>
         <label className="block">
-          <span className="text-slate-600">Clock out (optional — leave empty if still open)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock out (optional — leave empty if still open)</span>
           <input
             name="clockOutAt"
             type="datetime-local"
@@ -59,7 +59,7 @@ export function AdminCorrectPunchForm({
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-slate-600">Clock-in note</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock-in note</span>
           <input
             name="clockInNote"
             type="text"
@@ -68,7 +68,7 @@ export function AdminCorrectPunchForm({
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-slate-600">Clock-out note</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock-out note</span>
           <input
             name="clockOutNote"
             type="text"
@@ -77,7 +77,7 @@ export function AdminCorrectPunchForm({
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-slate-600">Reason for correction (required)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Reason for correction (required)</span>
           <textarea
             name="correctionReason"
             required
@@ -122,7 +122,7 @@ export function AdminCreatePunchForm({
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="text-slate-600">Clock in</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock in</span>
           <input
             name="clockInAt"
             type="datetime-local"
@@ -132,7 +132,7 @@ export function AdminCreatePunchForm({
           />
         </label>
         <label className="block">
-          <span className="text-slate-600">Clock out</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock out</span>
           <input
             name="clockOutAt"
             type="datetime-local"
@@ -141,15 +141,15 @@ export function AdminCreatePunchForm({
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-slate-600">Clock-in note</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock-in note</span>
           <input name="clockInNote" type="text" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5" />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-slate-600">Clock-out note</span>
+          <span className="text-slate-600 dark:text-zinc-400">Clock-out note</span>
           <input name="clockOutNote" type="text" className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5" />
         </label>
         <label className="block sm:col-span-2">
-          <span className="text-slate-600">Reason (required)</span>
+          <span className="text-slate-600 dark:text-zinc-400">Reason (required)</span>
           <textarea
             name="correctionReason"
             required

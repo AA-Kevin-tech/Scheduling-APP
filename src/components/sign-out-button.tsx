@@ -19,7 +19,7 @@ export function SignOutButton({ className }: { className?: string }) {
       onClick={() => void handleSignOut()}
       className={
         className ??
-        "text-sm text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
+        "text-sm text-slate-600 dark:text-zinc-400 underline-offset-2 hover:text-slate-900 dark:hover:text-zinc-100 dark:text-zinc-100 dark:hover:text-zinc-100 dark:text-zinc-100 hover:underline"
       }
     >
       Sign out

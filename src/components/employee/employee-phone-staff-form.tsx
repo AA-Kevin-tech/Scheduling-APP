@@ -40,7 +40,7 @@ export function EmployeePhoneStaffForm({
             defaultValue={currentPhone ?? ""}
             className={formControlClassName}
           />
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 dark:text-zinc-500">
             Contact number for SMS alerts when they opt in. Digits, spaces, dashes, +,
             and parentheses only.
           </p>

@@ -49,7 +49,7 @@ export function EmployeeHourLimitsForm({
       </FieldRow>
 
       <div className="space-y-2 sm:pl-[12rem]">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-500 dark:text-zinc-500">
           Leave blank to clear employee-only caps. Department or role limits may
           still apply; scheduling uses the strictest effective weekly cap.
         </p>
