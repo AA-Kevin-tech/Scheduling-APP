@@ -111,7 +111,7 @@ function BlockCard({
 
   const cardInner = (
     <div
-      className={`relative rounded-md border px-2 py-1.5 text-left text-xs shadow-sm ${base} ${draftClass} ${
+      className={`relative max-w-full overflow-hidden rounded border px-1.5 py-1 text-left text-[10px] leading-tight shadow-sm sm:px-2 sm:py-1 sm:text-xs ${base} ${draftClass} ${
         isOpenDraggable ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
@@ -121,9 +121,9 @@ function BlockCard({
           title="This person is not assigned to this shift’s department on their profile. Assign them in Edit user or override when scheduling."
         />
       )}
-      <p className="font-semibold leading-tight">{block.line1}</p>
+      <p className="font-semibold leading-snug">{block.line1}</p>
       {block.line2 && (
-        <p className="mt-0.5 truncate text-[11px] font-medium opacity-90">
+        <p className="mt-0.5 line-clamp-2 break-words text-[9px] font-medium opacity-90 sm:text-[11px]">
           {block.line2}
         </p>
       )}
@@ -149,7 +149,7 @@ function BlockCard({
           e.dataTransfer.setData(DRAG_MIME, JSON.stringify(payload));
           e.dataTransfer.effectAllowed = "move";
         }}
-        className="block outline-none ring-sky-400 transition hover:opacity-95 focus-visible:ring-2"
+        className="block min-w-0 max-w-full outline-none ring-sky-400 transition hover:opacity-95 focus-visible:ring-2"
       >
         {cardInner}
       </Link>
@@ -300,12 +300,18 @@ export function ScheduleWeekGrid({
       )}
 
       <div className="surface-card overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse text-sm">
+        <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
+          <colgroup>
+            <col className="w-[160px]" />
+            {weekDays.map((d) => (
+              <col key={`col-${d.isoKey}`} />
+            ))}
+          </colgroup>
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
               <th
                 scope="col"
-                className="sticky left-0 z-20 min-w-[180px] border-b border-r border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-500"
+                className="sticky left-0 z-20 w-[160px] min-w-0 max-w-[160px] border-b border-r border-slate-200 bg-slate-50 px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-500 sm:px-3 sm:py-2 sm:text-xs"
               >
                 {timezoneLabel ? (
                   <span className="normal-case text-slate-400">{timezoneLabel}</span>
@@ -327,7 +333,7 @@ export function ScheduleWeekGrid({
                     scope="col"
                     title={tip}
                     style={thStyle}
-                    className={`border-b border-slate-200 px-2 py-2 text-center ${
+                    className={`border-b border-slate-200 px-1 py-1.5 text-center sm:px-2 sm:py-2 ${
                       isToday ? "bg-sky-600 text-white" : "text-slate-700 dark:text-zinc-300"
                     } ${!isToday && pto ? "ring-1 ring-inset ring-amber-400/60" : ""}`}
                   >
@@ -335,7 +341,7 @@ export function ScheduleWeekGrid({
                       <button
                         type="button"
                         onClick={() => setAnnotationDay(d.isoKey)}
-                        className={`mb-1 w-full rounded px-1 py-0.5 text-[10px] font-medium ${
+                        className={`mb-0.5 w-full rounded px-1 py-0.5 text-[10px] font-medium sm:mb-1 ${
                           isToday
                             ? "text-white/90 hover:bg-white/10"
                             : "text-sky-700 hover:bg-sky-50"
@@ -354,10 +360,10 @@ export function ScheduleWeekGrid({
                         ● Note
                       </div>
                     ) : null}
-                    <div className="text-[11px] font-bold uppercase tracking-wider">
+                    <div className="text-[10px] font-bold uppercase tracking-wider sm:text-[11px]">
                       {d.weekdayShort}
                     </div>
-                    <div className="text-sm font-semibold">{d.dayNum}</div>
+                    <div className="text-xs font-semibold sm:text-sm">{d.dayNum}</div>
                   </th>
                 );
               })}
@@ -381,11 +387,13 @@ export function ScheduleWeekGrid({
                 <tr key={row.rowId} className={stripe}>
                   <th
                     scope="row"
-                    className={`sticky left-0 z-10 border-b border-r border-slate-200 px-3 py-2 text-left align-top ${stripeTh}`}
+                    className={`sticky left-0 z-10 w-[160px] min-w-0 max-w-[160px] border-b border-r border-slate-200 px-2 py-1.5 text-left align-top sm:px-3 sm:py-2 ${stripeTh}`}
                   >
-                    <div className="font-semibold text-slate-900 dark:text-zinc-100">{row.name}</div>
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-zinc-100">
+                      {row.name}
+                    </div>
                     {row.detail && (
-                      <div className="mt-0.5 text-xs font-normal text-slate-500 dark:text-zinc-500">
+                      <div className="mt-0.5 truncate text-[10px] font-normal text-slate-500 dark:text-zinc-500 sm:text-xs">
                         {row.detail}
                       </div>
                     )}
@@ -414,17 +422,17 @@ export function ScheduleWeekGrid({
                         onDragLeave={handleDragLeave}
                         onDrop={(e) => handleDrop(e, row.rowId, d.isoKey)}
                         style={tdBg}
-                        className={`border-b border-slate-200 px-1.5 py-2 align-top ${
+                        className={`min-w-0 border-b border-slate-200 px-1 py-1.5 align-top sm:px-1.5 sm:py-2 ${
                           isToday ? "bg-sky-50/60" : ""
                         } ${isDragTarget ? "ring-2 ring-inset ring-sky-400" : ""} ${
                           !isToday && pto ? "shadow-[inset_2px_0_0_0_rgba(251,191,36,0.5)]" : ""
                         }`}
                       >
-                        <div className="flex min-h-[52px] flex-col gap-1">
+                        <div className="flex min-h-[40px] min-w-0 flex-col gap-0.5 sm:min-h-[44px] sm:gap-1">
                           {blocks.length === 0 && emptyHref ? (
                             <Link
                               href={emptyHref}
-                              className="flex min-h-[52px] flex-1 items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/80 text-lg text-slate-300 transition hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600"
+                              className="flex min-h-[40px] flex-1 items-center justify-center rounded-md border border-dashed border-slate-200 bg-white/80 text-base text-slate-300 transition hover:border-sky-400 hover:bg-sky-50/50 hover:text-sky-600 sm:min-h-[44px] sm:text-lg"
                               title="Create shift"
                             >
                               <span className="sr-only">Create shift</span>
@@ -439,7 +447,7 @@ export function ScheduleWeekGrid({
                               />
                             ))
                           ) : (
-                            <div className="min-h-[52px]" />
+                            <div className="min-h-[40px] sm:min-h-[44px]" />
                           )}
                         </div>
                       </td>
@@ -454,7 +462,7 @@ export function ScheduleWeekGrid({
               <tr className="border-t-2 border-slate-300 bg-slate-100 font-medium text-slate-800 dark:text-zinc-200">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 border-r border-slate-200 bg-slate-100 px-3 py-2 text-left text-xs uppercase tracking-wide text-slate-600 dark:text-zinc-400"
+                  className="sticky left-0 z-10 w-[160px] min-w-0 max-w-[160px] border-r border-slate-200 bg-slate-100 px-2 py-1.5 text-left text-[10px] uppercase tracking-wide text-slate-600 dark:text-zinc-400 sm:px-3 sm:py-2 sm:text-xs"
                 >
                   Assigned total
                 </th>
@@ -471,7 +479,7 @@ export function ScheduleWeekGrid({
                     <td
                       key={d.isoKey}
                       style={tdBg}
-                      className={`border-t border-slate-200 px-2 py-2 text-center text-sm ${
+                      className={`min-w-0 border-t border-slate-200 px-1 py-1.5 text-center text-xs sm:px-2 sm:py-2 sm:text-sm ${
                         isToday ? "bg-sky-100/80" : ""
                       } ${!isToday && pto ? "shadow-[inset_2px_0_0_0_rgba(251,191,36,0.5)]" : ""}`}
                     >

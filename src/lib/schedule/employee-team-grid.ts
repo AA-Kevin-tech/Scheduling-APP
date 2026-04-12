@@ -34,8 +34,7 @@ function shiftToTeamBlock(
   opts?: { employee?: EmpRow },
 ): ScheduleWeekBlock {
   const dayIso = shiftDayIso(shift, scheduleTz);
-  const loc = shift.location?.name;
-  const sub = [shift.role?.name, shift.department.name, loc]
+  const sub = [shift.role?.name, shift.department.name]
     .filter(Boolean)
     .join(" · ");
   const viewerAssigned = shift.assignments.some(
