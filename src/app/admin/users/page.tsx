@@ -35,7 +35,7 @@ export default async function AdminUsersPage() {
           </Link>
           <Link
             href="/admin/employee-onboarding"
-            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 dark:text-zinc-200 hover:bg-slate-50"
+            className="rounded-md border border-sky-700 bg-white px-4 py-2 text-sm font-medium text-sky-800 hover:bg-sky-50"
           >
             Onboarding tracker
           </Link>
