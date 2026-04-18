@@ -1,8 +1,12 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { createEmployeeInvite } from "@/actions/employee-invite";
 import type { DeptOption } from "@/components/admin/employee-user-form";
+import { ONBOARDING_DOCUMENT_ROWS } from "@/lib/onboarding/document-catalog";
+
+type EmailTemplateOption = { id: string; name: string };
 
 type Assignment = {
   departmentId: string;
@@ -13,12 +17,20 @@ type Assignment = {
 type Props = {
   departments: DeptOption[];
   locations: { id: string; name: string }[];
+  emailTemplates?: EmailTemplateOption[];
+  /** When set, show a link for admins to edit templates. */
+  manageTemplatesHref?: string;
   successRedirect?: string;
 };
 
 export function EmployeeInviteForm(props: Props) {
-  const { departments, locations, successRedirect = "/manager/employees" } =
-    props;
+  const {
+    departments,
+    locations,
+    emailTemplates = [],
+    manageTemplatesHref,
+    successRedirect = "/manager/employees",
+  } = props;
 
   const [assignments, setAssignments] = useState<Assignment[]>(() => {
     const initialLocSet = locations[0] ? new Set([locations[0].id]) : new Set<string>();
@@ -39,6 +51,8 @@ export function EmployeeInviteForm(props: Props) {
     return new Set();
   });
 
+  const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(() => new Set());
+
   const [state, formAction, pending] = useActionState(createEmployeeInvite, null);
 
   const filteredDepartments = useMemo(
@@ -54,6 +68,11 @@ export function EmployeeInviteForm(props: Props) {
   const orderedLocationIds = useMemo(
     () => locations.filter((l) => locIds.has(l.id)).map((l) => l.id),
     [locations, locIds],
+  );
+
+  const onboardingDocSelectionsJson = useMemo(
+    () => JSON.stringify({ selectedIds: [...selectedDocIds] }),
+    [selectedDocIds],
   );
 
   function setPrimary(index: number) {
@@ -106,6 +125,15 @@ export function EmployeeInviteForm(props: Props) {
       } else {
         n.add(id);
       }
+      return n;
+    });
+  }
+
+  function toggleDocRow(id: string) {
+    setSelectedDocIds((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
       return n;
     });
   }
@@ -177,12 +205,13 @@ export function EmployeeInviteForm(props: Props) {
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} encType="multipart/form-data" className="space-y-6">
       <input
         type="hidden"
         name="assignments"
         value={JSON.stringify(assignments)}
       />
+      <input type="hidden" name="onboardingDocSelections" value={onboardingDocSelectionsJson} />
 
       {orderedLocationIds.map((id) => (
         <input key={id} type="hidden" name="locationIds" value={id} />
@@ -191,7 +220,8 @@ export function EmployeeInviteForm(props: Props) {
       <p className="text-sm text-slate-600 dark:text-zinc-400">
         We will email a secure link. They choose a password, set a time clock
         PIN, and enter payroll information (encrypted) for future QuickBooks
-        export.
+        export. You may attach PDFs (for example the current IRS W-4) and other
+        documents below.
       </p>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -203,7 +233,7 @@ export function EmployeeInviteForm(props: Props) {
             name="firstName"
             required
             autoComplete="given-name"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
           />
         </div>
         <div>
@@ -213,7 +243,7 @@ export function EmployeeInviteForm(props: Props) {
           <input
             name="lastName"
             autoComplete="family-name"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
             placeholder="Optional"
           />
         </div>
@@ -225,7 +255,7 @@ export function EmployeeInviteForm(props: Props) {
             name="email"
             type="email"
             required
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
             autoComplete="off"
           />
         </div>
@@ -235,8 +265,134 @@ export function EmployeeInviteForm(props: Props) {
           </label>
           <input
             name="employeeNumber"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
             placeholder="Optional"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-zinc-700 dark:bg-zinc-900/40">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
+          Invite email
+        </h3>
+        <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
+          Templates support placeholders:{" "}
+          <code className="rounded bg-white px-1 dark:bg-zinc-800">
+            {"{{onboardingUrl}}"}
+          </code>
+          ,{" "}
+          <code className="rounded bg-white px-1 dark:bg-zinc-800">
+            {"{{employeeFirstName}}"}
+          </code>
+          ,{" "}
+          <code className="rounded bg-white px-1 dark:bg-zinc-800">
+            {"{{employeeLastName}}"}
+          </code>
+          ,{" "}
+          <code className="rounded bg-white px-1 dark:bg-zinc-800">
+            {"{{complianceLinksHtml}}"}
+          </code>{" "}
+          (official reference links for selected Texas / federal rows). In the
+          subject line,{" "}
+          <code className="rounded bg-white px-1 dark:bg-zinc-800">
+            {"{{complianceLinksHtml}}"}
+          </code>{" "}
+          is omitted.
+        </p>
+        <div className="mt-3">
+          <label className="block text-xs font-medium text-slate-600 dark:text-zinc-400">
+            Template
+          </label>
+          <select
+            name="emailTemplateId"
+            className="mt-1 w-full max-w-md rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-900"
+            defaultValue=""
+          >
+            <option value="">Default (built-in)</option>
+            {emailTemplates.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+          {manageTemplatesHref ? (
+            <p className="mt-2 text-xs">
+              <Link
+                href={manageTemplatesHref}
+                className="text-sky-700 hover:underline"
+              >
+                Create or edit templates
+              </Link>
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 p-4 dark:border-zinc-700">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
+          Forms & Texas / federal compliance package
+        </h3>
+        <p className="mt-1 text-xs text-slate-600 dark:text-zinc-400">
+          Check a row to include it in the email: official PDFs are downloaded
+          from the government site when available, and reference links are added
+          to the message. Use the file column to attach your own copy instead
+          (for example a signed PDF from HR).
+        </p>
+        <ul className="mt-4 space-y-4">
+          {ONBOARDING_DOCUMENT_ROWS.map((row) => (
+            <li
+              key={row.id}
+              className="flex flex-col gap-2 border-b border-slate-100 pb-4 last:border-0 last:pb-0 dark:border-zinc-800 sm:flex-row sm:items-start"
+            >
+              <label className="flex shrink-0 cursor-pointer items-start gap-2 sm:w-[44%]">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={selectedDocIds.has(row.id)}
+                  onChange={() => toggleDocRow(row.id)}
+                />
+                <span>
+                  <span className="text-sm font-medium text-slate-800 dark:text-zinc-200">
+                    {row.label}
+                  </span>
+                  {row.fetchPdf ? (
+                    <span className="ml-1 text-xs font-normal text-emerald-700 dark:text-emerald-400">
+                      (official PDF when selected)
+                    </span>
+                  ) : null}
+                  <span className="mt-0.5 block text-xs font-normal text-slate-500 dark:text-zinc-500">
+                    {row.help}
+                  </span>
+                </span>
+              </label>
+              <div className="min-w-0 flex-1">
+                <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
+                  Optional file (PDF, Word, or image)
+                </label>
+                <input
+                  type="file"
+                  name={`docFile_${row.id}`}
+                  accept=".pdf,.doc,.docx,image/png,image/jpeg,.png,.jpg,.jpeg"
+                  className="mt-1 block w-full text-sm text-slate-600 file:mr-3 file:rounded file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-sm dark:text-zinc-400 dark:file:border-zinc-600 dark:file:bg-zinc-800"
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-4 border-t border-slate-100 pt-4 dark:border-zinc-800">
+          <label className="text-sm font-medium text-slate-800 dark:text-zinc-200">
+            Extra attachments
+          </label>
+          <p className="text-xs text-slate-500 dark:text-zinc-500">
+            Employee handbook acknowledgment, offer letter, or other PDFs (up to
+            eight files, 5 MB each).
+          </p>
+          <input
+            type="file"
+            name="extraAttachments"
+            multiple
+            accept=".pdf,.doc,.docx,image/png,image/jpeg,.png,.jpg,.jpeg"
+            className="mt-2 block w-full text-sm text-slate-600 file:mr-3 file:rounded file:border file:border-slate-300 file:bg-white file:px-3 file:py-1.5 file:text-sm dark:text-zinc-400 dark:file:border-zinc-600 dark:file:bg-zinc-800"
           />
         </div>
       </div>
@@ -284,7 +440,7 @@ export function EmployeeInviteForm(props: Props) {
             return (
               <li
                 key={index}
-                className="rounded-lg border border-slate-200 bg-slate-50/80 p-3"
+                className="rounded-lg border border-slate-200 bg-slate-50/80 p-3 dark:border-zinc-700 dark:bg-zinc-900/30"
               >
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
@@ -296,7 +452,7 @@ export function EmployeeInviteForm(props: Props) {
                       onChange={(e) =>
                         patchRow(index, { departmentId: e.target.value })
                       }
-                      className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+                      className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-zinc-600 dark:bg-zinc-900"
                     >
                       {filteredDepartments.length === 0 ? (
                         <option value="">
@@ -327,7 +483,7 @@ export function EmployeeInviteForm(props: Props) {
                           roleId: e.target.value || null,
                         })
                       }
-                      className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+                      className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm dark:border-zinc-600 dark:bg-zinc-900"
                     >
                       <option value="">—</option>
                       {roles.map((r) => (

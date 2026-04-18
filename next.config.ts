@@ -22,6 +22,13 @@ const withPWA = withPWAInit({
   },
 });
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      /** Employee invite emails may include several PDF attachments. */
+      bodySizeLimit: "12mb",
+    },
+  },
+};
 
 export default withPWA(nextConfig);

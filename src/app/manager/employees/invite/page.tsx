@@ -6,15 +6,17 @@ import {
 import { requireAdminOrManager } from "@/lib/auth/guards";
 import { EmployeeInviteForm } from "@/components/admin/employee-invite-form";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
+import { listOnboardingEmailTemplateSummaries } from "@/lib/queries/onboarding-email-templates";
 
 export default async function ManagerInviteEmployeePage() {
   const session = await requireAdminOrManager();
   const locationIds = await getSchedulingLocationIdsForSession(session);
-  const [locations, departments] = await Promise.all([
+  const [locations, departments, emailTemplates] = await Promise.all([
     locationsVisibleToSession(session),
     getDepartmentsWithRoles({
       onlyAtLocations: locationIds ?? undefined,
     }),
+    listOnboardingEmailTemplateSummaries(),
   ]);
 
   const deptOptions = departments.map((d) => ({
@@ -42,6 +44,10 @@ export default async function ManagerInviteEmployeePage() {
         <EmployeeInviteForm
           departments={deptOptions}
           locations={locations}
+          emailTemplates={emailTemplates.map((t) => ({
+            id: t.id,
+            name: t.name,
+          }))}
           successRedirect="/manager/employees?invited=1"
         />
       </div>

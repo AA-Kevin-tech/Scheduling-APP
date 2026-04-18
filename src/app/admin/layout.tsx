@@ -13,6 +13,10 @@ const links = [
   { href: "/admin/departments", label: "Departments" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/employee-onboarding", label: "Onboarding" },
+  {
+    href: "/admin/onboarding-email-templates",
+    label: "Onboarding emails",
+  },
   { href: "/admin/holidays", label: "Holidays" },
   { href: "/admin/time-off-blackouts", label: "Time off blackouts" },
   { href: "/admin/payroll-corrections", label: "Payroll corrections" },

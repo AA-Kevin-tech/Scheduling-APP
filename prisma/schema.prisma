@@ -54,6 +54,8 @@ model User {
   uploadedEmployeeFiles EmployeeFile[] @relation("EmployeeFileUploadedBy")
   /// Weekly schedule templates this user saved (manager scheduling).
   scheduleTemplates     ScheduleTemplate[]
+  /// Admin-authored onboarding invite email templates.
+  onboardingEmailTemplatesCreated OnboardingEmailTemplate[]
 }
 
 /// Single-tenant QuickBooks Online link (OAuth tokens for payroll/time export).
@@ -304,10 +306,52 @@ model EmployeeInvite {
   locationIds    String[] @default([])
   assignments    Json
 
+  /// Optional branded copy for the invite email.
+  emailTemplateId String?
+  emailTemplate   OnboardingEmailTemplate? @relation(fields: [emailTemplateId], references: [id], onDelete: SetNull)
+
+  /// Snapshot: which onboarding document rows were selected (see `ONBOARDING_DOCUMENT_ROWS`).
+  onboardingDocSelections Json?
+
   invitedBy User @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+  attachments EmployeeInviteAttachment[]
 
   @@index([email])
   @@index([stage])
+  @@index([emailTemplateId])
+}
+
+/// Files attached to a specific invite email (uploaded by admin/manager or fetched official PDFs).
+model EmployeeInviteAttachment {
+  id               String   @id @default(cuid())
+  employeeInviteId String
+  /// Row id from onboarding document catalog, or null for legacy/unknown uploads.
+  docKey           String?
+  fileName         String
+  contentType      String
+  sizeBytes        Int
+  data             Bytes
+  createdAt        DateTime @default(now())
+
+  employeeInvite EmployeeInvite @relation(fields: [employeeInviteId], references: [id], onDelete: Cascade)
+
+  @@index([employeeInviteId])
+}
+
+/// Reusable HTML email for employee onboarding invites (subject + body with placeholders).
+model OnboardingEmailTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  subject   String
+  htmlBody  String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdByUserId String?
+  createdBy       User?    @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  invites EmployeeInvite[]
+
+  @@index([name])
 }
 
 /// Encrypted JSON blob: SSN, tax withholding, direct deposit (for future QuickBooks Payroll export).

@@ -15,8 +15,16 @@ import {
   type PayrollVaultPayload,
 } from "@/lib/crypto/payroll-vault";
 import { publicAppBaseUrl } from "@/lib/app-url";
+import {
+  buildComplianceLinksHtml,
+  parseOnboardingDocSelectionsJson,
+} from "@/lib/onboarding/document-catalog";
+import { buildInviteAttachmentsFromFormData } from "@/lib/onboarding/invite-email-attachments";
 import { prisma } from "@/lib/db";
-import { sendEmployeeOnboardingInviteEmail } from "@/lib/email";
+import {
+  buildOnboardingInviteEmailContent,
+  sendEmployeeOnboardingInviteEmail,
+} from "@/lib/email";
 import { normalizeIanaTimezone } from "@/lib/schedule/tz";
 import { writeAuditLog } from "@/lib/services/audit";
 import { isTimeClockPinAvailable } from "@/lib/time-clock/pin-uniqueness";
@@ -171,6 +179,29 @@ export async function createEmployeeInvite(
     }
   }
 
+  const selections =
+    parseOnboardingDocSelectionsJson(
+      String(formData.get("onboardingDocSelections") ?? ""),
+    ) ?? { selectedIds: [] };
+
+  const templateIdField = emptyToNull(formData.get("emailTemplateId"));
+  let emailTemplateId: string | null = null;
+  if (templateIdField) {
+    const exists = await prisma.onboardingEmailTemplate.findUnique({
+      where: { id: templateIdField },
+      select: { id: true },
+    });
+    if (!exists) {
+      return { error: "Selected email template was not found." };
+    }
+    emailTemplateId = exists.id;
+  }
+
+  const built = await buildInviteAttachmentsFromFormData(formData, selections);
+  if (!built.ok) {
+    return { error: built.error };
+  }
+
   await prisma.employeeInvite.deleteMany({
     where: {
       email,
@@ -191,7 +222,11 @@ export async function createEmployeeInvite(
     }),
   );
 
-  await prisma.employeeInvite.create({
+  const docSelectionsJson: Prisma.InputJsonValue = {
+    selectedIds: selections.selectedIds,
+  };
+
+  const invite = await prisma.employeeInvite.create({
     data: {
       email,
       token,
@@ -202,13 +237,56 @@ export async function createEmployeeInvite(
       employeeNumber: parsed.data.employeeNumber?.trim() || null,
       locationIds,
       assignments: assignmentsJson,
+      emailTemplateId,
+      onboardingDocSelections: docSelectionsJson,
     },
   });
 
+  if (built.attachments.length > 0) {
+    await prisma.employeeInviteAttachment.createMany({
+      data: built.attachments.map((a) => ({
+        employeeInviteId: invite.id,
+        docKey: a.docKey,
+        fileName: a.fileName,
+        contentType: a.contentType,
+        sizeBytes: a.sizeBytes,
+        data: new Uint8Array(a.buffer),
+      })),
+    });
+  }
+
   const onboardingUrl = `${publicAppBaseUrl()}/onboarding/${encodeURIComponent(token)}`;
 
+  const tmpl = emailTemplateId
+    ? await prisma.onboardingEmailTemplate.findUnique({
+        where: { id: emailTemplateId },
+        select: { subject: true, htmlBody: true },
+      })
+    : null;
+
+  const complianceHtml = buildComplianceLinksHtml(selections.selectedIds);
+  const { subject, html } = buildOnboardingInviteEmailContent({
+    templateSubject: tmpl?.subject,
+    templateHtml: tmpl?.htmlBody,
+    onboardingUrl,
+    firstName: parsed.data.firstName,
+    lastName: parsed.data.lastName,
+    complianceLinksHtml: complianceHtml,
+  });
+
   try {
-    await sendEmployeeOnboardingInviteEmail(email, onboardingUrl);
+    await sendEmployeeOnboardingInviteEmail({
+      to: email,
+      onboardingUrl,
+      firstName: parsed.data.firstName,
+      lastName: parsed.data.lastName,
+      subject,
+      html,
+      attachments: built.attachments.map((a) => ({
+        filename: a.fileName,
+        contentBase64: a.buffer.toString("base64"),
+      })),
+    });
   } catch (e) {
     console.error(e);
     await prisma.employeeInvite.deleteMany({ where: { token } });
@@ -220,7 +298,11 @@ export async function createEmployeeInvite(
     entityType: "EmployeeInvite",
     entityId: email,
     action: "CREATE",
-    payload: { expiresAt: expiresAt.toISOString() },
+    payload: {
+      expiresAt: expiresAt.toISOString(),
+      attachmentCount: built.attachments.length,
+      emailTemplateId,
+    },
   });
 
   return { ok: true };
