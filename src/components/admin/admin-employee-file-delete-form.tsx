@@ -6,11 +6,11 @@ import { deleteEmployeeFile } from "@/actions/admin/employee-files";
 export function AdminEmployeeFileDeleteForm({
   fileId,
   employeeId,
-  adminUserIdForRevalidate,
+  adminUserIdForRevalidate = "",
 }: {
   fileId: string;
   employeeId: string;
-  adminUserIdForRevalidate: string;
+  adminUserIdForRevalidate?: string;
 }) {
   const [state, formAction, pending] = useActionState(deleteEmployeeFile, {});
 

@@ -78,11 +78,19 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
     }
   }
 
-  async function runClockOut(form: HTMLFormElement) {
+  async function runClockOut(form: HTMLFormElement, ev: React.FormEvent<HTMLFormElement>) {
     setClockOutError(null);
     setPending(true);
     try {
       const fd = new FormData(form);
+      const submitter = (ev.nativeEvent as SubmitEvent).submitter;
+      if (
+        submitter instanceof HTMLButtonElement &&
+        submitter.name === "lunchBreak" &&
+        submitter.value === "1"
+      ) {
+        fd.set("lunchBreak", "1");
+      }
       const pos = await getGeoPosition();
       if (pos) {
         fd.set("latitude", String(pos.lat));
@@ -133,7 +141,7 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
             className="mt-4 space-y-3"
             onSubmit={(e) => {
               e.preventDefault();
-              void runClockOut(e.currentTarget);
+              void runClockOut(e.currentTarget, e);
             }}
           >
             <label htmlFor="employee-home-clockOutNote" className="sr-only">
@@ -149,13 +157,28 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
             {clockOutError ? (
               <p className="text-sm text-red-700">{clockOutError}</p>
             ) : null}
-            <button
-              type="submit"
-              disabled={pending}
-              className="min-h-[56px] w-full rounded-xl bg-slate-900 px-4 text-lg font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-            >
-              {pending ? "Clocking out…" : "Clock out"}
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="submit"
+                name="lunchBreak"
+                value="1"
+                disabled={pending}
+                className="min-h-[52px] flex-1 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 text-base font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-60"
+              >
+                {pending ? "Starting lunch…" : "Start lunch break"}
+              </button>
+              <button
+                type="submit"
+                disabled={pending}
+                className="min-h-[56px] flex-1 rounded-xl bg-slate-900 px-4 text-lg font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+              >
+                {pending ? "Clocking out…" : "Clock out"}
+              </button>
+            </div>
+            <p className="text-xs text-sky-900/80">
+              Lunch break ends your current clocked-in segment. When you return, use{" "}
+              <span className="font-medium">End lunch break</span> below if shown.
+            </p>
           </form>
         </div>
       ) : null}
@@ -167,52 +190,110 @@ function EmployeeHomeClockInteractive({ dash }: { dash: TerminalDashboard }) {
         </p>
       ) : null}
 
-      {!dash.openPunch && dash.clockInOptions.length > 0 ? (
-        <div className="mt-4 space-y-3">
-          {dash.clockInOptions.map((opt) => (
-            <div
-              key={opt.assignmentId}
-              className="rounded-xl border border-white/80 bg-white p-3 shadow-sm"
+      {!dash.openPunch && dash.resumeLunchBreak ? (
+        <div className="mt-4 rounded-xl border-2 border-amber-300 bg-amber-50/90 p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wide text-amber-950">Lunch break</p>
+          <p className="mt-2 font-medium text-slate-900 dark:text-zinc-100">
+            {dash.resumeLunchBreak.title}
+          </p>
+          <p className="text-sm text-slate-600 dark:text-zinc-400">
+            {dash.resumeLunchBreak.departmentName}
+          </p>
+          {dash.resumeLunchBreak.locationName ? (
+            <p className="text-xs text-slate-500 dark:text-zinc-500">{dash.resumeLunchBreak.locationName}</p>
+          ) : null}
+          <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">
+            {dash.resumeLunchBreak.startsAtLabel} – {dash.resumeLunchBreak.endsAtLabel}
+          </p>
+          <form
+            className="mt-4 space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void runClockIn(e.currentTarget);
+            }}
+          >
+            <input type="hidden" name="assignmentId" value={dash.resumeLunchBreak.assignmentId} />
+            <label htmlFor="employee-home-resume-lunch-note" className="sr-only">
+              Note (optional)
+            </label>
+            <textarea
+              id="employee-home-resume-lunch-note"
+              name="note"
+              rows={2}
+              placeholder="Optional note"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
+            />
+            {clockInError ? (
+              <p className="text-sm text-red-700">{clockInError}</p>
+            ) : null}
+            <button
+              type="submit"
+              disabled={pending}
+              className="min-h-[52px] w-full rounded-xl bg-sky-700 px-4 text-base font-semibold text-white hover:bg-sky-800 disabled:opacity-60"
             >
-              <form
-                className="space-y-3"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void runClockIn(e.currentTarget);
-                }}
+              {pending ? "Clocking in…" : "End lunch break"}
+            </button>
+          </form>
+        </div>
+      ) : null}
+
+      {!dash.openPunch &&
+      dash.clockInOptions.length > 0 &&
+      (!dash.resumeLunchBreak ||
+        dash.clockInOptions.some(
+          (o) => o.assignmentId !== dash.resumeLunchBreak?.assignmentId,
+        )) ? (
+        <div className="mt-4 space-y-3">
+          {dash.clockInOptions
+            .filter(
+              (opt) =>
+                !dash.resumeLunchBreak ||
+                opt.assignmentId !== dash.resumeLunchBreak.assignmentId,
+            )
+            .map((opt) => (
+              <div
+                key={opt.assignmentId}
+                className="rounded-xl border border-white/80 bg-white p-3 shadow-sm"
               >
-                <input type="hidden" name="assignmentId" value={opt.assignmentId} />
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-zinc-100">{opt.title}</p>
-                  <p className="text-sm text-slate-600 dark:text-zinc-400">{opt.departmentName}</p>
-                  {opt.locationName ? (
-                    <p className="text-xs text-slate-500 dark:text-zinc-500">{opt.locationName}</p>
-                  ) : null}
-                  <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">
-                    {opt.startsAtLabel} – {opt.endsAtLabel}
-                  </p>
-                </div>
-                <label htmlFor={`employee-home-note-${opt.assignmentId}`} className="sr-only">
-                  Note (optional)
-                </label>
-                <textarea
-                  id={`employee-home-note-${opt.assignmentId}`}
-                  name="note"
-                  rows={2}
-                  placeholder="Optional note"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
-                />
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="min-h-[52px] w-full rounded-xl bg-sky-700 px-4 text-base font-medium text-white hover:bg-sky-800 disabled:opacity-60"
+                <form
+                  className="space-y-3"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void runClockIn(e.currentTarget);
+                  }}
                 >
-                  {pending ? "Clocking in…" : "Clock in"}
-                </button>
-              </form>
-            </div>
-          ))}
-          {clockInError ? (
+                  <input type="hidden" name="assignmentId" value={opt.assignmentId} />
+                  <div>
+                    <p className="font-medium text-slate-900 dark:text-zinc-100">{opt.title}</p>
+                    <p className="text-sm text-slate-600 dark:text-zinc-400">{opt.departmentName}</p>
+                    {opt.locationName ? (
+                      <p className="text-xs text-slate-500 dark:text-zinc-500">{opt.locationName}</p>
+                    ) : null}
+                    <p className="mt-2 text-sm text-slate-700 dark:text-zinc-300">
+                      {opt.startsAtLabel} – {opt.endsAtLabel}
+                    </p>
+                  </div>
+                  <label htmlFor={`employee-home-note-${opt.assignmentId}`} className="sr-only">
+                    Note (optional)
+                  </label>
+                  <textarea
+                    id={`employee-home-note-${opt.assignmentId}`}
+                    name="note"
+                    rows={2}
+                    placeholder="Optional note"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
+                  />
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    className="min-h-[52px] w-full rounded-xl bg-sky-700 px-4 text-base font-medium text-white hover:bg-sky-800 disabled:opacity-60"
+                  >
+                    {pending ? "Clocking in…" : "Clock in"}
+                  </button>
+                </form>
+              </div>
+            ))}
+          {clockInError && !dash.resumeLunchBreak ? (
             <p className="text-sm text-red-700">{clockInError}</p>
           ) : null}
         </div>

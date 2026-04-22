@@ -34,6 +34,21 @@ function PendingButton({
   );
 }
 
+function PendingLunchBreakButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      name="lunchBreak"
+      value="1"
+      disabled={pending}
+      className="min-h-[52px] flex-1 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 text-base font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-60"
+    >
+      {pending ? "Starting lunch…" : "Start lunch break"}
+    </button>
+  );
+}
+
 const KIOSK_RESET_SECONDS = 20;
 
 export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
@@ -128,11 +143,18 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
             {clockOutState.error ? (
               <p className="text-sm text-red-700">{clockOutState.error}</p>
             ) : null}
-            <PendingButton
-              label="Clock out"
-              pendingLabel="Clocking out…"
-              className="min-h-[56px] w-full rounded-xl bg-slate-900 px-4 text-lg font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-            />
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <PendingLunchBreakButton />
+              <PendingButton
+                label="Clock out"
+                pendingLabel="Clocking out…"
+                className="min-h-[56px] flex-1 rounded-xl bg-slate-900 px-4 text-lg font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+              />
+            </div>
+            <p className="text-xs text-slate-600 dark:text-zinc-400">
+              Lunch break ends your current clocked-in segment. When you return, use{" "}
+              <span className="font-medium">End lunch break</span> or clock in again.
+            </p>
           </form>
         </section>
       ) : null}
@@ -144,11 +166,65 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
         </p>
       ) : null}
 
-      {!dash.openPunch && dash.clockInOptions.length > 0 ? (
+      {!dash.openPunch && dash.resumeLunchBreak ? (
+        <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/90 p-6 shadow-sm">
+          <p className="text-sm font-medium uppercase tracking-wide text-amber-950">
+            Lunch break
+          </p>
+          <h2 className="mt-2 text-xl font-semibold text-slate-900 dark:text-zinc-100">
+            {dash.resumeLunchBreak.title}
+          </h2>
+          <p className="mt-1 text-slate-700 dark:text-zinc-300">
+            {dash.resumeLunchBreak.departmentName}
+          </p>
+          {dash.resumeLunchBreak.locationName ? (
+            <p className="text-sm text-slate-600 dark:text-zinc-400">
+              {dash.resumeLunchBreak.locationName}
+            </p>
+          ) : null}
+          <p className="mt-3 text-sm text-slate-600 dark:text-zinc-400">
+            {dash.resumeLunchBreak.startsAtLabel} – {dash.resumeLunchBreak.endsAtLabel}
+          </p>
+          <form action={clockInAction} className="mt-5 space-y-3">
+            <input type="hidden" name="assignmentId" value={dash.resumeLunchBreak.assignmentId} />
+            <label htmlFor="resumeLunchNote" className="sr-only">
+              Note (optional)
+            </label>
+            <textarea
+              id="resumeLunchNote"
+              name="note"
+              rows={2}
+              placeholder="Optional note"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400"
+            />
+            {clockInState.error ? (
+              <p className="text-sm text-red-700">{clockInState.error}</p>
+            ) : null}
+            <PendingButton
+              label="End lunch break"
+              pendingLabel="Clocking in…"
+              className="min-h-[56px] w-full rounded-xl bg-sky-700 px-4 text-lg font-semibold text-white hover:bg-sky-800 disabled:opacity-60"
+            />
+          </form>
+        </section>
+      ) : null}
+
+      {!dash.openPunch &&
+      dash.clockInOptions.length > 0 &&
+      (!dash.resumeLunchBreak ||
+        dash.clockInOptions.some(
+          (o) => o.assignmentId !== dash.resumeLunchBreak?.assignmentId,
+        )) ? (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-zinc-100">Clock in</h2>
           <ul className="space-y-3">
-            {dash.clockInOptions.map((opt) => (
+            {dash.clockInOptions
+              .filter(
+                (opt) =>
+                  !dash.resumeLunchBreak ||
+                  opt.assignmentId !== dash.resumeLunchBreak.assignmentId,
+              )
+              .map((opt) => (
               <li
                 key={opt.assignmentId}
                 className="surface-card p-4"
@@ -178,9 +254,9 @@ export function TerminalDashboardView({ dash }: { dash: TerminalDashboard }) {
                   <PendingButton label="Clock in" pendingLabel="Clocking in…" />
                 </form>
               </li>
-            ))}
+              ))}
           </ul>
-          {clockInState.error ? (
+          {clockInState.error && !dash.resumeLunchBreak ? (
             <p className="text-sm text-red-700">{clockInState.error}</p>
           ) : null}
         </section>

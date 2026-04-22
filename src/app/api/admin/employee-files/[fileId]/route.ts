@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import type { UserRole } from "@prisma/client";
-import { canAccessAdminRoutes } from "@/lib/auth/roles";
+import { canAccessManagerRoutes } from "@/lib/auth/roles";
 import { employeeOverlapsSchedulingScope } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 
@@ -15,7 +15,7 @@ export async function GET(
   }
 
   const role = session.user.role as UserRole;
-  if (!canAccessAdminRoutes(role)) {
+  if (!canAccessManagerRoutes(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

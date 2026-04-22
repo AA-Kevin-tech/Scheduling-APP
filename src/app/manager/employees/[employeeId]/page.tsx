@@ -6,6 +6,7 @@ import { EmployeeHrDetailsForm } from "@/components/employee-hr-details-form";
 import { EmployeeArchiveSection } from "@/components/employee-archive-section";
 import { EmployeePhoneStaffForm } from "@/components/employee/employee-phone-staff-form";
 import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-form";
+import { AdminEmployeeFilesSection } from "@/components/admin/admin-employee-files-section";
 import { FieldRow } from "@/components/ui/field-row";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
@@ -44,7 +45,7 @@ export default async function ManagerEmployeeHourLimitsPage({
     if (!overlap) notFound();
   }
 
-  const [employeeRow, effective] = await Promise.all([
+  const [employeeRow, effective, employeeFiles] = await Promise.all([
     prisma.hourLimit.findFirst({
       where: {
         employeeId,
@@ -53,6 +54,19 @@ export default async function ManagerEmployeeHourLimitsPage({
       orderBy: { updatedAt: "desc" },
     }),
     getEffectiveHourCaps(employeeId),
+    prisma.employeeFile.findMany({
+      where: { employeeId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        fileName: true,
+        contentType: true,
+        sizeBytes: true,
+        description: true,
+        createdAt: true,
+        uploadedBy: { select: { name: true, email: true } },
+      },
+    }),
   ]);
 
   const effectiveLabel =
@@ -120,6 +134,20 @@ export default async function ManagerEmployeeHourLimitsPage({
           />
         </div>
       </section>
+
+      <AdminEmployeeFilesSection
+        employeeId={employeeId}
+        files={employeeFiles.map((f) => ({
+          id: f.id,
+          fileName: f.fileName,
+          contentType: f.contentType,
+          sizeBytes: f.sizeBytes,
+          description: f.description,
+          createdAt: f.createdAt,
+          uploadedByLabel:
+            f.uploadedBy?.name?.trim() || f.uploadedBy?.email || null,
+        }))}
+      />
 
       <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">HR details</h2>

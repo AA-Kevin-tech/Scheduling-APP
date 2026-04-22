@@ -460,6 +460,22 @@ export function EmployeeOnboardingForm({
         </div>
       </section>
 
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">Documents</h2>
+        <p className="text-xs text-slate-500 dark:text-zinc-500">
+          Optional: upload PDFs or images your employer requested (for example ID or
+          certifications). Up to 5 files, 10 MB each. These are stored with your HR
+          record and are not shown in the employee scheduling app.
+        </p>
+        <input
+          name="onboardingDocuments"
+          type="file"
+          multiple
+          accept=".pdf,image/*,application/pdf"
+          className="block w-full text-sm text-slate-700 file:mr-4 file:rounded-md file:border-0 file:bg-sky-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-sky-900 hover:file:bg-sky-100 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-100"
+        />
+      </section>
+
       {state?.error ? (
         <p className="text-sm text-red-600" role="alert">
           {state.error}

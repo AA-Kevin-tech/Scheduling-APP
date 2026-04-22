@@ -6,10 +6,11 @@ import { FieldRow, formControlClassName } from "@/components/ui/field-row";
 
 export function AdminEmployeeFileUploadForm({
   employeeId,
-  adminUserIdForRevalidate,
+  adminUserIdForRevalidate = "",
 }: {
   employeeId: string;
-  adminUserIdForRevalidate: string;
+  /** Admin user page path; omit or empty when used on manager employee profile. */
+  adminUserIdForRevalidate?: string;
 }) {
   const [state, formAction, pending] = useActionState(uploadEmployeeFile, {});
 

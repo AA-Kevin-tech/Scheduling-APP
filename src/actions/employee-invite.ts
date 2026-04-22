@@ -30,6 +30,10 @@ import { writeAuditLog } from "@/lib/services/audit";
 import { isTimeClockPinAvailable } from "@/lib/time-clock/pin-uniqueness";
 import { timeClockPinLookupDigest } from "@/lib/time-clock/pin-lookup";
 import { userDisplayName } from "@/lib/user-display-name";
+import {
+  MAX_EMPLOYEE_FILE_BYTES,
+  safeEmployeeFileName,
+} from "@/actions/admin/employee-files";
 
 const assignmentSchema = z
   .array(
@@ -404,6 +408,34 @@ const completeSchema = z
     }
   });
 
+const MAX_ONBOARDING_SELF_UPLOADS = 5;
+
+async function collectOnboardingSelfUploads(formData: FormData): Promise<
+  | { ok: true; files: Array<{ buf: Buffer; fileName: string; contentType: string | null }> }
+  | { error: string }
+> {
+  const entries = formData.getAll("onboardingDocuments");
+  const selected = entries.filter((f): f is File => f instanceof File && f.size > 0);
+  if (selected.length > MAX_ONBOARDING_SELF_UPLOADS) {
+    return { error: `You can upload at most ${MAX_ONBOARDING_SELF_UPLOADS} files.` };
+  }
+  const files: Array<{ buf: Buffer; fileName: string; contentType: string | null }> = [];
+  for (const file of selected) {
+    if (file.size > MAX_EMPLOYEE_FILE_BYTES) {
+      return {
+        error: `Each file must be at most ${MAX_EMPLOYEE_FILE_BYTES / 1024 / 1024} MB.`,
+      };
+    }
+    const buf = Buffer.from(await file.arrayBuffer());
+    files.push({
+      buf,
+      fileName: safeEmployeeFileName(file.name),
+      contentType: file.type?.trim() ? file.type.trim() : null,
+    });
+  }
+  return { ok: true, files };
+}
+
 export async function completeEmployeeOnboarding(
   _prev: unknown,
   formData: FormData,
@@ -472,6 +504,11 @@ export async function completeEmployeeOnboarding(
   );
   if (assignErr) {
     return { error: "This invite is misconfigured. Ask your manager for a new invite." };
+  }
+
+  const uploads = await collectOnboardingSelfUploads(formData);
+  if ("error" in uploads) {
+    return { error: uploads.error };
   }
 
   const pin = parsed.data.pin.trim();
@@ -617,6 +654,20 @@ export async function completeEmployeeOnboarding(
           },
         },
       });
+
+      for (const f of uploads.files) {
+        await tx.employeeFile.create({
+          data: {
+            employeeId: emp.id,
+            fileName: f.fileName,
+            contentType: f.contentType,
+            sizeBytes: f.buf.length,
+            data: new Uint8Array(f.buf),
+            description: "Uploaded during self-service onboarding",
+            uploadedByUserId: null,
+          },
+        });
+      }
 
       await tx.employeePayrollVault.create({
         data: {

@@ -20,20 +20,20 @@ function formatBytes(n: number): string {
 
 export function AdminEmployeeFilesSection({
   employeeId,
-  adminUserIdForRevalidate,
+  adminUserIdForRevalidate = "",
   files,
 }: {
   employeeId: string;
-  adminUserIdForRevalidate: string;
+  adminUserIdForRevalidate?: string;
   files: AdminEmployeeFileRow[];
 }) {
   return (
     <div className="surface-card p-6">
-      <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Employee files</h2>
+      <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Documents</h2>
       <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">
-        Upload contracts, certifications, or other records. Files are only
-        visible to administrators (not shown on the employee app). Maximum 10
-        MB per file; stored in your database.
+        Upload contracts, certifications, or other records. Visible to managers
+        and administrators only (not shown in the employee app). Maximum 10 MB
+        per file; stored in your database.
       </p>
 
       <div className="mt-4 border-t border-slate-100 pt-4">

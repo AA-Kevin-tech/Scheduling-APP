@@ -2,14 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth/guards";
+import { requireAdminOrManager } from "@/lib/auth/guards";
 import { employeeOverlapsSchedulingScope } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
+export const MAX_EMPLOYEE_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_FILE_BYTES = MAX_EMPLOYEE_FILE_BYTES;
 
-function safeFileName(raw: string): string {
+export function safeEmployeeFileName(raw: string): string {
   const base = raw
     .replace(/^.*[/\\]/, "")
     .replace(/\0/g, "")
@@ -21,25 +22,31 @@ function safeFileName(raw: string): string {
 const uploadSchema = z.object({
   employeeId: z.string().min(1),
   description: z.string().max(2000).optional(),
-  adminUserIdForRevalidate: z.string().min(1),
+  adminUserIdForRevalidate: z
+    .string()
+    .transform((s) => s.trim())
+    .transform((s) => (s === "" ? undefined : s)),
 });
 
 const deleteSchema = z.object({
   fileId: z.string().min(1),
   employeeId: z.string().min(1),
-  adminUserIdForRevalidate: z.string().min(1),
+  adminUserIdForRevalidate: z
+    .string()
+    .transform((s) => s.trim())
+    .transform((s) => (s === "" ? undefined : s)),
 });
 
 export async function uploadEmployeeFile(
   _prev: { ok?: boolean; error?: string } | undefined,
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
-  const session = await requireAdmin();
+  const session = await requireAdminOrManager();
 
   const parsed = uploadSchema.safeParse({
     employeeId: formData.get("employeeId"),
     description: (formData.get("description") as string | null) ?? undefined,
-    adminUserIdForRevalidate: formData.get("adminUserIdForRevalidate"),
+    adminUserIdForRevalidate: String(formData.get("adminUserIdForRevalidate") ?? ""),
   });
   if (!parsed.success) {
     return { error: "Invalid form." };
@@ -65,7 +72,7 @@ export async function uploadEmployeeFile(
   }
 
   const buf = Buffer.from(await file.arrayBuffer());
-  const fileName = safeFileName(file.name);
+  const fileName = safeEmployeeFileName(file.name);
   const contentType = file.type?.trim() ? file.type.trim() : null;
   const desc = (parsed.data.description ?? "").trim();
   const description = desc.length > 0 ? desc : null;
@@ -95,7 +102,10 @@ export async function uploadEmployeeFile(
     },
   });
 
-  revalidatePath(`/admin/users/${parsed.data.adminUserIdForRevalidate}`);
+  revalidatePath(`/manager/employees/${parsed.data.employeeId}`);
+  if (parsed.data.adminUserIdForRevalidate) {
+    revalidatePath(`/admin/users/${parsed.data.adminUserIdForRevalidate}`);
+  }
   return { ok: true };
 }
 
@@ -103,12 +113,12 @@ export async function deleteEmployeeFile(
   _prev: { ok?: boolean; error?: string } | undefined,
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
-  const session = await requireAdmin();
+  const session = await requireAdminOrManager();
 
   const parsed = deleteSchema.safeParse({
     fileId: formData.get("fileId"),
     employeeId: formData.get("employeeId"),
-    adminUserIdForRevalidate: formData.get("adminUserIdForRevalidate"),
+    adminUserIdForRevalidate: String(formData.get("adminUserIdForRevalidate") ?? ""),
   });
   if (!parsed.success) {
     return { error: "Invalid form." };
@@ -146,6 +156,9 @@ export async function deleteEmployeeFile(
     },
   });
 
-  revalidatePath(`/admin/users/${parsed.data.adminUserIdForRevalidate}`);
+  revalidatePath(`/manager/employees/${parsed.data.employeeId}`);
+  if (parsed.data.adminUserIdForRevalidate) {
+    revalidatePath(`/admin/users/${parsed.data.adminUserIdForRevalidate}`);
+  }
   return { ok: true };
 }

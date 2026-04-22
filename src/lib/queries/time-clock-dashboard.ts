@@ -16,6 +16,15 @@ export type TerminalDashboard = {
     shiftLabel: string;
     locationName: string | null;
   } | null;
+  /** One shift to clock back into after a break (e.g. lunch), when they already finished a segment today. */
+  resumeLunchBreak: {
+    assignmentId: string;
+    title: string;
+    departmentName: string;
+    locationName: string | null;
+    startsAtLabel: string;
+    endsAtLabel: string;
+  } | null;
   clockInOptions: Array<{
     assignmentId: string;
     title: string;
@@ -72,10 +81,20 @@ export async function getTerminalDashboard(
       };
     });
 
+  let resumeLunchBreak: TerminalDashboard["resumeLunchBreak"] = null;
+  if (!openPunch && clockInOptions.length === 1) {
+    const only = clockInOptions[0];
+    const row = clockable.find((a) => a.id === only.assignmentId);
+    if (row && row.timePunches.some((p) => p.clockOutAt != null)) {
+      resumeLunchBreak = { ...only };
+    }
+  }
+
   return {
     displayName,
     timezone: tz,
     openPunch: openSerialized,
+    resumeLunchBreak,
     clockInOptions,
   };
 }

@@ -200,6 +200,16 @@ export async function terminalClockIn(
   return { ok: true };
 }
 
+function resolveClockOutNote(formData: FormData): string | null {
+  const isLunch = String(formData.get("lunchBreak") ?? "").trim() === "1";
+  const userNote = String(formData.get("note") ?? "").trim();
+  if (!isLunch) {
+    return userNote || null;
+  }
+  if (!userNote) return "Lunch break";
+  return `Lunch break — ${userNote}`;
+}
+
 export async function terminalClockOut(
   _prev: unknown,
   formData: FormData,
@@ -211,7 +221,7 @@ export async function terminalClockOut(
     return { error: e instanceof Error ? e.message : "Unauthorized." };
   }
 
-  const note = String(formData.get("note") ?? "").trim() || null;
+  const note = resolveClockOutNote(formData);
   const now = new Date();
 
   const result = await performClockOut({
@@ -292,7 +302,7 @@ export async function employeeAccountClockOut(
     };
   }
 
-  const note = String(formData.get("note") ?? "").trim() || null;
+  const note = resolveClockOutNote(formData);
   const now = new Date();
   const coords = parseOptionalClientCoords(formData);
 
