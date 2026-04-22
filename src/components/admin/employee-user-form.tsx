@@ -6,6 +6,7 @@ import {
   createEmployeeUser,
   updateEmployeeUser,
 } from "@/actions/admin/users";
+import { isSuperAdminRole } from "@/lib/auth/roles";
 import { SCHEDULE_TIMEZONE_OPTIONS } from "@/lib/schedule/timezones";
 
 export type DeptOption = {
@@ -320,7 +321,7 @@ export function EmployeeUserForm(props: Props) {
               <option value="ADMIN">Admin</option>
               <option value="IT">IT (all sites)</option>
               <option value="PAYROLL">Payroll (all sites)</option>
-              {actorRole === "SUPER_ADMIN" ? (
+              {actorRole != null && isSuperAdminRole(actorRole) ? (
                 <option value="SUPER_ADMIN">Super Admin</option>
               ) : null}
             </select>

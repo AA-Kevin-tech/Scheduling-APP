@@ -9,22 +9,16 @@ import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import { SCHEDULING_EDIT_FEATURE } from "@/lib/permissions/scheduling-edit";
 
+/** Roles that can be restricted from schedule editing (IT/SUPER_ADMIN always may edit). */
 const assignableRolesForSchedulingEdit: UserRole[] = [
   "EMPLOYEE",
   "MANAGER",
   "ADMIN",
-  "IT",
   "PAYROLL",
 ];
 
 const updateSchema = z.object({
-  role: z.enum([
-    "EMPLOYEE",
-    "MANAGER",
-    "ADMIN",
-    "IT",
-    "PAYROLL",
-  ] as const),
+  role: z.enum(["EMPLOYEE", "MANAGER", "ADMIN", "PAYROLL"] as const),
   allowed: z.enum(["true", "false"]),
 });
 

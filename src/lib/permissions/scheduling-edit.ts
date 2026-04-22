@@ -3,7 +3,7 @@ import type { UserRole } from "@prisma/client";
 import { isSuperAdminRole } from "@/lib/auth/roles";
 import { prisma } from "@/lib/db";
 
-/** Super Admin can toggle this per `UserRole` (except SUPER_ADMIN, which always may edit). */
+/** Super Admin / IT can toggle this per `UserRole` (those roles always may edit schedules). */
 export const SCHEDULING_EDIT_FEATURE = "scheduling_edit" as const;
 
 export async function getSchedulingEditAllowedForRole(

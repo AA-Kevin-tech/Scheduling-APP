@@ -13,8 +13,12 @@ export function isOrgWideSchedulingRole(role: UserRole): boolean {
   return ORG_WIDE_USER_ROLES.includes(role);
 }
 
+/**
+ * Super Admin privileges (role permissions UI, assigning SUPER_ADMIN, etc.).
+ * IT is treated the same as SUPER_ADMIN for these checks.
+ */
 export function isSuperAdminRole(role: UserRole): boolean {
-  return role === "SUPER_ADMIN";
+  return role === "SUPER_ADMIN" || role === "IT";
 }
 
 export function canAccessAdminRoutes(role: UserRole): boolean {

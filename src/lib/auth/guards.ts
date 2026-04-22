@@ -32,6 +32,7 @@ export async function requireAdmin() {
   return session;
 }
 
+/** Super Admin or IT (same privilege tier for org-wide permission controls). */
 export async function requireSuperAdmin() {
   const session = await requireSession();
   if (!isSuperAdminRole(session.user.role as UserRole)) {

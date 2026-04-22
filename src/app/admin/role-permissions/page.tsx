@@ -54,11 +54,11 @@ export default async function RolePermissionsPage({
       ) : null}
 
       <p className="text-sm text-slate-600 dark:text-zinc-400">
-        Super Admins can turn capabilities on or off per login role. When{" "}
-        <span className="font-medium">Edit schedule</span> is off, that role
-        can still open the week grid but only in read-only mode (no new shifts,
-        edits, publishing, bulk tools, or day notes). Super Admin accounts
-        always have full schedule access.
+        Super Admin and IT accounts can turn capabilities on or off per login
+        role. When <span className="font-medium">Edit schedule</span> is off,
+        that role can still open the week grid but only in read-only mode (no
+        new shifts, edits, publishing, bulk tools, or day notes). Super Admin
+        and IT always have full schedule access.
       </p>
 
       <div className="surface-card overflow-hidden">
