@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { assignEmployeeToShift } from "@/actions/shifts";
 import type { ScheduleAnnotationDTO } from "@/lib/schedule/annotations";
 import type { WeekDayColumn } from "@/lib/schedule/week-grid";
@@ -29,6 +29,8 @@ export type ScheduleWeekBlock = {
   outOfDepartment?: boolean;
   /** Manager: shift is draft until published (lighter / dashed card). */
   isDraft?: boolean;
+  /** Position view: role-colored card (overrides default tan/amber). */
+  cardAccent?: { background: string; borderColor: string };
 };
 
 export type ScheduleWeekRow = {
@@ -38,6 +40,16 @@ export type ScheduleWeekRow = {
   name: string;
   detail?: string;
   blocksByDay: Record<string, ScheduleWeekBlock[]>;
+  /** Position view: color dot beside row title (matches shift cards). */
+  rowSwatchColor?: string;
+  /** Position view: small summary above blocks, e.g. "4 A | 0 O". */
+  daySummaries?: Record<string, string>;
+  /** Manager: per-row defaults for empty-cell "create shift" links. */
+  newShiftQueryOverride?: NewShiftQueryContext;
+  /** When false, open shifts cannot be drag-assigned onto this row. */
+  acceptsDrop?: boolean;
+  /** Position layout: uppercase row label styling. */
+  isPositionRow?: boolean;
 };
 
 /** Serializable; used client-side to build “create shift” links for empty cells (manager schedule). */
@@ -81,6 +93,8 @@ type Props = {
   defaultAnnotationLocationId?: string | null;
   /** When false, hide create links, drag-assign, and day-note editing (read-only grid). */
   allowScheduleEdits?: boolean;
+  /** Manager: "positions" shows WIW-style role rows, filters, and counts. */
+  scheduleViewMode?: "people" | "positions";
 };
 
 type DragPayload = { shiftId: string; dayIso: string };
@@ -92,8 +106,10 @@ function BlockCard({
   block: ScheduleWeekBlock;
   enableDragAssign: boolean;
 }) {
-  const base =
-    block.variant === "time_off"
+  const accent = block.cardAccent;
+  const base = accent
+    ? "text-slate-900 dark:text-zinc-900"
+    : block.variant === "time_off"
       ? "border-slate-300 bg-slate-200/90 text-slate-800 dark:text-zinc-200"
       : block.variant === "open"
         ? "border-amber-300/80 bg-amber-100/90 text-amber-950"
@@ -111,8 +127,16 @@ function BlockCard({
     block.shiftId &&
     block.dayIso;
 
+  const accentStyle: CSSProperties | undefined = accent
+    ? {
+        backgroundColor: accent.background,
+        borderColor: accent.borderColor,
+      }
+    : undefined;
+
   const cardInner = (
     <div
+      style={accentStyle}
       className={`relative max-w-full overflow-hidden rounded border px-1.5 py-1 text-left text-[10px] leading-tight shadow-sm sm:px-2 sm:py-1 sm:text-xs ${base} ${draftClass} ${
         isOpenDraggable ? "cursor-grab active:cursor-grabbing" : ""
       }`}
@@ -174,10 +198,14 @@ export function ScheduleWeekGrid({
   annotationLocations,
   defaultAnnotationLocationId = null,
   allowScheduleEdits = true,
+  scheduleViewMode = "people",
 }: Props) {
   const router = useRouter();
   const [assignError, setAssignError] = useState<string | null>(null);
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const [hiddenPositionRowIds, setHiddenPositionRowIds] = useState<
+    Record<string, boolean>
+  >({});
   const [annotationDay, setAnnotationDay] = useState<string | null>(null);
   const [editingAnnotation, setEditingAnnotation] =
     useState<ScheduleAnnotationDTO | null>(null);
@@ -239,11 +267,13 @@ export function ScheduleWeekGrid({
   );
 
   const handleDragOver = useCallback(
-    (e: React.DragEvent, rowId: string, dayIso: string) => {
-      if (!dragEnabled || rowId === "open") return;
+    (e: React.DragEvent, row: ScheduleWeekRow, dayIso: string) => {
+      if (!dragEnabled || row.rowId === "open" || row.acceptsDrop === false) {
+        return;
+      }
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
-      setDragOverKey(`${rowId}:${dayIso}`);
+      setDragOverKey(`${row.rowId}:${dayIso}`);
     },
     [dragEnabled],
   );
@@ -253,9 +283,12 @@ export function ScheduleWeekGrid({
   }, []);
 
   const handleDrop = useCallback(
-    async (e: React.DragEvent, employeeId: string, dayIso: string) => {
+    async (e: React.DragEvent, row: ScheduleWeekRow, dayIso: string) => {
       setDragOverKey(null);
-      if (!dragEnabled || employeeId === "open") return;
+      if (!dragEnabled || row.rowId === "open" || row.acceptsDrop === false) {
+        return;
+      }
+      const employeeId = row.rowId;
       e.preventDefault();
       const raw = e.dataTransfer.getData(DRAG_MIME);
       if (!raw) return;
@@ -287,28 +320,23 @@ export function ScheduleWeekGrid({
     [dragEnabled, router],
   );
 
-  const hasAnyBlock = rows.some((r) =>
+  const positionFilterableRows = useMemo(
+    () => rows.filter((r) => r.isPositionRow && r.rowSwatchColor),
+    [rows],
+  );
+
+  const visibleRows = useMemo(() => {
+    if (scheduleViewMode !== "positions") return rows;
+    return rows.filter((r) => !hiddenPositionRowIds[r.rowId]);
+  }, [rows, scheduleViewMode, hiddenPositionRowIds]);
+
+  const hasAnyBlock = visibleRows.some((r) =>
     weekDays.some((d) => (r.blocksByDay[d.isoKey]?.length ?? 0) > 0),
   );
 
-  return (
-    <div className="space-y-3">
-      {assignError && (
-        <p
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
-          role="alert"
-        >
-          {assignError}
-        </p>
-      )}
-      {!hasAnyBlock && emptyMessage && (
-        <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600 dark:text-zinc-400">
-          {emptyMessage}
-        </p>
-      )}
-
-      <div className="surface-card overflow-x-auto">
-        <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
+  const gridTable = (
+    <div className="surface-card overflow-x-auto">
+      <table className="w-full min-w-[720px] table-fixed border-collapse text-sm">
           <colgroup>
             <col className="w-[160px]" />
             {weekDays.map((d) => (
@@ -378,7 +406,7 @@ export function ScheduleWeekGrid({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, rowIdx) => {
+            {visibleRows.map((row, rowIdx) => {
               const stripe =
                 row.rowTone === "open"
                   ? "bg-emerald-50/80"
@@ -397,8 +425,21 @@ export function ScheduleWeekGrid({
                     scope="row"
                     className={`sticky left-0 z-10 w-[160px] min-w-0 max-w-[160px] border-b border-r border-slate-200 px-2 py-1.5 text-left align-top sm:px-3 sm:py-2 ${stripeTh}`}
                   >
-                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-zinc-100">
-                      {row.name}
+                    <div
+                      className={`flex min-w-0 items-start gap-1.5 font-semibold text-slate-900 dark:text-zinc-100 ${
+                        row.isPositionRow
+                          ? "text-[11px] uppercase tracking-wide sm:text-xs"
+                          : "text-sm"
+                      }`}
+                    >
+                      {row.rowSwatchColor ? (
+                        <span
+                          className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: row.rowSwatchColor }}
+                          aria-hidden
+                        />
+                      ) : null}
+                      <span className="min-w-0 truncate">{row.name}</span>
                     </div>
                     {row.detail && (
                       <div className="mt-0.5 truncate text-[10px] font-normal text-slate-500 dark:text-zinc-500 sm:text-xs">
@@ -409,13 +450,17 @@ export function ScheduleWeekGrid({
                   {weekDays.map((d) => {
                     const isToday = d.isoKey === todayIso;
                     const blocks = row.blocksByDay[d.isoKey] ?? [];
-                    const emptyHref = newShiftQueryResolved
-                      ? managerNewShiftHref(d.isoKey, newShiftQueryResolved)
+                    const cellCtx =
+                      row.newShiftQueryOverride ?? newShiftQueryResolved;
+                    const emptyHref = cellCtx
+                      ? managerNewShiftHref(d.isoKey, cellCtx)
                       : undefined;
+                    const daySummary = row.daySummaries?.[d.isoKey];
                     const dropKey = `${row.rowId}:${d.isoKey}`;
                     const isDragTarget =
                       dragEnabled &&
                       row.rowId !== "open" &&
+                      row.acceptsDrop !== false &&
                       dragOverKey === dropKey;
                     const tint = columnTintHex(d.isoKey);
                     const pto = columnPtoBlocked(d.isoKey);
@@ -426,9 +471,9 @@ export function ScheduleWeekGrid({
                     return (
                       <td
                         key={d.isoKey}
-                        onDragOver={(e) => handleDragOver(e, row.rowId, d.isoKey)}
+                        onDragOver={(e) => handleDragOver(e, row, d.isoKey)}
                         onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, row.rowId, d.isoKey)}
+                        onDrop={(e) => handleDrop(e, row, d.isoKey)}
                         style={tdBg}
                         className={`min-w-0 border-b border-slate-200 px-1 py-1.5 align-top sm:px-1.5 sm:py-2 ${
                           isToday ? "bg-sky-50/60" : ""
@@ -437,6 +482,11 @@ export function ScheduleWeekGrid({
                         }`}
                       >
                         <div className="flex min-h-[40px] min-w-0 flex-col gap-0.5 sm:min-h-[44px] sm:gap-1">
+                          {daySummary ? (
+                            <div className="text-center text-[9px] font-semibold tabular-nums text-slate-600 dark:text-zinc-400 sm:text-[10px]">
+                              {daySummary}
+                            </div>
+                          ) : null}
                           {blocks.length === 0 && emptyHref ? (
                             <Link
                               href={emptyHref}
@@ -499,7 +549,73 @@ export function ScheduleWeekGrid({
             </tfoot>
           )}
         </table>
-      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      {assignError && (
+        <p
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+          role="alert"
+        >
+          {assignError}
+        </p>
+      )}
+      {!hasAnyBlock && emptyMessage && (
+        <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-600 dark:text-zinc-400">
+          {emptyMessage}
+        </p>
+      )}
+      {scheduleViewMode === "positions" && positionFilterableRows.length > 0 ? (
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <aside className="surface-card w-full shrink-0 p-4 lg:w-52">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-zinc-500">
+              Filters
+            </h2>
+            <p className="mt-1 text-[11px] text-slate-600 dark:text-zinc-400">
+              Positions — show or hide rows on this week.
+            </p>
+            <ul className="mt-3 max-h-[min(420px,50vh)] space-y-2 overflow-y-auto pr-1 text-sm">
+              {positionFilterableRows.map((r) => {
+                const on = !hiddenPositionRowIds[r.rowId];
+                return (
+                  <li key={r.rowId}>
+                    <label className="flex cursor-pointer items-center gap-2 text-slate-800 dark:text-zinc-200">
+                      <input
+                        type="checkbox"
+                        className="rounded border-slate-300"
+                        checked={on}
+                        onChange={() => {
+                          setHiddenPositionRowIds((prev) => {
+                            const next = { ...prev };
+                            if (on) next[r.rowId] = true;
+                            else delete next[r.rowId];
+                            return next;
+                          });
+                        }}
+                      />
+                      {r.rowSwatchColor ? (
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                          style={{ backgroundColor: r.rowSwatchColor }}
+                          aria-hidden
+                        />
+                      ) : null}
+                      <span className="min-w-0 truncate text-xs font-medium uppercase tracking-wide">
+                        {r.name}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
+          <div className="min-w-0 flex-1 space-y-3">{gridTable}</div>
+        </div>
+      ) : (
+        gridTable
+      )}
 
       {annotationDay && canManageAnnotations ? (
         <ScheduleAnnotationDialog

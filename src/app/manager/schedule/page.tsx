@@ -32,6 +32,13 @@ import {
 import { firstSearchParam } from "@/lib/search-params";
 import { PublishScheduleBar } from "@/components/manager/publish-schedule-bar";
 import { ScheduleBulkToolbar } from "@/components/manager/schedule-bulk-toolbar";
+import { buildManagerPositionGridRows } from "@/lib/schedule/manager-position-grid";
+
+type ManagerScheduleLayout = "people" | "positions";
+
+function parseScheduleLayout(raw: string | undefined): ManagerScheduleLayout {
+  return raw === "positions" ? "positions" : "people";
+}
 
 export default async function ManagerSchedulePage({
   searchParams,
@@ -42,6 +49,7 @@ export default async function ManagerSchedulePage({
     roleId?: string | string[];
     roster?: string | string[];
     q?: string | string[];
+    layout?: string | string[];
   }>;
 }) {
   const session = await requireManager();
@@ -53,6 +61,7 @@ export default async function ManagerSchedulePage({
   const roleId = firstSearchParam(raw.roleId);
   const roster = firstSearchParam(raw.roster);
   const q = firstSearchParam(raw.q);
+  const layout = parseScheduleLayout(firstSearchParam(raw.layout));
 
   const scheduleTz = getDefaultScheduleTimezone();
   const now = new Date();
@@ -87,11 +96,23 @@ export default async function ManagerSchedulePage({
   if (roleId) baseQuery.set("roleId", roleId);
   if (rosterMode === "all") baseQuery.set("roster", "all");
   if (searchQ) baseQuery.set("q", q ?? "");
+  if (layout === "positions") baseQuery.set("layout", "positions");
 
   function weekHref(monday: string) {
-    const q = new URLSearchParams(baseQuery);
-    q.set("week", monday);
-    return `/manager/schedule?${q.toString()}`;
+    const next = new URLSearchParams(baseQuery);
+    next.set("week", monday);
+    return `/manager/schedule?${next.toString()}`;
+  }
+
+  function weekHrefWithLayout(
+    monday: string,
+    targetLayout: ManagerScheduleLayout,
+  ) {
+    const next = new URLSearchParams(baseQuery);
+    next.set("week", monday);
+    if (targetLayout === "positions") next.set("layout", "positions");
+    else next.delete("layout");
+    return `/manager/schedule?${next.toString()}`;
   }
 
   const prevMonday = addWeeksToMondayIso(mondayIso, -1, scheduleTz);
@@ -145,16 +166,33 @@ export default async function ManagerSchedulePage({
     "MMM d, yyyy",
   )}`;
 
-  const rows = buildManagerGridRows({
-    shifts,
-    employees,
-    weekDays,
-    scheduleTz,
-    departmentId,
-    roleId,
-    rosterMode,
-    searchQ,
-  });
+  const rows =
+    layout === "positions"
+      ? buildManagerPositionGridRows({
+          shifts,
+          employees,
+          departments,
+          weekDays,
+          scheduleTz,
+          departmentId,
+          roleId,
+          searchQ,
+          baseNewShiftQuery: {
+            weekMondayIso: mondayIso,
+            ...(departmentId ? { departmentId } : {}),
+            ...(roleId ? { roleId } : {}),
+          },
+        })
+      : buildManagerGridRows({
+          shifts,
+          employees,
+          weekDays,
+          scheduleTz,
+          departmentId,
+          roleId,
+          rosterMode,
+          searchQ,
+        });
 
   const footerHoursByDay = buildFooterHoursByDay(shifts, weekDays, scheduleTz);
   const draftCount = shifts.filter((s) => s.publishedAt == null).length;
@@ -208,11 +246,42 @@ export default async function ManagerSchedulePage({
         </Link>
       </div>
 
+      <div
+        className="flex flex-wrap items-center gap-2 text-sm"
+        role="group"
+        aria-label="Schedule row grouping"
+      >
+        <span className="text-slate-500 dark:text-zinc-500">View as</span>
+        <Link
+          href={weekHrefWithLayout(mondayIso, "people")}
+          className={`rounded-md px-3 py-1.5 font-medium ${
+            layout === "people"
+              ? "bg-sky-700 text-white"
+              : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          }`}
+        >
+          Staff
+        </Link>
+        <Link
+          href={weekHrefWithLayout(mondayIso, "positions")}
+          className={`rounded-md px-3 py-1.5 font-medium ${
+            layout === "positions"
+              ? "bg-sky-700 text-white"
+              : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          }`}
+        >
+          Positions
+        </Link>
+      </div>
+
       <form
         method="get"
         className="flex flex-wrap items-end gap-3 surface-card p-4"
       >
         <input type="hidden" name="week" value={mondayIso} />
+        {layout === "positions" ? (
+          <input type="hidden" name="layout" value="positions" />
+        ) : null}
         <label className="text-sm">
           <span className="block text-slate-600 dark:text-zinc-400">Department</span>
           <select
@@ -246,24 +315,30 @@ export default async function ManagerSchedulePage({
             )}
           </select>
         </label>
+        {layout === "people" ? (
+          <label className="text-sm">
+            <span className="block text-slate-600 dark:text-zinc-400">
+              Staff rows
+            </span>
+            <select
+              name="roster"
+              defaultValue={rosterMode === "all" ? "all" : ""}
+              className="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+            >
+              <option value="">Scheduled this week (default)</option>
+              <option value="all">All staff</option>
+            </select>
+          </label>
+        ) : null}
         <label className="text-sm">
-          <span className="block text-slate-600 dark:text-zinc-400">Staff rows</span>
-          <select
-            name="roster"
-            defaultValue={rosterMode === "all" ? "all" : ""}
-            className="mt-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="">Scheduled this week (default)</option>
-            <option value="all">All staff</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="block text-slate-600 dark:text-zinc-400">Search name</span>
+          <span className="block text-slate-600 dark:text-zinc-400">
+            {layout === "positions" ? "Search positions" : "Search name"}
+          </span>
           <input
             name="q"
             type="search"
             defaultValue={q ?? ""}
-            placeholder="Filter rows"
+            placeholder={layout === "positions" ? "Filter positions" : "Filter rows"}
             className="mt-1 w-44 rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </label>
@@ -299,12 +374,13 @@ export default async function ManagerSchedulePage({
         rows={rows}
         footerHoursByDay={footerHoursByDay}
         timezoneLabel={scheduleTz}
+        scheduleViewMode={layout === "positions" ? "positions" : "people"}
         newShiftQuery={{
           weekMondayIso: mondayIso,
           ...(departmentId ? { departmentId } : {}),
           ...(roleId ? { roleId } : {}),
         }}
-        enableDragAssign={canEditSchedule}
+        enableDragAssign={canEditSchedule && layout === "people"}
         allowScheduleEdits={canEditSchedule}
         scheduleAnnotations={scheduleAnnotationDtos}
         annotationLocations={annotationLocationRows}
