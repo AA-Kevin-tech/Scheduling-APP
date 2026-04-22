@@ -16,7 +16,8 @@ export async function getSchedulingEditAllowedForRole(
     },
     select: { allowed: true },
   });
-  if (!row) return true;
+  // No row: managers/admins/payroll may edit; employees default to read-only (WIW-style).
+  if (!row) return role !== "EMPLOYEE";
   return row.allowed;
 }
 

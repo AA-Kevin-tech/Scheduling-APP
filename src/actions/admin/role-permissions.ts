@@ -62,6 +62,7 @@ export async function updateRoleSchedulingEditPermission(
 
   revalidatePath("/admin/role-permissions");
   revalidatePath("/manager/schedule");
+  revalidatePath("/manager/swaps");
   redirect("/admin/role-permissions");
 }
 
@@ -76,6 +77,6 @@ export async function listRoleSchedulingEditState(): Promise<
   const byRole = new Map(rows.map((r) => [r.role, r.allowed]));
   return assignableRolesForSchedulingEdit.map((role) => ({
     role,
-    allowed: byRole.get(role) ?? true,
+    allowed: byRole.get(role) ?? (role === "EMPLOYEE" ? false : true),
   }));
 }

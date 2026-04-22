@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { sessionMayAccessSwapRequest } from "@/lib/auth/location-scope";
 import { requireEmployeeProfile, requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import { createNotification, notifyManagersExcept } from "@/lib/services/notifications";
@@ -216,6 +217,9 @@ export async function approveSwapAsManager(
   formData: FormData,
 ): Promise<{ error?: string }> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    return { error: "Schedule is view-only for your role." };
+  }
 
   const parsed = approveSchema.safeParse({
     id: formData.get("id"),
