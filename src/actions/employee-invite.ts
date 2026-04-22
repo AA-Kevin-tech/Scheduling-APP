@@ -33,7 +33,7 @@ import { userDisplayName } from "@/lib/user-display-name";
 import {
   MAX_EMPLOYEE_FILE_BYTES,
   safeEmployeeFileName,
-} from "@/actions/admin/employee-files";
+} from "@/lib/employee-file-upload";
 
 const assignmentSchema = z
   .array(

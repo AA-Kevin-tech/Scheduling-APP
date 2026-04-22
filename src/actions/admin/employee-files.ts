@@ -6,18 +6,12 @@ import { requireAdminOrManager } from "@/lib/auth/guards";
 import { employeeOverlapsSchedulingScope } from "@/lib/auth/location-scope";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
+import {
+  MAX_EMPLOYEE_FILE_BYTES,
+  safeEmployeeFileName,
+} from "@/lib/employee-file-upload";
 
-export const MAX_EMPLOYEE_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_FILE_BYTES = MAX_EMPLOYEE_FILE_BYTES;
-
-export function safeEmployeeFileName(raw: string): string {
-  const base = raw
-    .replace(/^.*[/\\]/, "")
-    .replace(/\0/g, "")
-    .trim();
-  if (!base) return "upload";
-  return base.length > 200 ? base.slice(0, 200) : base;
-}
 
 const uploadSchema = z.object({
   employeeId: z.string().min(1),
