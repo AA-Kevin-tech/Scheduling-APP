@@ -4,6 +4,7 @@ import {
   canAccessAdminRoutes,
   canAccessItPayrollTimeClockSettings,
   canAccessManagerRoutes,
+  isSuperAdminRole,
   loginHomePath,
 } from "@/lib/auth/roles";
 import { redirect } from "next/navigation";
@@ -27,6 +28,14 @@ export async function requireAdmin() {
   const session = await requireSession();
   if (!canAccessAdminRoutes(session.user.role as UserRole)) {
     redirect("/manager");
+  }
+  return session;
+}
+
+export async function requireSuperAdmin() {
+  const session = await requireSession();
+  if (!isSuperAdminRole(session.user.role as UserRole)) {
+    redirect("/admin");
   }
   return session;
 }

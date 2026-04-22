@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { addHours } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import { NewShiftForm } from "@/components/manager/new-shift-form";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
 import {
@@ -23,6 +25,9 @@ export default async function NewShiftPage({
   }>;
 }) {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    redirect("/manager/schedule");
+  }
   const locationIds = await getSchedulingLocationIdsForSession(session);
   const departments = await getDepartmentsWithRoles({
     onlyAtLocations: locationIds ?? undefined,

@@ -12,6 +12,7 @@ import {
 } from "@/lib/auth/location-scope";
 import {
   isOrgWideSchedulingRole,
+  isSuperAdminRole,
   ORG_WIDE_USER_ROLES,
 } from "@/lib/auth/roles";
 import { requireAdmin, requireAdminOrManager } from "@/lib/auth/guards";
@@ -34,7 +35,14 @@ const createUserSchema = z.object({
   firstName: z.string().trim().min(1),
   lastName: z.string().trim(),
   password: z.string().min(8),
-  role: z.enum(["ADMIN", "IT", "PAYROLL", "MANAGER", "EMPLOYEE"]),
+  role: z.enum([
+    "SUPER_ADMIN",
+    "ADMIN",
+    "IT",
+    "PAYROLL",
+    "MANAGER",
+    "EMPLOYEE",
+  ]),
   employeeNumber: z.string().nullable().optional(),
   timezone: z.string().optional(),
   locationIds: z.array(z.string()).min(1),
@@ -87,6 +95,13 @@ export async function createEmployeeUser(
 
   if (!parsed.success) {
     return { error: zodFormError(parsed.error) };
+  }
+
+  if (
+    parsed.data.role === "SUPER_ADMIN" &&
+    !isSuperAdminRole(session.user.role as UserRole)
+  ) {
+    return { error: "Only a Super Admin can assign the Super Admin role." };
   }
 
   const phoneChecked = validateEmployeePhoneFormValue(
@@ -229,7 +244,14 @@ const updateUserSchema = z.object({
   userId: z.string().min(1),
   firstName: z.string().trim().min(1),
   lastName: z.string().trim(),
-  role: z.enum(["ADMIN", "IT", "PAYROLL", "MANAGER", "EMPLOYEE"]),
+  role: z.enum([
+    "SUPER_ADMIN",
+    "ADMIN",
+    "IT",
+    "PAYROLL",
+    "MANAGER",
+    "EMPLOYEE",
+  ]),
   employeeNumber: z.string().nullable().optional(),
   timezone: z.string().optional(),
   locationIds: z.array(z.string()).min(1),
@@ -280,6 +302,20 @@ export async function updateEmployeeUser(
   });
   if (!user?.employee) {
     return { error: "User or employee profile not found." };
+  }
+
+  if (
+    user.role === "SUPER_ADMIN" &&
+    !isSuperAdminRole(session.user.role as UserRole)
+  ) {
+    return { error: "Only a Super Admin can edit Super Admin accounts." };
+  }
+
+  if (
+    parsed.data.role === "SUPER_ADMIN" &&
+    !isSuperAdminRole(session.user.role as UserRole)
+  ) {
+    return { error: "Only a Super Admin can assign the Super Admin role." };
   }
 
   const deptIds = parsed.data.assignments.map((a) => a.departmentId);
@@ -441,6 +477,13 @@ export async function deleteUserFromAdmin(
     return { error: "Email does not match this account." };
   }
 
+  if (
+    user.role === "SUPER_ADMIN" &&
+    !isSuperAdminRole(session.user.role as UserRole)
+  ) {
+    return { error: "Only a Super Admin can delete a Super Admin account." };
+  }
+
   if (isOrgWideSchedulingRole(user.role)) {
     const elevatedCount = await prisma.user.count({
       where: { role: { in: [...ORG_WIDE_USER_ROLES] } },
@@ -448,7 +491,7 @@ export async function deleteUserFromAdmin(
     if (elevatedCount <= 1) {
       return {
         error:
-          "Cannot delete the only organization admin (admin, IT, or payroll) account.",
+          "Cannot delete the only organization elevated account (Super Admin, Admin, IT, or Payroll).",
       };
     }
   }
@@ -501,10 +544,17 @@ export async function adminSetUserPassword(
   const userId = parsed.data.userId;
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true },
+    select: { id: true, email: true, role: true },
   });
   if (!user) {
     return { error: "User not found." };
+  }
+
+  if (
+    user.role === "SUPER_ADMIN" &&
+    !isSuperAdminRole(session.user.role as UserRole)
+  ) {
+    return { error: "Only a Super Admin can reset a Super Admin password." };
   }
 
   const passwordHash = await hash(parsed.data.password, 12);

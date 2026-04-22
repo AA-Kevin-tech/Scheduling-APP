@@ -8,6 +8,7 @@ import {
   shiftVenueId,
 } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import { prisma } from "@/lib/db";
 import { getShiftsForRange } from "@/lib/queries/schedule";
 import {
@@ -62,6 +63,9 @@ export async function runScheduleBulkAction(
   formData: FormData,
 ): Promise<ScheduleBulkState> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    return { error: "Schedule is view-only for your role." };
+  }
   const intent = String(formData.get("intent") ?? "");
   const scheduleTz = getDefaultScheduleTimezone();
   const now = new Date();

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatInTimeZone } from "date-fns-tz";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import {
   ScheduleWeekGrid,
   type ScheduleWeekBlock,
@@ -44,6 +45,7 @@ export default async function ManagerSchedulePage({
   }>;
 }) {
   const session = await requireManager();
+  const canEditSchedule = await getSchedulingEditAllowedForSession(session);
   const locationIds = await getSchedulingLocationIdsForSession(session);
   const raw = await searchParams;
   const week = firstSearchParam(raw.week);
@@ -159,14 +161,25 @@ export default async function ManagerSchedulePage({
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
+      {!canEditSchedule ? (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
+          role="status"
+        >
+          Schedule is <span className="font-semibold">read-only</span> for your
+          role. You can review the week but cannot create or change shifts.
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-xl font-semibold text-slate-900 dark:text-zinc-100">Schedule</h1>
-        <Link
-          href="/manager/shifts/new"
-          className="rounded-md bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800"
-        >
-          Create shift
-        </Link>
+        {canEditSchedule ? (
+          <Link
+            href="/manager/shifts/new"
+            className="rounded-md bg-sky-700 px-3 py-2 text-sm font-medium text-white hover:bg-sky-800"
+          >
+            Create shift
+          </Link>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -262,12 +275,14 @@ export default async function ManagerSchedulePage({
         </button>
       </form>
 
-      <ScheduleBulkToolbar
-        mondayIso={mondayIso}
-        {...(departmentId ? { departmentId } : {})}
-        {...(roleId ? { roleId } : {})}
-        templates={scheduleTemplates}
-      />
+      {canEditSchedule ? (
+        <ScheduleBulkToolbar
+          mondayIso={mondayIso}
+          {...(departmentId ? { departmentId } : {})}
+          {...(roleId ? { roleId } : {})}
+          templates={scheduleTemplates}
+        />
+      ) : null}
 
       <PublishScheduleBar
         draftCount={draftCount}
@@ -275,6 +290,7 @@ export default async function ManagerSchedulePage({
         weekEndIso={weekEnd.toISOString()}
         {...(departmentId ? { departmentId } : {})}
         {...(roleId ? { roleId } : {})}
+        canPublish={canEditSchedule}
       />
 
       <ScheduleWeekGrid
@@ -288,7 +304,8 @@ export default async function ManagerSchedulePage({
           ...(departmentId ? { departmentId } : {}),
           ...(roleId ? { roleId } : {}),
         }}
-        enableDragAssign
+        enableDragAssign={canEditSchedule}
+        allowScheduleEdits={canEditSchedule}
         scheduleAnnotations={scheduleAnnotationDtos}
         annotationLocations={annotationLocationRows}
         defaultAnnotationLocationId={defaultAnnotationLocationId}

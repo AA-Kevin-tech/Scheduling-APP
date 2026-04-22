@@ -6,6 +6,7 @@ import {
   shiftVenueId,
 } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import { departmentBadgeClass } from "@/lib/departments/theme";
 import {
   getDepartmentsWithRoles,
@@ -28,6 +29,7 @@ export default async function ShiftDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await requireManager();
+  const canEditSchedule = await getSchedulingEditAllowedForSession(session);
   const locationIds = await getSchedulingLocationIdsForSession(session);
   const { id } = await params;
   const [shift, departments, employees, eligible] = await Promise.all([
@@ -93,7 +95,7 @@ export default async function ShiftDetailPage({
             <p className="mt-1 text-xs text-amber-900/85">
               This shift is not visible to assigned staff until you publish it.
             </p>
-            <PublishShiftForm shiftId={shift.id} />
+            {canEditSchedule ? <PublishShiftForm shiftId={shift.id} /> : null}
           </div>
         ) : (
           <p className="mt-3 text-xs text-slate-500 dark:text-zinc-500">
@@ -106,28 +108,36 @@ export default async function ShiftDetailPage({
         )}
       </div>
 
-      <section className="surface-card p-6">
-        <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Edit shift</h2>
-        <div className="mt-4">
-          <EditShiftForm
-            shift={shift}
-            departments={departments}
-            scheduleTimeZone={scheduleTz}
-            defaultStartsAtLocal={defaultStartsAtLocal}
-            defaultEndsAtLocal={defaultEndsAtLocal}
-          />
-        </div>
-        <form action={deleteShift} className="mt-6 border-t border-slate-100 pt-4">
-          <input type="hidden" name="id" value={shift.id} />
-          <button
-            type="submit"
-            className="text-sm text-red-700 hover:underline"
-            formNoValidate
-          >
-            Delete shift
-          </button>
-        </form>
-      </section>
+      {canEditSchedule ? (
+        <section className="surface-card p-6">
+          <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">
+            Edit shift
+          </h2>
+          <div className="mt-4">
+            <EditShiftForm
+              shift={shift}
+              departments={departments}
+              scheduleTimeZone={scheduleTz}
+              defaultStartsAtLocal={defaultStartsAtLocal}
+              defaultEndsAtLocal={defaultEndsAtLocal}
+            />
+          </div>
+          <form action={deleteShift} className="mt-6 border-t border-slate-100 pt-4">
+            <input type="hidden" name="id" value={shift.id} />
+            <button
+              type="submit"
+              className="text-sm text-red-700 hover:underline"
+              formNoValidate
+            >
+              Delete shift
+            </button>
+          </form>
+        </section>
+      ) : (
+        <p className="text-sm text-slate-600 dark:text-zinc-400">
+          This shift is view-only for your role.
+        </p>
+      )}
 
       <section className="surface-card p-6">
         <h2 className="text-sm font-medium text-slate-800 dark:text-zinc-200">Assignments</h2>
@@ -145,12 +155,14 @@ export default async function ShiftDetailPage({
                   </span>
                 )}
               </span>
-              <form action={removeShiftAssignment}>
-                <input type="hidden" name="assignmentId" value={a.id} />
-                <button type="submit" className="text-sky-700 hover:underline">
-                  Remove
-                </button>
-              </form>
+              {canEditSchedule ? (
+                <form action={removeShiftAssignment}>
+                  <input type="hidden" name="assignmentId" value={a.id} />
+                  <button type="submit" className="text-sky-700 hover:underline">
+                    Remove
+                  </button>
+                </form>
+              ) : null}
             </li>
           ))}
           {shift.assignments.length === 0 && (
@@ -158,7 +170,9 @@ export default async function ShiftDetailPage({
           )}
         </ul>
 
-        <AssignEmployeeForm shiftId={shift.id} employees={employees} />
+        {canEditSchedule ? (
+          <AssignEmployeeForm shiftId={shift.id} employees={employees} />
+        ) : null}
       </section>
 
       <section className="surface-card p-6">

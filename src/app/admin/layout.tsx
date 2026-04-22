@@ -2,7 +2,10 @@ import Link from "next/link";
 import type { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { getVenueSwitcherPayload } from "@/lib/auth/location-scope";
-import { canAccessItPayrollTimeClockSettings } from "@/lib/auth/roles";
+import {
+  canAccessItPayrollTimeClockSettings,
+  isSuperAdminRole,
+} from "@/lib/auth/roles";
 import { VenueScopeSwitcher } from "@/components/venue-scope-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 import { RefreshBridge } from "@/components/refresh-bridge";
@@ -44,7 +47,12 @@ export default async function AdminLayout({
         ] as const)
       : [];
 
-  const navLinks = [...links, ...itPayrollClockLink];
+  const superAdminLinks =
+    session?.user && isSuperAdminRole(session.user.role as UserRole)
+      ? ([{ href: "/admin/role-permissions", label: "Role permissions" }] as const)
+      : [];
+
+  const navLinks = [...links, ...superAdminLinks, ...itPayrollClockLink];
 
   return (
     <div className="surface-page min-h-screen lg:flex">

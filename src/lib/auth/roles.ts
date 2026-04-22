@@ -1,11 +1,20 @@
 import type { UserRole } from "@prisma/client";
 
 /** Prisma roles with org-wide scheduling (all venues). */
-export const ORG_WIDE_USER_ROLES: UserRole[] = ["ADMIN", "IT", "PAYROLL"];
+export const ORG_WIDE_USER_ROLES: UserRole[] = [
+  "SUPER_ADMIN",
+  "ADMIN",
+  "IT",
+  "PAYROLL",
+];
 
 /** Org-wide scheduling: all venues (same data access as classic admin). */
 export function isOrgWideSchedulingRole(role: UserRole): boolean {
   return ORG_WIDE_USER_ROLES.includes(role);
+}
+
+export function isSuperAdminRole(role: UserRole): boolean {
+  return role === "SUPER_ADMIN";
 }
 
 export function canAccessAdminRoutes(role: UserRole): boolean {
@@ -24,6 +33,7 @@ export function canAccessItPayrollTimeClockSettings(role: UserRole): boolean {
 /** Roles that receive manager-style notifications (in addition to venue managers). */
 export const MANAGER_NOTIFICATION_ROLES: UserRole[] = [
   "MANAGER",
+  "SUPER_ADMIN",
   "ADMIN",
   "IT",
   "PAYROLL",

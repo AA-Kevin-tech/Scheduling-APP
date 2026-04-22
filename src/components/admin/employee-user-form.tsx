@@ -26,6 +26,8 @@ type Props = {
   mode: "create" | "edit";
   userId?: string;
   isAdminContext: boolean;
+  /** Signed-in user creating/editing (used to gate Super Admin role). */
+  actorRole?: UserRole;
   /** Where to send the browser after a successful create (not used for edit). */
   successRedirect?: string;
   departments: DeptOption[];
@@ -47,6 +49,7 @@ export function EmployeeUserForm(props: Props) {
   const {
     departments,
     locations,
+    actorRole,
     mode,
     isAdminContext,
     initial,
@@ -317,6 +320,9 @@ export function EmployeeUserForm(props: Props) {
               <option value="ADMIN">Admin</option>
               <option value="IT">IT (all sites)</option>
               <option value="PAYROLL">Payroll (all sites)</option>
+              {actorRole === "SUPER_ADMIN" ? (
+                <option value="SUPER_ADMIN">Super Admin</option>
+              ) : null}
             </select>
           </div>
         ) : (

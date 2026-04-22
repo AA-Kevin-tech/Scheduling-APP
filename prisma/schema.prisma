@@ -82,6 +82,19 @@ model OrganizationSettings {
   updatedAt                   DateTime @updatedAt
 }
 
+/// Super Admin–configurable capabilities per `UserRole` (e.g. schedule editing).
+model RolePermission {
+  id        String   @id @default(cuid())
+  role      UserRole
+  /// Stable feature key (e.g. `scheduling_edit`).
+  feature   String
+  allowed   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@unique([role, feature])
+  @@index([role])
+}
+
 /// Physical venue / job site (e.g. main building, annex).
 model Location {
   id        String   @id @default(cuid())
@@ -626,6 +639,7 @@ model SwapRequest {
 }
 
 enum UserRole {
+  SUPER_ADMIN
   ADMIN
   IT
   PAYROLL

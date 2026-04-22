@@ -79,6 +79,8 @@ type Props = {
   annotationLocations?: { id: string; name: string }[];
   /** Default venue for new notes (e.g. active venue or filtered department’s site). */
   defaultAnnotationLocationId?: string | null;
+  /** When false, hide create links, drag-assign, and day-note editing (read-only grid). */
+  allowScheduleEdits?: boolean;
 };
 
 type DragPayload = { shiftId: string; dayIso: string };
@@ -171,6 +173,7 @@ export function ScheduleWeekGrid({
   scheduleAnnotations = [],
   annotationLocations,
   defaultAnnotationLocationId = null,
+  allowScheduleEdits = true,
 }: Props) {
   const router = useRouter();
   const [assignError, setAssignError] = useState<string | null>(null);
@@ -179,8 +182,13 @@ export function ScheduleWeekGrid({
   const [editingAnnotation, setEditingAnnotation] =
     useState<ScheduleAnnotationDTO | null>(null);
 
+  const dragEnabled = Boolean(enableDragAssign && allowScheduleEdits);
+  const newShiftQueryResolved =
+    allowScheduleEdits && newShiftQuery ? newShiftQuery : undefined;
   const canManageAnnotations =
-    Array.isArray(annotationLocations) && annotationLocations.length > 0;
+    allowScheduleEdits &&
+    Array.isArray(annotationLocations) &&
+    annotationLocations.length > 0;
 
   useEffect(() => {
     setEditingAnnotation(null);
@@ -232,12 +240,12 @@ export function ScheduleWeekGrid({
 
   const handleDragOver = useCallback(
     (e: React.DragEvent, rowId: string, dayIso: string) => {
-      if (!enableDragAssign || rowId === "open") return;
+      if (!dragEnabled || rowId === "open") return;
       e.preventDefault();
       e.dataTransfer.dropEffect = "move";
       setDragOverKey(`${rowId}:${dayIso}`);
     },
-    [enableDragAssign],
+    [dragEnabled],
   );
 
   const handleDragLeave = useCallback(() => {
@@ -247,7 +255,7 @@ export function ScheduleWeekGrid({
   const handleDrop = useCallback(
     async (e: React.DragEvent, employeeId: string, dayIso: string) => {
       setDragOverKey(null);
-      if (!enableDragAssign || employeeId === "open") return;
+      if (!dragEnabled || employeeId === "open") return;
       e.preventDefault();
       const raw = e.dataTransfer.getData(DRAG_MIME);
       if (!raw) return;
@@ -276,7 +284,7 @@ export function ScheduleWeekGrid({
       }
       router.refresh();
     },
-    [enableDragAssign, router],
+    [dragEnabled, router],
   );
 
   const hasAnyBlock = rows.some((r) =>
@@ -401,12 +409,12 @@ export function ScheduleWeekGrid({
                   {weekDays.map((d) => {
                     const isToday = d.isoKey === todayIso;
                     const blocks = row.blocksByDay[d.isoKey] ?? [];
-                    const emptyHref = newShiftQuery
-                      ? managerNewShiftHref(d.isoKey, newShiftQuery)
+                    const emptyHref = newShiftQueryResolved
+                      ? managerNewShiftHref(d.isoKey, newShiftQueryResolved)
                       : undefined;
                     const dropKey = `${row.rowId}:${d.isoKey}`;
                     const isDragTarget =
-                      enableDragAssign &&
+                      dragEnabled &&
                       row.rowId !== "open" &&
                       dragOverKey === dropKey;
                     const tint = columnTintHex(d.isoKey);
@@ -443,7 +451,7 @@ export function ScheduleWeekGrid({
                               <BlockCard
                                 key={b.key}
                                 block={b}
-                                enableDragAssign={enableDragAssign}
+                                enableDragAssign={dragEnabled}
                               />
                             ))
                           ) : (

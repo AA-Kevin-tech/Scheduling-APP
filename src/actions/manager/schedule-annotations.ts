@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { sessionMayAccessVenue } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 
@@ -48,6 +49,9 @@ export async function createScheduleAnnotation(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    return { error: "Schedule is view-only for your role." };
+  }
   const types = parseTypes(formData);
   const parsed = baseSchema.safeParse({
     locationId: formData.get("locationId"),
@@ -125,6 +129,9 @@ export async function updateScheduleAnnotation(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    return { error: "Schedule is view-only for your role." };
+  }
   const types = parseTypes(formData);
   const parsed = updateSchema.safeParse({
     id: formData.get("id"),
@@ -218,6 +225,9 @@ export async function deleteScheduleAnnotation(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    return { error: "Schedule is view-only for your role." };
+  }
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return { error: "Missing id." };
 

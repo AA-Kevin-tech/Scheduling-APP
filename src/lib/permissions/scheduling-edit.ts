@@ -1,0 +1,27 @@
+import type { Session } from "next-auth";
+import type { UserRole } from "@prisma/client";
+import { isSuperAdminRole } from "@/lib/auth/roles";
+import { prisma } from "@/lib/db";
+
+/** Super Admin can toggle this per `UserRole` (except SUPER_ADMIN, which always may edit). */
+export const SCHEDULING_EDIT_FEATURE = "scheduling_edit" as const;
+
+export async function getSchedulingEditAllowedForRole(
+  role: UserRole,
+): Promise<boolean> {
+  if (isSuperAdminRole(role)) return true;
+  const row = await prisma.rolePermission.findUnique({
+    where: {
+      role_feature: { role, feature: SCHEDULING_EDIT_FEATURE },
+    },
+    select: { allowed: true },
+  });
+  if (!row) return true;
+  return row.allowed;
+}
+
+export async function getSchedulingEditAllowedForSession(
+  session: Session,
+): Promise<boolean> {
+  return getSchedulingEditAllowedForRole(session.user.role as UserRole);
+}

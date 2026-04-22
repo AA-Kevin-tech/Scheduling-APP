@@ -13,6 +13,8 @@ import { EmployeeTimeClockPinForm } from "@/components/employee-time-clock-pin-f
 import { FieldRow } from "@/components/ui/field-row";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireAdmin } from "@/lib/auth/guards";
+import { isSuperAdminRole } from "@/lib/auth/roles";
+import type { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getLocations, getUserForAdminEdit } from "@/lib/queries/admin";
 import { getDepartmentsWithRoles } from "@/lib/queries/schedule";
@@ -43,6 +45,14 @@ export default async function AdminEditUserPage({
   ]);
 
   if (!user?.employee) notFound();
+
+  if (
+    user.role === "SUPER_ADMIN" &&
+    session?.user?.role &&
+    !isSuperAdminRole(session.user.role as UserRole)
+  ) {
+    notFound();
+  }
 
   const venueScope =
     session != null ? await getSchedulingLocationIdsForSession(session) : null;
@@ -145,6 +155,7 @@ export default async function AdminEditUserPage({
           mode="edit"
           userId={user.id}
           isAdminContext
+          actorRole={session?.user?.role as UserRole | undefined}
           initial={initial}
           departments={deptOptions}
           locations={locations}

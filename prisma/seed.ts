@@ -151,6 +151,25 @@ async function main() {
     },
   });
 
+  const superAdminUser = await prisma.user.upsert({
+    where: { email: "superadmin@seed.local" },
+    create: {
+      email: "superadmin@seed.local",
+      firstName: "Super",
+      lastName: "Admin",
+      name: "Super Admin",
+      role: UserRole.SUPER_ADMIN,
+      passwordHash: adminPasswordHash,
+    },
+    update: {
+      firstName: "Super",
+      lastName: "Admin",
+      name: "Super Admin",
+      role: UserRole.SUPER_ADMIN,
+      passwordHash: adminPasswordHash,
+    },
+  });
+
   const managerUser = await prisma.user.upsert({
     where: { email: "manager@seed.local" },
     create: {
@@ -412,6 +431,7 @@ async function main() {
     "Seed complete. Admin password: SEED_ADMIN_ACCOUNT_PASSWORD or default; other users: SEED_PASSWORD or SEED_ADMIN_PASSWORD, else `changeme`",
   );
   console.log("  Admin:", adminUser.email);
+  console.log("  Super Admin:", superAdminUser.email);
   console.log("  Manager:", managerUser.email);
   console.log(
     "  Employees:",

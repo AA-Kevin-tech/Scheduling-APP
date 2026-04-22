@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { UserRole } from "@prisma/client";
 import { auth } from "@/auth";
 import { getSchedulingLocationIdsForSession } from "@/lib/auth/location-scope";
 import { requireAdmin } from "@/lib/auth/guards";
@@ -61,6 +62,7 @@ export default async function AdminNewUserPage() {
         <EmployeeUserForm
           mode="create"
           isAdminContext
+          actorRole={session?.user?.role as UserRole | undefined}
           successRedirect="/admin/users"
           departments={deptOptions}
           locations={locations}

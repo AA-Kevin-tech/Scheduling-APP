@@ -11,6 +11,7 @@ import {
   shiftsWhereForLocations,
 } from "@/lib/auth/location-scope";
 import { requireManager } from "@/lib/auth/guards";
+import { getSchedulingEditAllowedForSession } from "@/lib/permissions/scheduling-edit";
 import { prisma } from "@/lib/db";
 import { writeAuditLog } from "@/lib/services/audit";
 import { notifyUsersSchedulePublished } from "@/lib/services/notifications";
@@ -43,6 +44,15 @@ async function assertManagerVenue(session: Session, venueId: string) {
   return null;
 }
 
+const SCHEDULE_VIEW_ONLY_ERROR = "Schedule is view-only for your role.";
+
+async function assertSchedulingEditAllowed(session: Session) {
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    return { error: SCHEDULE_VIEW_ONLY_ERROR } as const;
+  }
+  return null;
+}
+
 const createShiftSchema = z.object({
   departmentId: z.string().min(1),
   roleId: z.string().nullable().optional(),
@@ -59,6 +69,8 @@ export async function createShift(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  const schedGate = await assertSchedulingEditAllowed(session);
+  if (schedGate) return schedGate;
   const parsed = createShiftSchema.safeParse({
     departmentId: formData.get("departmentId"),
     roleId: emptyToNull(formData.get("roleId")),
@@ -173,6 +185,8 @@ export async function updateShift(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  const schedGate = await assertSchedulingEditAllowed(session);
+  if (schedGate) return schedGate;
   const parsed = updateShiftSchema.safeParse({
     id: formData.get("id"),
     departmentId: formData.get("departmentId"),
@@ -254,6 +268,9 @@ export async function updateShift(
 
 export async function deleteShift(formData: FormData): Promise<void> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    redirect("/manager/schedule");
+  }
   const id = formData.get("id");
   if (typeof id !== "string" || !id) return;
 
@@ -290,6 +307,8 @@ export async function assignEmployeeToShift(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  const schedGate = await assertSchedulingEditAllowed(session);
+  if (schedGate) return schedGate;
   const parsed = assignSchema.safeParse({
     shiftId: formData.get("shiftId"),
     employeeId: formData.get("employeeId"),
@@ -362,6 +381,9 @@ export async function assignEmployeeToShift(
 
 export async function removeShiftAssignment(formData: FormData): Promise<void> {
   const session = await requireManager();
+  if (!(await getSchedulingEditAllowedForSession(session))) {
+    redirect("/manager/schedule");
+  }
   const assignmentId = formData.get("assignmentId");
   if (typeof assignmentId !== "string" || !assignmentId) return;
 
@@ -412,6 +434,8 @@ export async function publishDraftShiftsForRange(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string; count?: number }> {
   const session = await requireManager();
+  const schedGate = await assertSchedulingEditAllowed(session);
+  if (schedGate) return schedGate;
   const parsed = publishRangeSchema.safeParse({
     weekStart: formData.get("weekStart"),
     weekEnd: formData.get("weekEnd"),
@@ -497,6 +521,8 @@ export async function publishShift(
   formData: FormData,
 ): Promise<{ ok?: boolean; error?: string }> {
   const session = await requireManager();
+  const schedGate = await assertSchedulingEditAllowed(session);
+  if (schedGate) return schedGate;
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
     return { error: "Missing shift id." };
